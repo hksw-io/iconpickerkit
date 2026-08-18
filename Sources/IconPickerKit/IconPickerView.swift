@@ -130,21 +130,23 @@ public struct IconPickerView: View {
                 .foregroundStyle(.secondary)
                 .accessibilityAddTraits(.isHeader)
 
-            Picker(self.labels.icon, selection: self.$mode) {
-                Text(self.labels.emojis).tag(Mode.emojis)
-                Text(self.labels.symbols).tag(Mode.symbols)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .controlSize(.large)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(height: IconPickerLayout.modeHeight)
+            HStack(spacing: IconPickerLayout.stackSpacing) {
+                Picker(self.labels.icon, selection: self.$mode) {
+                    Text(self.labels.emojis).tag(Mode.emojis)
+                    Text(self.labels.symbols).tag(Mode.symbols)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .controlSize(.large)
+                .fixedSize()
+                .frame(height: IconPickerLayout.modeHeight)
 
-            IconPickerSearchField(
-                text: self.$query,
-                debounce: self.$debounce,
-                origin: self.origin,
-                prompt: self.labels.search)
+                IconPickerSearchField(
+                    text: self.$query,
+                    debounce: self.$debounce,
+                    origin: self.origin,
+                    prompt: self.labels.search)
+            }
 
             if self.mode == .emojis {
                 self.emojiGrid

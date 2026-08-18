@@ -9,9 +9,11 @@ struct IconPickerSearchField: View {
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: "magnifyingglass")
+                .font(.body)
                 .foregroundStyle(.secondary)
                 .accessibilityHidden(true)
             TextField(self.prompt, text: self.$text)
+                .font(.body)
                 .textFieldStyle(.plain)
                 .autocorrectionDisabled()
 #if os(iOS)
@@ -28,9 +30,7 @@ struct IconPickerSearchField: View {
                 .accessibilityLabel("Clear")
             }
         }
-        .padding(.horizontal, 8)
         .frame(height: IconPickerLayout.searchHeight)
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         .onChange(of: self.text) { _, new in
             self.debounce.push(new, at: ContinuousClock.now - self.origin)
         }
