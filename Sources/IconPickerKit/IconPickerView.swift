@@ -68,10 +68,16 @@ public struct IconPickerView: View {
     }
 
     private var colorSection: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: IconPickerLayout.stackSpacing) {
-                ForEach(self.colors) { swatch in
-                    self.colorSwatch(swatch)
+        VStack(alignment: .leading, spacing: IconPickerLayout.stackSpacing) {
+            Text(self.labels.color)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .accessibilityAddTraits(.isHeader)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: IconPickerLayout.stackSpacing) {
+                    ForEach(self.colors) { swatch in
+                        self.colorSwatch(swatch)
+                    }
                 }
             }
         }

@@ -8,8 +8,8 @@ A SwiftUI picker for a tint color plus an emoji or SF Symbol. Bind two values th
 ## Preview
 
 <p>
-  <img src="Docs/Media/iconpickerkit-view-light.png" width="240" alt="IconPickerView in light mode: color swatches, Search Icons, and the Smileys section of the mixed catalog.">
-  <img src="Docs/Media/iconpickerkit-view-dark.png" width="240" alt="IconPickerView in dark mode with the same color strip, search field, and Smileys section.">
+  <img src="Docs/Media/iconpickerkit-view-light.png" width="240" alt="IconPickerView in light mode: a Color header and swatches, Search Icons, and the Smileys section.">
+  <img src="Docs/Media/iconpickerkit-view-dark.png" width="240" alt="IconPickerView in dark mode with the same Color header, search field, and Smileys section.">
 </p>
 
 `IconPickerView`. Present it in a sheet; you own Done.
