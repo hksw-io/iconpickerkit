@@ -4,6 +4,16 @@ All notable changes to IconPickerKit are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- README stills of `IconPickerView` and `IconPickerRow` in light and dark.
+
+### Changed
+
+- The emoji/symbol control hides its extra macOS picker title. The section header already names it.
+
 ## [1.1.0] - 2026-08-18
 
 ### Added

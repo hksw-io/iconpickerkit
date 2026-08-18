@@ -131,6 +131,7 @@ public struct IconPickerView: View {
                 Text(self.labels.symbols).tag(Mode.symbols)
             }
             .pickerStyle(.segmented)
+            .labelsHidden()
             .padding(.horizontal)
 
             if self.mode == .emojis {

@@ -15,6 +15,9 @@ let package = Package(
     targets: [
         .target(
             name: "IconPickerKit"),
+        .executableTarget(
+            name: "GenerateMedia",
+            dependencies: ["IconPickerKit"]),
         .testTarget(
             name: "IconPickerKitTests",
             dependencies: ["IconPickerKit"]),
