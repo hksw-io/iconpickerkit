@@ -16,7 +16,6 @@ public struct IconPickerView: View {
     @State private var debounce = SearchDebounce()
     @State private var origin = ContinuousClock.now
 
-    @ScaledMetric(relativeTo: .title3) private var previewIconSize: CGFloat = IconPickerLayout.previewIconSize
     @ScaledMetric(relativeTo: .title3) private var cellFont: CGFloat = 22
     @ScaledMetric(relativeTo: .title3) private var cellSize: CGFloat = 44
 
@@ -40,14 +39,22 @@ public struct IconPickerView: View {
     }
 
     public var body: some View {
-        ScrollView {
-            VStack(spacing: IconPickerLayout.sectionSpacing) {
-                self.preview
-                self.colorSection
-                self.search
-                self.catalog
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: IconPickerLayout.sectionSpacing) {
+                    self.colorSection
+                    self.search
+                    self.catalog
+                }
+                .padding(.vertical)
             }
-            .padding(.vertical)
+            .task {
+                try? await Task.sleep(for: .milliseconds(16))
+                if let section = IconCatalog.section(containing: self.icon, symbols: self.symbols) {
+                    proxy.scrollTo(section.id, anchor: .center)
+                }
+                proxy.scrollTo(self.icon, anchor: .center)
+            }
         }
     }
 
@@ -58,24 +65,6 @@ public struct IconPickerView: View {
             origin: self.origin,
             prompt: self.labels.search)
             .padding(.horizontal, IconPickerLayout.horizontalInset)
-    }
-
-    private var preview: some View {
-        Group {
-            if self.icon.isEmoji {
-                Text(verbatim: self.icon)
-                    .font(.system(size: self.previewIconSize))
-            } else {
-                Image(systemName: self.icon)
-                    .font(.system(size: self.previewIconSize))
-                    .foregroundStyle(self.color.color)
-            }
-        }
-        .frame(width: IconPickerLayout.previewSize, height: IconPickerLayout.previewSize)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(self.color.color.opacity(0.15)))
-        .accessibilityHidden(true)
     }
 
     private var colorSection: some View {
@@ -120,6 +109,7 @@ public struct IconPickerView: View {
         LazyVStack(alignment: .leading, spacing: IconPickerLayout.sectionSpacing) {
             ForEach(IconCatalog.search(self.debounce.applied, symbols: self.symbols)) { section in
                 self.section(section)
+                    .id(section.id)
             }
         }
         .padding(.horizontal, IconPickerLayout.horizontalInset)
@@ -134,6 +124,7 @@ public struct IconPickerView: View {
             LazyVGrid(columns: self.columns, spacing: IconPickerLayout.stackSpacing) {
                 ForEach(section.items) { item in
                     self.iconButton(item)
+                        .id(item.value)
                 }
             }
         }

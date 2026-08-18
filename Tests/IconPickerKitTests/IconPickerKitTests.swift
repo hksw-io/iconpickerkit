@@ -187,3 +187,17 @@ import Testing
         IconCatalog.sections().flatMap(\.items).map(\.value).filter { !$0.isEmoji })
     #expect(assigned == Set(SymbolCatalog.ids))
 }
+
+@Test func catalogSectionContainsKnownSymbol() {
+    let section = IconCatalog.section(containing: "folder")
+    #expect(section?.items.contains { $0.value == "folder" } == true)
+}
+
+@Test func catalogSectionContainsKnownEmoji() {
+    let section = IconCatalog.section(containing: "🐶")
+    #expect(section?.items.contains { $0.value == "🐶" } == true)
+}
+
+@Test func catalogSectionMissIsNil() {
+    #expect(IconCatalog.section(containing: "zzzznotanicon") == nil)
+}

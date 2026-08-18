@@ -48,6 +48,13 @@ public enum IconCatalog {
         }
     }
 
+    /// The meaning section that holds `value`, if any.
+    public static func section(containing value: String, symbols: [String] = SymbolCatalog.ids) -> IconSection? {
+        self.sections(symbols: symbols).first { section in
+            section.items.contains { $0.value == value }
+        }
+    }
+
     /// Empty query returns every section. A miss returns no sections.
     public static func search(_ query: String, symbols: [String] = SymbolCatalog.ids) -> [IconSection] {
         let all = self.sections(symbols: symbols)

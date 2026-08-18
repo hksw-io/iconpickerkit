@@ -19,6 +19,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 - `IconPickerView` shows one meaning-grouped catalog of emoji and SF Symbols. No Emojis/Symbols mode switch.
 - Preview is cell-sized; search sits under the color strip, above the catalog.
+- No hero preview. Opening the picker scrolls the current icon into view.
 - `IconCatalog.search` returns named sections; an empty query is the full catalog.
 - The emoji/symbol control hides its extra macOS picker title. The section header already names it.
 

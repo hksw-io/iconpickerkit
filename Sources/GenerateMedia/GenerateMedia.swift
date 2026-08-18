@@ -62,6 +62,8 @@ struct GenerateMedia {
         window.orderFrontRegardless()
         hosting.layoutSubtreeIfNeeded()
         window.layoutIfNeeded()
+        CFRunLoopRunInMode(.defaultMode, 0.05, false)
+        hosting.layoutSubtreeIfNeeded()
 
         guard let rep = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds) else {
             throw Exit("could not cache \(url.lastPathComponent)")
