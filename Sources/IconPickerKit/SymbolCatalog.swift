@@ -2,6 +2,13 @@ import Foundation
 
 /// Curated SF Symbol names used by ``IconPickerView``.
 public enum SymbolCatalog {
+    /// Names whose symbol id contains `query`. An empty query returns `ids`.
+    public static func search(_ query: String, in ids: [String] = Self.ids) -> [String] {
+        guard !query.isEmpty else { return ids }
+        let lowercased = query.lowercased()
+        return ids.filter { $0.lowercased().contains(lowercased) }
+    }
+
     public static let ids: [String] = [
         "rectangle.stack",
         "sparkles.rectangle.stack",

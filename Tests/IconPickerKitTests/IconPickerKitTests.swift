@@ -17,6 +17,37 @@ import Testing
     #expect(EmojiCatalog.search("zzzznotanemoji").isEmpty)
 }
 
+@Test func emptyEmojiQueryReturnsFullCatalog() {
+    #expect(EmojiCatalog.search("").count == EmojiCatalog.all.count)
+}
+
+@Test func symbolSearchHitMatchesName() {
+    let query = "folder"
+    let results = SymbolCatalog.search(query)
+    #expect(!results.isEmpty)
+    #expect(results.allSatisfy { $0.lowercased().contains(query) })
+}
+
+@Test func symbolSearchMissIsEmpty() {
+    #expect(SymbolCatalog.search("zzzznotasymbol").isEmpty)
+}
+
+@Test func emptySymbolQueryReturnsFullCatalog() {
+    #expect(SymbolCatalog.search("") == SymbolCatalog.ids)
+}
+
+@Test func debounceAppliesLatestQueryAfterPause() {
+    var debounce = SearchDebounce(interval: .milliseconds(250))
+    debounce.push("d", at: .milliseconds(0))
+    debounce.push("do", at: .milliseconds(10))
+    debounce.push("dog", at: .milliseconds(20))
+    debounce.flush(at: .milliseconds(20))
+    #expect(debounce.applied != "d")
+    #expect(debounce.applied != "do")
+    debounce.flush(at: .milliseconds(270))
+    #expect(debounce.applied == "dog")
+}
+
 @Test func classifyEmoji() {
     #expect(IconKind.classify("🐶") == .emoji)
 }

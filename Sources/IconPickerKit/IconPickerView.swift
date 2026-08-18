@@ -21,6 +21,8 @@ public struct IconPickerView: View {
 
     @State private var mode: Mode
     @State private var query = ""
+    @State private var debounce = SearchDebounce()
+    @State private var origin = ContinuousClock.now
 
     @ScaledMetric(relativeTo: .largeTitle) private var previewSize: CGFloat = 48
     @ScaledMetric(relativeTo: .title3) private var cellFont: CGFloat = 22
@@ -55,6 +57,11 @@ public struct IconPickerView: View {
             }
             .padding(.vertical)
         }
+        .iconPickerSearch(
+            text: self.$query,
+            debounce: self.$debounce,
+            origin: self.origin,
+            prompt: self.labels.search)
     }
 
     private var preview: some View {
@@ -135,10 +142,6 @@ public struct IconPickerView: View {
             .padding(.horizontal)
 
             if self.mode == .emojis {
-                TextField(self.labels.search, text: self.$query)
-                    .textFieldStyle(.roundedBorder)
-                    .padding(.horizontal)
-                    .accessibilityLabel(self.labels.search)
                 self.emojiGrid
             } else {
                 self.symbolGrid
@@ -148,7 +151,7 @@ public struct IconPickerView: View {
 
     private var emojiGrid: some View {
         LazyVGrid(columns: self.columns, spacing: 12) {
-            ForEach(EmojiCatalog.search(self.query)) { item in
+            ForEach(EmojiCatalog.search(self.debounce.applied)) { item in
                 self.emojiButton(item)
             }
         }
@@ -157,7 +160,7 @@ public struct IconPickerView: View {
 
     private var symbolGrid: some View {
         LazyVGrid(columns: self.columns, spacing: 12) {
-            ForEach(self.symbols, id: \.self) { symbol in
+            ForEach(SymbolCatalog.search(self.debounce.applied, in: self.symbols), id: \.self) { symbol in
                 self.symbolButton(symbol)
             }
         }

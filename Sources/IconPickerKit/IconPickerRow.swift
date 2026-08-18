@@ -13,6 +13,8 @@ public struct IconPickerRow: View {
     @State private var showingEmojis = false
     @State private var showingSymbols = false
     @State private var query = ""
+    @State private var debounce = SearchDebounce()
+    @State private var origin = ContinuousClock.now
 
     @ScaledMetric(relativeTo: .title3) private var gridEmojiSize: CGFloat = 22
     @ScaledMetric(relativeTo: .body) private var gridSymbolSize: CGFloat = 18
@@ -153,19 +155,21 @@ public struct IconPickerRow: View {
     }
 
     private var emojiPopover: some View {
-        VStack(spacing: 8) {
-            TextField(self.labels.search, text: self.$query)
-                .textFieldStyle(.roundedBorder)
-                .accessibilityLabel(self.labels.search)
+        NavigationStack {
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 36), spacing: 4)], spacing: 4) {
-                    ForEach(EmojiCatalog.search(self.query)) { item in
+                    ForEach(EmojiCatalog.search(self.debounce.applied)) { item in
                         self.emojiCell(item)
                     }
                 }
             }
+            .padding(12)
+            .iconPickerSearch(
+                text: self.$query,
+                debounce: self.$debounce,
+                origin: self.origin,
+                prompt: self.labels.search)
         }
-        .padding(12)
         .frame(width: 320, height: 240)
     }
 
@@ -191,14 +195,21 @@ public struct IconPickerRow: View {
     }
 
     private var symbolPopover: some View {
-        ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 40), spacing: 6)], spacing: 6) {
-                ForEach(self.symbols, id: \.self) { symbol in
-                    self.symbolCell(symbol)
+        NavigationStack {
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 40), spacing: 6)], spacing: 6) {
+                    ForEach(SymbolCatalog.search(self.debounce.applied, in: self.symbols), id: \.self) { symbol in
+                        self.symbolCell(symbol)
+                    }
                 }
             }
+            .padding(12)
+            .iconPickerSearch(
+                text: self.$query,
+                debounce: self.$debounce,
+                origin: self.origin,
+                prompt: self.labels.search)
         }
-        .padding(12)
         .frame(width: 320, height: 280)
     }
 

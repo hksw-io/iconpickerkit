@@ -9,6 +9,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 ### Added
 
 - README stills of `IconPickerView` and `IconPickerRow` in light and dark.
+- Platform search on both pickers, with debounce. The same query filters emojis or symbols.
+- `SymbolCatalog.search` and `SearchDebounce`.
 
 ### Changed
 
