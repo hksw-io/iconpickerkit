@@ -94,16 +94,8 @@ private struct ViewShot: View {
     let scheme: ColorScheme
 
     var body: some View {
-        NavigationStack {
-            IconPickerView(icon: self.$icon, color: self.$color)
-                .navigationTitle("Icon")
-                .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") {}
-                    }
-                }
-        }
-        .preferredColorScheme(self.scheme)
+        IconPickerView(icon: self.$icon, color: self.$color)
+            .preferredColorScheme(self.scheme)
     }
 }
 

@@ -10,6 +10,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 - README stills of `IconPickerView` and `IconPickerRow` in light and dark.
 - Platform search on both pickers, with debounce. The same query filters emojis or symbols.
+- Search is an in-catalog field (`NSSearchField` / `UISearchBar`) so it is visible without a nav bar.
 - `SymbolCatalog.search` and `SearchDebounce`.
 
 ### Changed

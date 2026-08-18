@@ -57,11 +57,6 @@ public struct IconPickerView: View {
             }
             .padding(.vertical)
         }
-        .iconPickerSearch(
-            text: self.$query,
-            debounce: self.$debounce,
-            origin: self.origin,
-            prompt: self.labels.search)
     }
 
     private var preview: some View {
@@ -140,6 +135,13 @@ public struct IconPickerView: View {
             .pickerStyle(.segmented)
             .labelsHidden()
             .padding(.horizontal)
+
+            IconPickerSearchField(
+                text: self.$query,
+                debounce: self.$debounce,
+                origin: self.origin,
+                prompt: self.labels.search)
+                .padding(.horizontal)
 
             if self.mode == .emojis {
                 self.emojiGrid

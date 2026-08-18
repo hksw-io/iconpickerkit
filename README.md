@@ -8,8 +8,8 @@ A SwiftUI picker for a tint color plus an emoji or SF Symbol. Bind two values th
 ## Preview
 
 <p>
-  <img src="Docs/Media/iconpickerkit-view-light.png" width="240" alt="IconPickerView in light mode: a folder preview tinted blue, a row of color swatches, an Emojis/Symbols control on Symbols, and a grid of SF Symbols with folder selected.">
-  <img src="Docs/Media/iconpickerkit-view-dark.png" width="240" alt="IconPickerView in dark mode with the same folder, blue tint, color swatches, and symbol grid.">
+  <img src="Docs/Media/iconpickerkit-view-light.png" width="240" alt="IconPickerView in light mode: a folder preview tinted blue, color swatches, an Emojis/Symbols control, a Search field, and a grid of SF Symbols with folder selected.">
+  <img src="Docs/Media/iconpickerkit-view-dark.png" width="240" alt="IconPickerView in dark mode with the same folder, blue tint, Search field, and symbol grid.">
 </p>
 
 `IconPickerView`. Present it in a sheet; you own Done.
@@ -72,7 +72,7 @@ struct EditItemView: View {
 
 `icon` is either an emoji (`"🐶"`) or an SF Symbol name (`"folder"`). Persist `icon` and `color.id`.
 
-Search uses the system search field and filters whichever catalog is showing (emoji names/keywords or symbol names). Keystrokes debounce for 250 ms.
+Search is the system search field above the catalog and filters whichever list is showing (emoji names/keywords or symbol names). Keystrokes debounce for 250 ms.
 
 ### In a form
 

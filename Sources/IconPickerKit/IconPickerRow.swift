@@ -155,7 +155,12 @@ public struct IconPickerRow: View {
     }
 
     private var emojiPopover: some View {
-        NavigationStack {
+        VStack(spacing: 8) {
+            IconPickerSearchField(
+                text: self.$query,
+                debounce: self.$debounce,
+                origin: self.origin,
+                prompt: self.labels.search)
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 36), spacing: 4)], spacing: 4) {
                     ForEach(EmojiCatalog.search(self.debounce.applied)) { item in
@@ -163,13 +168,8 @@ public struct IconPickerRow: View {
                     }
                 }
             }
-            .padding(12)
-            .iconPickerSearch(
-                text: self.$query,
-                debounce: self.$debounce,
-                origin: self.origin,
-                prompt: self.labels.search)
         }
+        .padding(12)
         .frame(width: 320, height: 240)
     }
 
@@ -195,7 +195,12 @@ public struct IconPickerRow: View {
     }
 
     private var symbolPopover: some View {
-        NavigationStack {
+        VStack(spacing: 8) {
+            IconPickerSearchField(
+                text: self.$query,
+                debounce: self.$debounce,
+                origin: self.origin,
+                prompt: self.labels.search)
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 40), spacing: 6)], spacing: 6) {
                     ForEach(SymbolCatalog.search(self.debounce.applied, in: self.symbols), id: \.self) { symbol in
@@ -203,13 +208,8 @@ public struct IconPickerRow: View {
                     }
                 }
             }
-            .padding(12)
-            .iconPickerSearch(
-                text: self.$query,
-                debounce: self.$debounce,
-                origin: self.origin,
-                prompt: self.labels.search)
         }
+        .padding(12)
         .frame(width: 320, height: 280)
     }
 
