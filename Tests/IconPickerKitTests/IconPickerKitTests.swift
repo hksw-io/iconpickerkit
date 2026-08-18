@@ -145,6 +145,10 @@ import Testing
     #expect(IconPickerLayout.spacingBelowSearch == IconPickerLayout.stackSpacing)
 }
 
+@Test func sectionGapMatchesStackGap() {
+    #expect(IconPickerLayout.sectionSpacing == IconPickerLayout.stackSpacing)
+}
+
 @Test func controlsShareOneInset() {
     #expect(IconPickerLayout.searchInset == IconPickerLayout.horizontalInset)
     #expect(IconPickerLayout.modeInset == IconPickerLayout.horizontalInset)

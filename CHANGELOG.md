@@ -12,6 +12,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 - Platform search on both pickers, with debounce. The same query filters emojis or symbols.
 - Search is an in-catalog field (`NSSearchField` / `UISearchBar`) so it is visible without a nav bar.
 - One stack gap, inset, and control height for the full picker’s label, mode control, search, and catalog.
+- Section-to-section spacing uses that same gap, so Color → Icon matches Icon → controls.
 - `SymbolCatalog.search` and `SearchDebounce`.
 
 ### Changed

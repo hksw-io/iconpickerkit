@@ -50,7 +50,7 @@ public struct IconPickerView: View {
 
     public var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: IconPickerLayout.sectionSpacing) {
                 self.preview
                 self.colorSection
                 self.iconSection
@@ -104,14 +104,18 @@ public struct IconPickerView: View {
             ZStack {
                 Circle()
                     .fill(swatch.color)
-                    .frame(width: 32, height: 32)
+                    .frame(
+                        width: IconPickerLayout.swatchSize,
+                        height: IconPickerLayout.swatchSize)
                 if isSelected {
                     Circle()
                         .strokeBorder(Color.white, lineWidth: 2)
-                        .frame(width: 28, height: 28)
+                        .frame(
+                            width: IconPickerLayout.swatchSize - 4,
+                            height: IconPickerLayout.swatchSize - 4)
                 }
             }
-            .frame(width: 44, height: 44)
+            .frame(width: IconPickerLayout.swatchSize, height: IconPickerLayout.swatchSize)
             .contentShape(Circle())
         }
         .buttonStyle(.plain)
