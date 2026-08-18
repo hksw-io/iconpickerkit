@@ -28,3 +28,7 @@ import Testing
 @Test @MainActor func publicPickerCompiles() {
     _ = IconPickerView(icon: .constant("folder"), color: .constant(.blue))
 }
+
+@Test func primarySwatchNameIsLabel() {
+    #expect(IconPickerColor.primary.name == "Label")
+}

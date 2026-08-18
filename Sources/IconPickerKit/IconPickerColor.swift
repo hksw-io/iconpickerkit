@@ -32,7 +32,7 @@ public enum IconPickerColor: String, CaseIterable, Identifiable, Sendable {
         case .purple: "Purple"
         case .pink: "Pink"
         case .brown: "Brown"
-        case .primary: "Black"
+        case .primary: "Label"
         }
     }
 
