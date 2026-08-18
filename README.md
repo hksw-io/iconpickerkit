@@ -9,21 +9,17 @@ A SwiftUI picker for a tint color plus an emoji or SF Symbol. Bind two values th
 
 ## Installation
 
-The package is unpublished. Add it as a local Swift package:
+Internal to the `hksw-io` org. Add:
 
 ```swift
-dependencies: [
-    .package(path: "../iconpickerkit"),
-]
+.package(url: "https://github.com/hksw-io/iconpickerkit.git", from: "1.0.0")
 ```
-
-And to the target:
 
 ```swift
 .product(name: "IconPickerKit", package: "IconPickerKit"),
 ```
 
-In Xcode: **File > Add Package Dependencies… > Add Local…** and choose the `iconpickerkit` folder.
+In Xcode: **File > Add Package Dependencies…** and enter the URL above. You need access to the org.
 
 ## Usage
 
