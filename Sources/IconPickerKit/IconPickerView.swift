@@ -11,18 +11,12 @@ public struct IconPickerView: View {
         case symbols
 
         var id: String { self.rawValue }
-
-        var title: String {
-            switch self {
-            case .emojis: "Emojis"
-            case .symbols: "Symbols"
-            }
-        }
     }
 
     @Binding private var icon: String
     @Binding private var color: IconPickerColor
     private let colors: [IconPickerColor]
+    private let labels: IconPickerLabels
 
     @State private var mode: Mode
     @State private var query = ""
@@ -34,15 +28,17 @@ public struct IconPickerView: View {
     /// Creates a picker bound to the consumer's icon string and tint color.
     ///
     /// Pass `colors` to replace the built-in palette with your own swatches,
-    /// including brand colors.
+    /// including brand colors. Pass `labels` to localize the chrome.
     public init(
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
-        colors: [IconPickerColor] = IconPickerColor.all)
+        colors: [IconPickerColor] = IconPickerColor.all,
+        labels: IconPickerLabels = .english)
     {
         self._icon = icon
         self._color = color
         self.colors = colors
+        self.labels = labels
         self._mode = State(initialValue: icon.wrappedValue.isEmoji ? .emojis : .symbols)
     }
 
@@ -78,7 +74,7 @@ public struct IconPickerView: View {
 
     private var colorSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Color")
+            Text(self.labels.color)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal)
@@ -120,25 +116,24 @@ public struct IconPickerView: View {
 
     private var iconSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Icon")
+            Text(self.labels.icon)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal)
                 .accessibilityAddTraits(.isHeader)
 
-            Picker("Icon", selection: self.$mode) {
-                ForEach(Mode.allCases) { mode in
-                    Text(mode.title).tag(mode)
-                }
+            Picker(self.labels.icon, selection: self.$mode) {
+                Text(self.labels.emojis).tag(Mode.emojis)
+                Text(self.labels.symbols).tag(Mode.symbols)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
 
             if self.mode == .emojis {
-                TextField("Search", text: self.$query)
+                TextField(self.labels.search, text: self.$query)
                     .textFieldStyle(.roundedBorder)
                     .padding(.horizontal)
-                    .accessibilityLabel("Search")
+                    .accessibilityLabel(self.labels.search)
                 self.emojiGrid
             } else {
                 self.symbolGrid

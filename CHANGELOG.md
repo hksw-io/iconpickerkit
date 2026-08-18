@@ -9,6 +9,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 ### Added
 
 - `IconPickerColor` is a value you can construct. Pass `colors:` to `IconPickerView` to use a brand palette.
+- `IconPickerLabels` localizes the chrome. Pass `labels:` or keep `.english`.
 
 ### Fixed
 

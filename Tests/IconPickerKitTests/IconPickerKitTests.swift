@@ -50,3 +50,32 @@ import Testing
         color: .constant(brand),
         colors: [brand, .blue])
 }
+
+@Test func englishLabelsAreTheDefaults() {
+    #expect(IconPickerLabels.english.color == "Color")
+    #expect(IconPickerLabels.english.icon == "Icon")
+    #expect(IconPickerLabels.english.emojis == "Emojis")
+    #expect(IconPickerLabels.english.symbols == "Symbols")
+    #expect(IconPickerLabels.english.search == "Search")
+}
+
+@Test func customLabelsKeepCallerCopy() {
+    let labels = IconPickerLabels(
+        color: "Färg",
+        icon: "Ikon",
+        emojis: "Emoji",
+        symbols: "Symboler",
+        search: "Sök")
+    #expect(labels.color == "Färg")
+    #expect(labels.icon == "Ikon")
+    #expect(labels.emojis == "Emoji")
+    #expect(labels.symbols == "Symboler")
+    #expect(labels.search == "Sök")
+}
+
+@Test @MainActor func pickerAcceptsLabels() {
+    _ = IconPickerView(
+        icon: .constant("folder"),
+        color: .constant(.blue),
+        labels: IconPickerLabels(color: "Färg", search: "Sök"))
+}
