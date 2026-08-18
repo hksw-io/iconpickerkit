@@ -74,13 +74,21 @@ struct EditItemView: View {
 
 One mixed catalog, grouped by meaning (People, Work, Home, …). Search Icons filters the whole library. Keystrokes debounce for 250 ms.
 
-Put Smileys last (or hide a group) with `groups:`:
+Presets set which groups appear, their order, and how many items each shows:
+
+```swift
+IconPickerView(icon: $icon, color: $color, catalog: .compact)
+```
+
+`.all` is every group, uncapped. `.compact` and `.work` cap each section. Or build your own — Smileys last, 8 each:
 
 ```swift
 IconPickerView(
     icon: $icon,
     color: $color,
-    groups: IconGroup.allCases.filter { $0 != .smileys } + [.smileys])
+    catalog: IconCatalogPreset(
+        groups: IconGroup.allCases.filter { $0 != .smileys } + [.smileys],
+        limit: 8))
 ```
 
 ### In a form

@@ -10,7 +10,7 @@ public struct IconPickerView: View {
     @Binding private var color: IconPickerColor
     private let colors: [IconPickerColor]
     let symbols: [String]
-    let groups: [IconGroup]
+    let catalog: IconCatalogPreset
     private let labels: IconPickerLabels
 
     @State private var query = ""
@@ -24,20 +24,20 @@ public struct IconPickerView: View {
     ///
     /// Pass `colors` to replace the built-in palette with your own swatches,
     /// including brand colors. Pass `symbols` to replace the built-in SF Symbol
-    /// catalog. Pass `groups` to set section order; omit a group to hide it.
+    /// catalog. Pass `catalog` to choose groups, order, and per-group caps.
     public init(
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
         colors: [IconPickerColor] = IconPickerColor.all,
         symbols: [String] = SymbolCatalog.ids,
-        groups: [IconGroup] = IconGroup.allCases,
+        catalog: IconCatalogPreset = .all,
         labels: IconPickerLabels = .english)
     {
         self._icon = icon
         self._color = color
         self.colors = colors
         self.symbols = symbols
-        self.groups = groups
+        self.catalog = catalog
         self.labels = labels
     }
 
@@ -47,7 +47,7 @@ public struct IconPickerView: View {
                 VStack(spacing: IconPickerLayout.sectionSpacing) {
                     self.colorSection
                     self.search
-                    self.catalog
+                    self.catalogList
                 }
                 .padding(.vertical)
             }
@@ -56,7 +56,7 @@ public struct IconPickerView: View {
                 if let section = IconCatalog.section(
                     containing: self.icon,
                     symbols: self.symbols,
-                    groups: self.groups)
+                    catalog: self.catalog)
                 {
                     proxy.scrollTo(section.id, anchor: .center)
                 }
@@ -118,13 +118,13 @@ public struct IconPickerView: View {
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 
-    private var catalog: some View {
+    private var catalogList: some View {
         LazyVStack(alignment: .leading, spacing: IconPickerLayout.sectionSpacing) {
             ForEach(
                 IconCatalog.search(
                     self.debounce.applied,
                     symbols: self.symbols,
-                    groups: self.groups))
+                    catalog: self.catalog))
             { section in
                 self.section(section)
                     .id(section.id)

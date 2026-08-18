@@ -71,20 +71,64 @@ public struct IconSection: Identifiable, Sendable, Equatable {
     }
 }
 
+/// How many items to show from one group. `limit` nil means the whole group.
+public struct IconSectionLimit: Sendable, Equatable {
+    public var group: IconGroup
+    public var limit: Int?
+
+    public init(_ group: IconGroup, limit: Int? = nil) {
+        self.group = group
+        self.limit = limit
+    }
+}
+
+/// Group order, membership, and per-group caps.
+public struct IconCatalogPreset: Sendable, Equatable {
+    public var sections: [IconSectionLimit]
+
+    public init(_ sections: [IconSectionLimit]) {
+        self.sections = sections
+    }
+
+    public init(groups: [IconGroup], limit: Int? = nil) {
+        self.sections = groups.map { IconSectionLimit($0, limit: limit) }
+    }
+
+    public static let all = IconCatalogPreset(groups: IconGroup.allCases)
+
+    public static let compact = IconCatalogPreset([
+        IconSectionLimit(.people, limit: 8),
+        IconSectionLimit(.work, limit: 12),
+        IconSectionLimit(.home, limit: 8),
+        IconSectionLimit(.places, limit: 8),
+        IconSectionLimit(.objects, limit: 12),
+        IconSectionLimit(.symbols, limit: 8),
+    ])
+
+    public static let work = IconCatalogPreset([
+        IconSectionLimit(.work, limit: 16),
+        IconSectionLimit(.home, limit: 12),
+        IconSectionLimit(.objects, limit: 12),
+    ])
+}
+
 /// One catalog of emoji and SF Symbols, grouped by meaning.
 public enum IconCatalog {
-    /// Sections for `symbols` in `groups` order. Omit a group to hide it.
+    /// Sections for `symbols` using `catalog` order, membership, and caps.
     public static func sections(
         symbols: [String] = SymbolCatalog.ids,
-        groups: [IconGroup] = IconGroup.allCases) -> [IconSection]
+        catalog: IconCatalogPreset = .all) -> [IconSection]
     {
         let allowed = Set(symbols)
-        return groups.compactMap { group in
-            let (emojis, symbolIDs) = self.content(for: group)
-            let mixed =
+        return catalog.sections.compactMap { spec in
+            let (emojis, symbolIDs) = self.content(for: spec.group)
+            var mixed =
                 emojis.map(Self.emojiItem)
                 + symbolIDs.filter { allowed.contains($0) }.map(Self.symbolItem)
-            return mixed.isEmpty ? nil : IconSection(group: group, items: mixed)
+            if let limit = spec.limit {
+                mixed = Array(mixed.prefix(limit))
+            }
+            return mixed.isEmpty ? nil : IconSection(group: spec.group, items: mixed)
         }
     }
 
@@ -92,9 +136,9 @@ public enum IconCatalog {
     public static func section(
         containing value: String,
         symbols: [String] = SymbolCatalog.ids,
-        groups: [IconGroup] = IconGroup.allCases) -> IconSection?
+        catalog: IconCatalogPreset = .all) -> IconSection?
     {
-        self.sections(symbols: symbols, groups: groups).first { section in
+        self.sections(symbols: symbols, catalog: catalog).first { section in
             section.items.contains { $0.value == value }
         }
     }
@@ -103,14 +147,37 @@ public enum IconCatalog {
     public static func search(
         _ query: String,
         symbols: [String] = SymbolCatalog.ids,
-        groups: [IconGroup] = IconGroup.allCases) -> [IconSection]
+        catalog: IconCatalogPreset = .all) -> [IconSection]
     {
-        let all = self.sections(symbols: symbols, groups: groups)
+        let all = self.sections(symbols: symbols, catalog: catalog)
         guard !query.isEmpty else { return all }
         return all.compactMap { section in
             let items = section.items.filter { $0.matches(query) }
             return items.isEmpty ? nil : IconSection(group: section.group, items: items)
         }
+    }
+
+    public static func sections(
+        symbols: [String] = SymbolCatalog.ids,
+        groups: [IconGroup]) -> [IconSection]
+    {
+        self.sections(symbols: symbols, catalog: IconCatalogPreset(groups: groups))
+    }
+
+    public static func section(
+        containing value: String,
+        symbols: [String] = SymbolCatalog.ids,
+        groups: [IconGroup]) -> IconSection?
+    {
+        self.section(containing: value, symbols: symbols, catalog: IconCatalogPreset(groups: groups))
+    }
+
+    public static func search(
+        _ query: String,
+        symbols: [String] = SymbolCatalog.ids,
+        groups: [IconGroup]) -> [IconSection]
+    {
+        self.search(query, symbols: symbols, catalog: IconCatalogPreset(groups: groups))
     }
 
     private static func emojiItem(_ item: EmojiItem) -> IconItem {

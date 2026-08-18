@@ -129,10 +129,29 @@ import Testing
     #expect(view.symbols == symbols)
 }
 
-@Test @MainActor func pickerStoresCallerGroups() {
-    let groups: [IconGroup] = [.home, .smileys]
-    let view = IconPickerView(icon: .constant("folder"), color: .constant(.blue), groups: groups)
-    #expect(view.groups == groups)
+@Test @MainActor func pickerStoresCallerCatalog() {
+    let catalog = IconCatalogPreset(groups: [.home, .smileys])
+    let view = IconPickerView(icon: .constant("folder"), color: .constant(.blue), catalog: catalog)
+    #expect(view.catalog == catalog)
+}
+
+@Test func presetLimitCapsSection() {
+    let full = IconCatalog.sections(groups: [.smileys]).first?.items.count ?? 0
+    let limited = IconCatalog.sections(
+        catalog: IconCatalogPreset([IconSectionLimit(.smileys, limit: 3)]))
+        .first?.items.count ?? 0
+    #expect(limited == min(3, full))
+}
+
+@Test func compactPresetIsSmallerThanAll() {
+    let allCount = IconCatalog.sections(catalog: .all).flatMap(\.items).count
+    let compactCount = IconCatalog.sections(catalog: .compact).flatMap(\.items).count
+    #expect(compactCount < allCount)
+}
+
+@Test func workPresetOnlyUsesItsGroups() {
+    let allowed: Set<IconGroup> = [.work, .home, .objects]
+    #expect(IconCatalog.sections(catalog: .work).allSatisfy { allowed.contains($0.group) })
 }
 
 @Test @MainActor func pickerDefaultsToSymbolCatalog() {
