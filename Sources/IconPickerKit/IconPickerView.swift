@@ -130,23 +130,19 @@ public struct IconPickerView: View {
                 .foregroundStyle(.secondary)
                 .accessibilityAddTraits(.isHeader)
 
-            HStack(spacing: IconPickerLayout.stackSpacing) {
-                Picker(self.labels.icon, selection: self.$mode) {
-                    Text(self.labels.emojis).tag(Mode.emojis)
-                    Text(self.labels.symbols).tag(Mode.symbols)
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .controlSize(.large)
-                .fixedSize()
-                .frame(height: IconPickerLayout.modeHeight)
+            IconPickerSearchField(
+                text: self.$query,
+                debounce: self.$debounce,
+                origin: self.origin,
+                prompt: self.labels.search)
 
-                IconPickerSearchField(
-                    text: self.$query,
-                    debounce: self.$debounce,
-                    origin: self.origin,
-                    prompt: self.labels.search)
+            HStack(spacing: 4) {
+                self.scope(.emojis, self.labels.emojis)
+                self.scope(.symbols, self.labels.symbols)
             }
+            .padding(2)
+            .frame(height: IconPickerLayout.modeHeight)
+            .background(.quaternary, in: Capsule())
 
             if self.mode == .emojis {
                 self.emojiGrid
@@ -155,6 +151,23 @@ public struct IconPickerView: View {
             }
         }
         .padding(.horizontal, IconPickerLayout.horizontalInset)
+    }
+
+    private func scope(_ mode: Mode, _ title: String) -> some View {
+        let isSelected = self.mode == mode
+        return Button {
+            self.mode = mode
+        } label: {
+            Text(title)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background {
+                    if isSelected {
+                        Capsule().fill(.background)
+                    }
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 
     private var emojiGrid: some View {
