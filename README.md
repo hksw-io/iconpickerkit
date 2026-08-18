@@ -1,6 +1,9 @@
 # IconPickerKit
 
-A SwiftUI picker for a tint color plus an emoji or SF Symbol. Bind two values the consumer owns; present the view in a sheet, form, or navigation stack.
+A SwiftUI picker for a tint color plus an emoji or SF Symbol. Bind two values the consumer owns.
+
+- `IconPickerView` — a full picker for a sheet or pushed screen.
+- `IconPickerRow` — compact swatches and popovers for a form.
 
 ## Requirements
 
@@ -23,6 +26,8 @@ In Xcode: **File > Add Package Dependencies…** and enter the URL above. You ne
 
 ## Usage
 
+Sheet with a Done button. Bindings update live; you own dismissal.
+
 ```swift
 import SwiftUI
 import IconPickerKit
@@ -30,17 +35,54 @@ import IconPickerKit
 struct EditItemView: View {
     @State private var icon = "folder"
     @State private var color = IconPickerColor.blue
+    @State private var showingPicker = false
 
     var body: some View {
-        NavigationStack {
-            IconPickerView(icon: $icon, color: $color)
-                .navigationTitle("Icon")
-        }
+        Button("Icon") { self.showingPicker = true }
+            .sheet(isPresented: self.$showingPicker) {
+                NavigationStack {
+                    IconPickerView(icon: self.$icon, color: self.$color)
+                        .navigationTitle("Icon")
+                        .toolbar {
+                            ToolbarItem(placement: .confirmationAction) {
+                                Button("Done") { self.showingPicker = false }
+                            }
+                        }
+                }
+            }
     }
 }
 ```
 
-`icon` is either an emoji (`"🐶"`) or an SF Symbol name (`"folder"`). `color` is a swatch from the built-in palette.
+`icon` is either an emoji (`"🐶"`) or an SF Symbol name (`"folder"`). Persist `icon` and `color.id`.
+
+### In a form
+
+```swift
+Form {
+    IconPickerRow(icon: self.$icon, color: self.$color)
+}
+```
+
+### Palette, symbols, and labels
+
+```swift
+let brand = IconPickerColor(id: "brand", name: "Brand", color: .indigo)
+
+IconPickerView(
+    icon: self.$icon,
+    color: self.$color,
+    colors: [.blue, brand],
+    symbols: ["folder", "star", "heart"],
+    labels: IconPickerLabels(
+        color: String(localized: "picker.color"),
+        icon: String(localized: "picker.icon"),
+        emojis: String(localized: "picker.emojis"),
+        symbols: String(localized: "picker.symbols"),
+        search: String(localized: "picker.search")))
+```
+
+`IconPickerRow` takes the same `colors`, `symbols`, and `labels` arguments.
 
 Search and classification are also public if you want the catalogs without the view:
 
