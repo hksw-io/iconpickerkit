@@ -87,7 +87,7 @@ import Testing
     #expect(IconPickerLabels.english.icon == "Icon")
     #expect(IconPickerLabels.english.emojis == "Emojis")
     #expect(IconPickerLabels.english.symbols == "Symbols")
-    #expect(IconPickerLabels.english.search == "Search")
+    #expect(IconPickerLabels.english.search == "Search Icons")
 }
 
 @Test func customLabelsKeepCallerCopy() {
@@ -160,4 +160,30 @@ import Testing
 @Test func searchMatchesModeControlHeight() {
     #expect(IconPickerLayout.searchHeight == IconPickerLayout.controlHeight)
     #expect(IconPickerLayout.modeHeight == IconPickerLayout.controlHeight)
+}
+
+@Test func mixedCatalogIdleHasNamedSectionsAndBothKinds() {
+    let sections = IconCatalog.search("")
+    #expect(sections.count > 1)
+    let values = sections.flatMap(\.items).map(\.value)
+    #expect(values.contains { $0.isEmoji })
+    #expect(values.contains { !$0.isEmoji })
+    #expect(Set(sections.map(\.title)).count == sections.count)
+}
+
+@Test func mixedCatalogSearchHitMatchesNameKeywordsOrId() {
+    let query = "dog"
+    let items = IconCatalog.search(query).flatMap(\.items)
+    #expect(!items.isEmpty)
+    #expect(items.allSatisfy { $0.matches(query) })
+}
+
+@Test func mixedCatalogSearchMissIsEmpty() {
+    #expect(IconCatalog.search("zzzznotanicon").isEmpty)
+}
+
+@Test func mixedCatalogAssignsEveryBuiltInSymbol() {
+    let assigned = Set(
+        IconCatalog.sections().flatMap(\.items).map(\.value).filter { !$0.isEmoji })
+    #expect(assigned == Set(SymbolCatalog.ids))
 }

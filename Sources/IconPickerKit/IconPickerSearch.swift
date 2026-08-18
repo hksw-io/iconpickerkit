@@ -30,7 +30,10 @@ struct IconPickerSearchField: View {
                 .accessibilityLabel("Clear")
             }
         }
+        .padding(.horizontal, 8)
+        .frame(maxWidth: .infinity)
         .frame(height: IconPickerLayout.searchHeight)
+        .background(.quaternary, in: Capsule())
         .onChange(of: self.text) { _, new in
             self.debounce.push(new, at: ContinuousClock.now - self.origin)
         }

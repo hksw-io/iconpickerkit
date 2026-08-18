@@ -11,7 +11,7 @@ public struct IconPickerLabels: Equatable, Sendable {
         icon: String = "Icon",
         emojis: String = "Emojis",
         symbols: String = "Symbols",
-        search: String = "Search")
+        search: String = "Search Icons")
     {
         self.color = color
         self.icon = icon
