@@ -32,3 +32,21 @@ import Testing
 @Test func primarySwatchNameIsLabel() {
     #expect(IconPickerColor.primary.name == "Label")
 }
+
+@Test func customColorKeepsCallerIdentity() {
+    let brand = IconPickerColor(id: "brand", name: "Brand", color: .indigo)
+    #expect(brand.id == "brand")
+    #expect(brand.name == "Brand")
+}
+
+@Test func defaultPaletteIncludesBlue() {
+    #expect(IconPickerColor.all.contains { $0.id == IconPickerColor.blue.id })
+}
+
+@Test @MainActor func pickerAcceptsCustomPalette() {
+    let brand = IconPickerColor(id: "brand", name: "Brand", color: .indigo)
+    _ = IconPickerView(
+        icon: .constant("folder"),
+        color: .constant(brand),
+        colors: [brand, .blue])
+}

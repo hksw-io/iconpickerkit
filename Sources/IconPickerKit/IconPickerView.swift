@@ -22,6 +22,7 @@ public struct IconPickerView: View {
 
     @Binding private var icon: String
     @Binding private var color: IconPickerColor
+    private let colors: [IconPickerColor]
 
     @State private var mode: Mode
     @State private var query = ""
@@ -31,9 +32,17 @@ public struct IconPickerView: View {
     @ScaledMetric(relativeTo: .title3) private var cellSize: CGFloat = 44
 
     /// Creates a picker bound to the consumer's icon string and tint color.
-    public init(icon: Binding<String>, color: Binding<IconPickerColor>) {
+    ///
+    /// Pass `colors` to replace the built-in palette with your own swatches,
+    /// including brand colors.
+    public init(
+        icon: Binding<String>,
+        color: Binding<IconPickerColor>,
+        colors: [IconPickerColor] = IconPickerColor.all)
+    {
         self._icon = icon
         self._color = color
+        self.colors = colors
         self._mode = State(initialValue: icon.wrappedValue.isEmoji ? .emojis : .symbols)
     }
 
@@ -77,7 +86,7 @@ public struct IconPickerView: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(IconPickerColor.allCases) { swatch in
+                    ForEach(self.colors) { swatch in
                         self.colorSwatch(swatch)
                     }
                 }

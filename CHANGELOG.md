@@ -6,6 +6,10 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `IconPickerColor` is a value you can construct. Pass `colors:` to `IconPickerView` to use a brand palette.
+
 ### Fixed
 
 - The `.primary` swatch is named "Label". It follows the system label color, so "Black" was a lie in dark mode.
