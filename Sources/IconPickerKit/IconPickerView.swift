@@ -16,7 +16,7 @@ public struct IconPickerView: View {
     @State private var debounce = SearchDebounce()
     @State private var origin = ContinuousClock.now
 
-    @ScaledMetric(relativeTo: .largeTitle) private var previewSize: CGFloat = 48
+    @ScaledMetric(relativeTo: .title3) private var previewIconSize: CGFloat = IconPickerLayout.previewIconSize
     @ScaledMetric(relativeTo: .title3) private var cellFont: CGFloat = 22
     @ScaledMetric(relativeTo: .title3) private var cellSize: CGFloat = 44
 
@@ -42,9 +42,9 @@ public struct IconPickerView: View {
     public var body: some View {
         ScrollView {
             VStack(spacing: IconPickerLayout.sectionSpacing) {
-                self.search
                 self.preview
                 self.colorSection
+                self.search
                 self.catalog
             }
             .padding(.vertical)
@@ -64,16 +64,16 @@ public struct IconPickerView: View {
         Group {
             if self.icon.isEmoji {
                 Text(verbatim: self.icon)
-                    .font(.system(size: self.previewSize))
+                    .font(.system(size: self.previewIconSize))
             } else {
                 Image(systemName: self.icon)
-                    .font(.system(size: self.previewSize))
+                    .font(.system(size: self.previewIconSize))
                     .foregroundStyle(self.color.color)
             }
         }
-        .frame(width: 80, height: 80)
+        .frame(width: IconPickerLayout.previewSize, height: IconPickerLayout.previewSize)
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: 10)
                 .fill(self.color.color.opacity(0.15)))
         .accessibilityHidden(true)
     }

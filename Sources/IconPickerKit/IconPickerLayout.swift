@@ -6,6 +6,8 @@ enum IconPickerLayout {
     static let horizontalInset: CGFloat = 16
     static let controlHeight: CGFloat = 28
     static let swatchSize: CGFloat = 32
+    static let previewSize: CGFloat = 44
+    static let previewIconSize: CGFloat = 22
 
     static var sectionSpacing: CGFloat { self.stackSpacing }
     static var spacingAboveSearch: CGFloat { self.stackSpacing }
