@@ -129,6 +129,12 @@ import Testing
     #expect(view.symbols == symbols)
 }
 
+@Test @MainActor func pickerStoresCallerGroups() {
+    let groups: [IconGroup] = [.home, .smileys]
+    let view = IconPickerView(icon: .constant("folder"), color: .constant(.blue), groups: groups)
+    #expect(view.groups == groups)
+}
+
 @Test @MainActor func pickerDefaultsToSymbolCatalog() {
     let view = IconPickerView(icon: .constant("folder"), color: .constant(.blue))
     #expect(view.symbols == SymbolCatalog.ids)
@@ -200,4 +206,23 @@ import Testing
 
 @Test func catalogSectionMissIsNil() {
     #expect(IconCatalog.section(containing: "zzzznotanicon") == nil)
+}
+
+@Test func catalogRespectsGroupOrder() {
+    let sections = IconCatalog.sections(groups: [.work, .smileys])
+    #expect(sections.map(\.group) == [.work, .smileys])
+}
+
+@Test func catalogOmitsUnlistedGroups() {
+    let sections = IconCatalog.sections(groups: [.home])
+    #expect(sections.allSatisfy { $0.group == .home })
+}
+
+@Test func searchPreservesCallerGroupOrder() {
+    let sections = IconCatalog.search("a", groups: [.work, .smileys, .home])
+    let order = sections.map(\.group)
+    #expect(order == order.sorted { lhs, rhs in
+        let rank: [IconGroup] = [.work, .smileys, .home]
+        return rank.firstIndex(of: lhs)! < rank.firstIndex(of: rhs)!
+    })
 }

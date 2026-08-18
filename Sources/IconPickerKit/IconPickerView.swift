@@ -10,6 +10,7 @@ public struct IconPickerView: View {
     @Binding private var color: IconPickerColor
     private let colors: [IconPickerColor]
     let symbols: [String]
+    let groups: [IconGroup]
     private let labels: IconPickerLabels
 
     @State private var query = ""
@@ -23,18 +24,20 @@ public struct IconPickerView: View {
     ///
     /// Pass `colors` to replace the built-in palette with your own swatches,
     /// including brand colors. Pass `symbols` to replace the built-in SF Symbol
-    /// catalog.
+    /// catalog. Pass `groups` to set section order; omit a group to hide it.
     public init(
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
         colors: [IconPickerColor] = IconPickerColor.all,
         symbols: [String] = SymbolCatalog.ids,
+        groups: [IconGroup] = IconGroup.allCases,
         labels: IconPickerLabels = .english)
     {
         self._icon = icon
         self._color = color
         self.colors = colors
         self.symbols = symbols
+        self.groups = groups
         self.labels = labels
     }
 
@@ -50,7 +53,11 @@ public struct IconPickerView: View {
             }
             .task {
                 try? await Task.sleep(for: .milliseconds(16))
-                if let section = IconCatalog.section(containing: self.icon, symbols: self.symbols) {
+                if let section = IconCatalog.section(
+                    containing: self.icon,
+                    symbols: self.symbols,
+                    groups: self.groups)
+                {
                     proxy.scrollTo(section.id, anchor: .center)
                 }
                 proxy.scrollTo(self.icon, anchor: .center)
@@ -113,7 +120,12 @@ public struct IconPickerView: View {
 
     private var catalog: some View {
         LazyVStack(alignment: .leading, spacing: IconPickerLayout.sectionSpacing) {
-            ForEach(IconCatalog.search(self.debounce.applied, symbols: self.symbols)) { section in
+            ForEach(
+                IconCatalog.search(
+                    self.debounce.applied,
+                    symbols: self.symbols,
+                    groups: self.groups))
+            { section in
                 self.section(section)
                     .id(section.id)
             }

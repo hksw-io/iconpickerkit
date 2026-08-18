@@ -74,6 +74,15 @@ struct EditItemView: View {
 
 One mixed catalog, grouped by meaning (People, Work, Home, …). Search Icons filters the whole library. Keystrokes debounce for 250 ms.
 
+Put Smileys last (or hide a group) with `groups:`:
+
+```swift
+IconPickerView(
+    icon: $icon,
+    color: $color,
+    groups: IconGroup.allCases.filter { $0 != .smileys } + [.smileys])
+```
+
 ### In a form
 
 ```swift
