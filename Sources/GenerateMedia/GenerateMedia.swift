@@ -16,12 +16,12 @@ struct GenerateMedia {
 
         try write(
             ViewShot(scheme: .light),
-            size: CGSize(width: 390, height: 720),
+            size: CGSize(width: 390, height: 780),
             appearance: .aqua,
             to: out.appending(path: "iconpickerkit-view-light.png"))
         try write(
             ViewShot(scheme: .dark),
-            size: CGSize(width: 390, height: 720),
+            size: CGSize(width: 390, height: 780),
             appearance: .darkAqua,
             to: out.appending(path: "iconpickerkit-view-dark.png"))
         try write(
@@ -94,8 +94,16 @@ private struct ViewShot: View {
     let scheme: ColorScheme
 
     var body: some View {
-        IconPickerView(icon: self.$icon, color: self.$color)
-            .preferredColorScheme(self.scheme)
+        NavigationStack {
+            IconPickerView(icon: self.$icon, color: self.$color)
+                .navigationTitle("Icon")
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") {}
+                    }
+                }
+        }
+        .preferredColorScheme(self.scheme)
     }
 }
 
