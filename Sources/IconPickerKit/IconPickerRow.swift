@@ -155,7 +155,7 @@ public struct IconPickerRow: View {
     }
 
     private var emojiPopover: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: IconPickerLayout.stackSpacing) {
             IconPickerSearchField(
                 text: self.$query,
                 debounce: self.$debounce,
@@ -195,7 +195,7 @@ public struct IconPickerRow: View {
     }
 
     private var symbolPopover: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: IconPickerLayout.stackSpacing) {
             IconPickerSearchField(
                 text: self.$query,
                 debounce: self.$debounce,

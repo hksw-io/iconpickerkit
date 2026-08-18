@@ -8,7 +8,8 @@ struct IconPickerSearchField: View {
 
     var body: some View {
         PlatformSearchField(text: self.$text, prompt: self.prompt)
-            .frame(minHeight: 28)
+            .frame(height: IconPickerLayout.searchHeight)
+            .clipped()
             .onChange(of: self.text) { _, new in
                 self.debounce.push(new, at: ContinuousClock.now - self.origin)
             }
@@ -33,6 +34,7 @@ struct PlatformSearchField: NSViewRepresentable {
         field.delegate = context.coordinator
         field.sendsSearchStringImmediately = true
         field.sendsWholeSearchString = false
+        field.controlSize = .large
         return field
     }
 

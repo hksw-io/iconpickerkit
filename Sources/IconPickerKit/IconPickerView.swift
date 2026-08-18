@@ -79,22 +79,21 @@ public struct IconPickerView: View {
     }
 
     private var colorSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: IconPickerLayout.stackSpacing) {
             Text(self.labels.color)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-                .padding(.horizontal)
                 .accessibilityAddTraits(.isHeader)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
+                HStack(spacing: IconPickerLayout.stackSpacing) {
                     ForEach(self.colors) { swatch in
                         self.colorSwatch(swatch)
                     }
                 }
-                .padding(.horizontal)
             }
         }
+        .padding(.horizontal, IconPickerLayout.horizontalInset)
     }
 
     private func colorSwatch(_ swatch: IconPickerColor) -> some View {
@@ -121,11 +120,10 @@ public struct IconPickerView: View {
     }
 
     private var iconSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: IconPickerLayout.stackSpacing) {
             Text(self.labels.icon)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-                .padding(.horizontal)
                 .accessibilityAddTraits(.isHeader)
 
             Picker(self.labels.icon, selection: self.$mode) {
@@ -134,14 +132,15 @@ public struct IconPickerView: View {
             }
             .pickerStyle(.segmented)
             .labelsHidden()
-            .padding(.horizontal)
+            .controlSize(.large)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: IconPickerLayout.modeHeight)
 
             IconPickerSearchField(
                 text: self.$query,
                 debounce: self.$debounce,
                 origin: self.origin,
                 prompt: self.labels.search)
-                .padding(.horizontal)
 
             if self.mode == .emojis {
                 self.emojiGrid
@@ -149,28 +148,31 @@ public struct IconPickerView: View {
                 self.symbolGrid
             }
         }
+        .padding(.horizontal, IconPickerLayout.horizontalInset)
     }
 
     private var emojiGrid: some View {
-        LazyVGrid(columns: self.columns, spacing: 12) {
+        LazyVGrid(columns: self.columns, spacing: IconPickerLayout.stackSpacing) {
             ForEach(EmojiCatalog.search(self.debounce.applied)) { item in
                 self.emojiButton(item)
             }
         }
-        .padding(.horizontal)
     }
 
     private var symbolGrid: some View {
-        LazyVGrid(columns: self.columns, spacing: 12) {
+        LazyVGrid(columns: self.columns, spacing: IconPickerLayout.stackSpacing) {
             ForEach(SymbolCatalog.search(self.debounce.applied, in: self.symbols), id: \.self) { symbol in
                 self.symbolButton(symbol)
             }
         }
-        .padding(.horizontal)
     }
 
     private var columns: [GridItem] {
-        [GridItem(.adaptive(minimum: self.cellSize, maximum: self.cellSize * 1.4), spacing: 12)]
+        [
+            GridItem(
+                .adaptive(minimum: self.cellSize, maximum: self.cellSize * 1.4),
+                spacing: IconPickerLayout.stackSpacing),
+        ]
     }
 
     private func emojiButton(_ item: EmojiItem) -> some View {

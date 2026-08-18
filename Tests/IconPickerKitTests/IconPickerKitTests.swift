@@ -139,3 +139,21 @@ import Testing
     let view = IconPickerRow(icon: .constant("star"), color: .constant(.blue), symbols: symbols)
     #expect(view.symbols == symbols)
 }
+
+@Test func stackGapIsSharedAroundSearch() {
+    #expect(IconPickerLayout.spacingAboveSearch == IconPickerLayout.stackSpacing)
+    #expect(IconPickerLayout.spacingBelowSearch == IconPickerLayout.stackSpacing)
+}
+
+@Test func controlsShareOneInset() {
+    #expect(IconPickerLayout.searchInset == IconPickerLayout.horizontalInset)
+    #expect(IconPickerLayout.modeInset == IconPickerLayout.horizontalInset)
+    #expect(IconPickerLayout.labelInset == IconPickerLayout.horizontalInset)
+    #expect(IconPickerLayout.catalogInset == IconPickerLayout.horizontalInset)
+    #expect(IconPickerLayout.colorStripInset == IconPickerLayout.horizontalInset)
+}
+
+@Test func searchMatchesModeControlHeight() {
+    #expect(IconPickerLayout.searchHeight == IconPickerLayout.controlHeight)
+    #expect(IconPickerLayout.modeHeight == IconPickerLayout.controlHeight)
+}
