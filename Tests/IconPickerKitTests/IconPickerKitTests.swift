@@ -79,3 +79,15 @@ import Testing
         color: .constant(.blue),
         labels: IconPickerLabels(color: "Färg", search: "Sök"))
 }
+
+@Test @MainActor func inlineRowCompiles() {
+    _ = IconPickerRow(icon: .constant("folder"), color: .constant(.blue))
+}
+
+@Test @MainActor func inlineRowAcceptsPaletteAndLabels() {
+    _ = IconPickerRow(
+        icon: .constant("🐶"),
+        color: .constant(.blue),
+        colors: [.blue, .red],
+        labels: IconPickerLabels(color: "Färg"))
+}
