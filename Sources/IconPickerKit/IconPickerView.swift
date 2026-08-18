@@ -16,6 +16,7 @@ public struct IconPickerView: View {
     @Binding private var icon: String
     @Binding private var color: IconPickerColor
     private let colors: [IconPickerColor]
+    let symbols: [String]
     private let labels: IconPickerLabels
 
     @State private var mode: Mode
@@ -28,16 +29,19 @@ public struct IconPickerView: View {
     /// Creates a picker bound to the consumer's icon string and tint color.
     ///
     /// Pass `colors` to replace the built-in palette with your own swatches,
-    /// including brand colors. Pass `labels` to localize the chrome.
+    /// including brand colors. Pass `symbols` to replace the built-in SF Symbol
+    /// catalog. Pass `labels` to localize the chrome.
     public init(
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
         colors: [IconPickerColor] = IconPickerColor.all,
+        symbols: [String] = SymbolCatalog.ids,
         labels: IconPickerLabels = .english)
     {
         self._icon = icon
         self._color = color
         self.colors = colors
+        self.symbols = symbols
         self.labels = labels
         self._mode = State(initialValue: icon.wrappedValue.isEmoji ? .emojis : .symbols)
     }
@@ -152,7 +156,7 @@ public struct IconPickerView: View {
 
     private var symbolGrid: some View {
         LazyVGrid(columns: self.columns, spacing: 12) {
-            ForEach(SymbolCatalog.ids, id: \.self) { symbol in
+            ForEach(self.symbols, id: \.self) { symbol in
                 self.symbolButton(symbol)
             }
         }

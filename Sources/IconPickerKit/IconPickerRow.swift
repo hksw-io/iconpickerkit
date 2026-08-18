@@ -7,6 +7,7 @@ public struct IconPickerRow: View {
     @Binding private var icon: String
     @Binding private var color: IconPickerColor
     private let colors: [IconPickerColor]
+    let symbols: [String]
     private let labels: IconPickerLabels
 
     @State private var showingEmojis = false
@@ -24,11 +25,13 @@ public struct IconPickerRow: View {
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
         colors: [IconPickerColor] = IconPickerColor.all,
+        symbols: [String] = SymbolCatalog.ids,
         labels: IconPickerLabels = .english)
     {
         self._icon = icon
         self._color = color
         self.colors = colors
+        self.symbols = symbols
         self.labels = labels
     }
 
@@ -190,7 +193,7 @@ public struct IconPickerRow: View {
     private var symbolPopover: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 40), spacing: 6)], spacing: 6) {
-                ForEach(SymbolCatalog.ids, id: \.self) { symbol in
+                ForEach(self.symbols, id: \.self) { symbol in
                     self.symbolCell(symbol)
                 }
             }

@@ -11,6 +11,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 - `IconPickerColor` is a value you can construct. Pass `colors:` to `IconPickerView` to use a brand palette.
 - `IconPickerLabels` localizes the chrome. Pass `labels:` or keep `.english`.
 - `IconPickerRow` — compact swatches + emoji/symbol popovers for forms.
+- Pass `symbols:` on either picker to use your own SF Symbol list.
 
 ### Fixed
 

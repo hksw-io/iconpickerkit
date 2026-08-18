@@ -91,3 +91,20 @@ import Testing
         colors: [.blue, .red],
         labels: IconPickerLabels(color: "Färg"))
 }
+
+@Test @MainActor func pickerStoresCallerSymbols() {
+    let symbols = ["star", "heart"]
+    let view = IconPickerView(icon: .constant("star"), color: .constant(.blue), symbols: symbols)
+    #expect(view.symbols == symbols)
+}
+
+@Test @MainActor func pickerDefaultsToSymbolCatalog() {
+    let view = IconPickerView(icon: .constant("folder"), color: .constant(.blue))
+    #expect(view.symbols == SymbolCatalog.ids)
+}
+
+@Test @MainActor func inlineRowStoresCallerSymbols() {
+    let symbols = ["star", "heart"]
+    let view = IconPickerRow(icon: .constant("star"), color: .constant(.blue), symbols: symbols)
+    #expect(view.symbols == symbols)
+}
