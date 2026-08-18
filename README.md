@@ -72,7 +72,7 @@ struct EditItemView: View {
 
 `icon` is either an emoji (`"🐶"`) or an SF Symbol name (`"folder"`). Persist `icon` and `color.id`.
 
-Search is the primary control. Emojis / Symbols sit under it as scopes and filter whichever list is showing. Keystrokes debounce for 250 ms.
+Search sits on the same row as Emojis / Symbols and filters whichever list is showing. Keystrokes debounce for 250 ms.
 
 ### In a form
 
