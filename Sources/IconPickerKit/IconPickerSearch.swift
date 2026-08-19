@@ -1,15 +1,5 @@
 import SwiftUI
 
-enum IconPickerSearchStyle {
-    static var usesRoundedBorder: Bool {
-        #if os(macOS)
-        true
-        #else
-        false
-        #endif
-    }
-}
-
 struct IconPickerSearchField: View {
     @Binding var text: String
     @Binding var debounce: SearchDebounce
@@ -19,31 +9,6 @@ struct IconPickerSearchField: View {
     @FocusState private var focused: Bool
 
     var body: some View {
-        Group {
-            if IconPickerSearchStyle.usesRoundedBorder {
-                TextField(self.prompt, text: self.$text)
-                    .textFieldStyle(.roundedBorder)
-            } else {
-                self.capsule
-            }
-        }
-        .focused(self.$focused)
-        .onAppear {
-            if self.autofocus {
-                self.focused = true
-            }
-        }
-        .onChange(of: self.text) { _, new in
-            self.debounce.push(new, at: ContinuousClock.now - self.origin)
-        }
-        .task(id: self.text) {
-            try? await Task.sleep(for: self.debounce.interval)
-            guard !Task.isCancelled else { return }
-            self.debounce.flush(at: ContinuousClock.now - self.origin)
-        }
-    }
-
-    private var capsule: some View {
         HStack(spacing: 6) {
             Image(systemName: "magnifyingglass")
                 .font(.body)
@@ -67,9 +32,23 @@ struct IconPickerSearchField: View {
                 .accessibilityLabel("Clear")
             }
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 10)
         .frame(maxWidth: .infinity)
         .frame(height: IconPickerLayout.searchHeight)
         .background(.quaternary, in: Capsule())
+        .focused(self.$focused)
+        .onAppear {
+            if self.autofocus {
+                self.focused = true
+            }
+        }
+        .onChange(of: self.text) { _, new in
+            self.debounce.push(new, at: ContinuousClock.now - self.origin)
+        }
+        .task(id: self.text) {
+            try? await Task.sleep(for: self.debounce.interval)
+            guard !Task.isCancelled else { return }
+            self.debounce.flush(at: ContinuousClock.now - self.origin)
+        }
     }
 }

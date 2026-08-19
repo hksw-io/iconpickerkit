@@ -22,7 +22,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 - README: on Mac, embed `IconPickerRow` in the form. Do not present `IconPickerView` in a sheet.
 - On Mac, the compact row uses smaller swatches and buttons, help text, and a hover scale that turns off under Reduce Motion.
 - Selected swatch rings use a contrasting stroke instead of white, so yellow and the label swatch stay visible in dark mode.
-- Mac search uses the system rounded-border field. iOS keeps the in-content capsule.
+- Search uses a capsule field on every platform.
 - `IconPickerRow` opens one mixed emoji and SF Symbol catalog popover.
 - Opening that popover focuses search. Escape dismisses it.
 - Custom color is a circular rainbow swatch on every platform. It opens the system color picker.

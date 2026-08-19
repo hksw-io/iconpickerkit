@@ -377,14 +377,6 @@ import Testing
     #endif
 }
 
-@Test func macSearchUsesRoundedBorder() {
-    #if os(macOS)
-    #expect(IconPickerSearchStyle.usesRoundedBorder)
-    #else
-    #expect(!IconPickerSearchStyle.usesRoundedBorder)
-    #endif
-}
-
 @Test func macRowMetricsAreDenserThanFullPicker() {
     #expect(IconPickerLayout.rowSwatchSize < IconPickerLayout.swatchSize)
     #expect(IconPickerLayout.rowIconButtonSize < IconPickerLayout.viewCellSize)
