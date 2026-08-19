@@ -6,6 +6,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-08-19
+
 ### Changed
 
 - Search field is 36pt tall so body text has room inside the capsule.
