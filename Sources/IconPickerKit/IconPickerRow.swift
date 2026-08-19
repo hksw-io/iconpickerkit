@@ -36,19 +36,8 @@ public struct IconPickerRow: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            self.colorSection
-            self.iconSection
-        }
-    }
-
-    private var colorSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(self.labels.color)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .accessibilityAddTraits(.isHeader)
-
+        HStack(alignment: .center, spacing: IconPickerLayout.stackSpacing) {
+            self.iconButton
             IconColorStrip(
                 color: self.$color,
                 colors: self.colors,
@@ -56,17 +45,6 @@ public struct IconPickerRow: View {
                 customLabel: self.labels.customColor,
                 swatchSize: IconPickerLayout.rowSwatchSize,
                 contentInset: 0)
-        }
-    }
-
-    private var iconSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(self.labels.icon)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .accessibilityAddTraits(.isHeader)
-
-            self.iconButton
         }
     }
 

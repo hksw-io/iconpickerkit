@@ -26,6 +26,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 - `IconPickerRow` opens one mixed emoji and SF Symbol catalog popover.
 - Opening that popover focuses search. Escape dismisses it.
 - Custom color is a circular rainbow swatch on every platform. It opens the system color picker.
+- `IconPickerRow` is one row: icon on the left, color swatches after it.
 - The full picker does not scroll to the current icon after the user has scrolled, and does not appear-scroll on a short Mac form.
 - `IconPickerView` shows one meaning-grouped catalog of emoji and SF Symbols. No Emojis/Symbols mode switch.
 - Preview is cell-sized; search sits under the color strip, above the catalog.
