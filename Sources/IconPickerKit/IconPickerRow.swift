@@ -8,6 +8,7 @@ public struct IconPickerRow: View {
     @Binding private var color: IconPickerColor
     private let colors: [IconPickerColor]
     let symbols: [String]
+    let allowsCustomColor: Bool
     private let labels: IconPickerLabels
 
     @State private var showingEmojis = false
@@ -28,12 +29,14 @@ public struct IconPickerRow: View {
         color: Binding<IconPickerColor>,
         colors: [IconPickerColor] = IconPickerColor.all,
         symbols: [String] = SymbolCatalog.ids,
+        allowsCustomColor: Bool = false,
         labels: IconPickerLabels = .english)
     {
         self._icon = icon
         self._color = color
         self.colors = colors
         self.symbols = symbols
+        self.allowsCustomColor = allowsCustomColor
         self.labels = labels
     }
 
@@ -51,37 +54,13 @@ public struct IconPickerRow: View {
                 .foregroundStyle(.secondary)
                 .accessibilityAddTraits(.isHeader)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(self.colors) { swatch in
-                        self.colorSwatch(swatch)
-                    }
-                }
-            }
+            IconColorStrip(
+                color: self.$color,
+                colors: self.colors,
+                allowsCustomColor: self.allowsCustomColor,
+                customLabel: self.labels.customColor,
+                swatchSize: 24)
         }
-    }
-
-    private func colorSwatch(_ swatch: IconPickerColor) -> some View {
-        let isSelected = swatch == self.color
-        return Button {
-            self.color = swatch
-        } label: {
-            ZStack {
-                Circle()
-                    .fill(swatch.color)
-                    .frame(width: 24, height: 24)
-                if isSelected {
-                    Circle()
-                        .strokeBorder(Color.white, lineWidth: 2)
-                        .frame(width: 20, height: 20)
-                }
-            }
-            .frame(width: 44, height: 44)
-            .contentShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(swatch.name)
-        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 
     private var iconSection: some View {

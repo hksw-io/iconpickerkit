@@ -11,6 +11,7 @@ public struct IconPickerView: View {
     private let colors: [IconPickerColor]
     let symbols: [String]
     let catalog: IconCatalogPreset
+    let allowsCustomColor: Bool
     private let labels: IconPickerLabels
 
     @State private var query = ""
@@ -25,12 +26,14 @@ public struct IconPickerView: View {
     /// Pass `colors` to replace the built-in palette with your own swatches,
     /// including brand colors. Pass `symbols` to replace the built-in SF Symbol
     /// catalog. Pass `catalog` to choose groups, order, and per-group caps.
+    /// Pass `allowsCustomColor` to append a system color picker on the far right.
     public init(
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
         colors: [IconPickerColor] = IconPickerColor.all,
         symbols: [String] = SymbolCatalog.ids,
         catalog: IconCatalogPreset = .all,
+        allowsCustomColor: Bool = false,
         labels: IconPickerLabels = .english)
     {
         self._icon = icon
@@ -38,6 +41,7 @@ public struct IconPickerView: View {
         self.colors = colors
         self.symbols = symbols
         self.catalog = catalog
+        self.allowsCustomColor = allowsCustomColor
         self.labels = labels
     }
 
@@ -80,42 +84,14 @@ public struct IconPickerView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .accessibilityAddTraits(.isHeader)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: IconPickerLayout.stackSpacing) {
-                    ForEach(self.colors) { swatch in
-                        self.colorSwatch(swatch)
-                    }
-                }
-            }
+            IconColorStrip(
+                color: self.$color,
+                colors: self.colors,
+                allowsCustomColor: self.allowsCustomColor,
+                customLabel: self.labels.customColor,
+                swatchSize: IconPickerLayout.swatchSize)
         }
         .padding(.horizontal, IconPickerLayout.horizontalInset)
-    }
-
-    private func colorSwatch(_ swatch: IconPickerColor) -> some View {
-        let isSelected = swatch == self.color
-        return Button {
-            self.color = swatch
-        } label: {
-            ZStack {
-                Circle()
-                    .fill(swatch.color)
-                    .frame(
-                        width: IconPickerLayout.swatchSize,
-                        height: IconPickerLayout.swatchSize)
-                if isSelected {
-                    Circle()
-                        .strokeBorder(Color.white, lineWidth: 2)
-                        .frame(
-                            width: IconPickerLayout.swatchSize - 4,
-                            height: IconPickerLayout.swatchSize - 4)
-                }
-            }
-            .frame(width: IconPickerLayout.swatchSize, height: IconPickerLayout.swatchSize)
-            .contentShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(swatch.name)
-        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 
     private var catalogList: some View {

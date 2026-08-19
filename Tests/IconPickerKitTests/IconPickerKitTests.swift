@@ -64,6 +64,27 @@ import Testing
     #expect(IconPickerColor.primary.name == "Label")
 }
 
+@Test func customColorUsesStableID() {
+    let custom = IconPickerColor.custom(.mint)
+    #expect(custom.id == IconPickerColor.customID)
+    #expect(custom.isCustom)
+}
+
+@Test func presetSwatchesAreNotCustom() {
+    #expect(IconPickerColor.all.allSatisfy { !$0.isCustom })
+}
+
+@Test @MainActor func pickersAcceptCustomColorSlot() {
+    _ = IconPickerView(
+        icon: .constant("folder"),
+        color: .constant(.custom(.orange)),
+        allowsCustomColor: true)
+    _ = IconPickerRow(
+        icon: .constant("folder"),
+        color: .constant(.custom(.orange)),
+        allowsCustomColor: true)
+}
+
 @Test func customColorKeepsCallerIdentity() {
     let brand = IconPickerColor(id: "brand", name: "Brand", color: .indigo)
     #expect(brand.id == "brand")
@@ -88,6 +109,7 @@ import Testing
     #expect(IconPickerLabels.english.emojis == "Emojis")
     #expect(IconPickerLabels.english.symbols == "Symbols")
     #expect(IconPickerLabels.english.search == "Search Icons")
+    #expect(IconPickerLabels.english.customColor == "Custom")
 }
 
 @Test func customLabelsKeepCallerCopy() {
@@ -102,6 +124,7 @@ import Testing
     #expect(labels.emojis == "Emoji")
     #expect(labels.symbols == "Symboler")
     #expect(labels.search == "Sök")
+    #expect(labels.customColor == "Custom")
 }
 
 @Test @MainActor func pickerAcceptsLabels() {

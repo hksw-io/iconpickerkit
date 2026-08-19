@@ -108,6 +108,7 @@ IconPickerView(
     icon: self.$icon,
     color: self.$color,
     colors: [.blue, brand],
+    allowsCustomColor: true,
     symbols: ["folder", "star", "heart"],
     labels: IconPickerLabels(
         color: String(localized: "picker.color"),

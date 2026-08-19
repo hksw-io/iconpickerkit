@@ -5,19 +5,22 @@ public struct IconPickerLabels: Equatable, Sendable {
     public var emojis: String
     public var symbols: String
     public var search: String
+    public var customColor: String
 
     public init(
         color: String = "Color",
         icon: String = "Icon",
         emojis: String = "Emojis",
         symbols: String = "Symbols",
-        search: String = "Search Icons")
+        search: String = "Search Icons",
+        customColor: String = "Custom")
     {
         self.color = color
         self.icon = icon
         self.emojis = emojis
         self.symbols = symbols
         self.search = search
+        self.customColor = customColor
     }
 
     public static let english = IconPickerLabels()

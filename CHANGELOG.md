@@ -22,6 +22,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 - No hero preview. Opening the picker scrolls the current icon into view.
 - `IconCatalog.search` returns named sections; an empty query is the full catalog.
 - `IconCatalogPreset` (`.all`, `.compact`, `.work`) sets groups, order, and per-group caps.
+- `allowsCustomColor` appends a system color picker as the far-right swatch. `IconPickerColor.custom(_:)`.
 - The emoji/symbol control hides its extra macOS picker title. The section header already names it.
 
 ## [1.1.0] - 2026-08-18
