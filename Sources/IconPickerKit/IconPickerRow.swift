@@ -59,7 +59,8 @@ public struct IconPickerRow: View {
                 colors: self.colors,
                 allowsCustomColor: self.allowsCustomColor,
                 customLabel: self.labels.customColor,
-                swatchSize: 24)
+                swatchSize: 24,
+                contentInset: 0)
         }
     }
 

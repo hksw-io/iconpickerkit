@@ -83,6 +83,7 @@ public struct IconPickerView: View {
             Text(self.labels.color)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+                .padding(.horizontal, IconPickerLayout.horizontalInset)
                 .accessibilityAddTraits(.isHeader)
             IconColorStrip(
                 color: self.$color,
@@ -91,7 +92,6 @@ public struct IconPickerView: View {
                 customLabel: self.labels.customColor,
                 swatchSize: IconPickerLayout.swatchSize)
         }
-        .padding(.horizontal, IconPickerLayout.horizontalInset)
     }
 
     private var catalogList: some View {

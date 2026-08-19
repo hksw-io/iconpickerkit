@@ -6,6 +6,7 @@ struct IconColorStrip: View {
     var allowsCustomColor: Bool
     var customLabel: String
     var swatchSize: CGFloat
+    var contentInset: CGFloat = IconPickerLayout.horizontalInset
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -17,6 +18,8 @@ struct IconColorStrip: View {
                     self.customSwatch
                 }
             }
+            .padding(.leading, self.contentInset)
+            .padding(.trailing, self.contentInset)
         }
     }
 

@@ -24,6 +24,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 - `IconCatalogPreset` (`.all`, `.compact`, `.work`) sets groups, order, and per-group caps.
 - `allowsCustomColor` appends a spectrum swatch on the far right that opens the system color picker. `IconPickerColor.custom(_:)`.
 - Default palette is one row of common hues. Teal, cyan, brown, and label stay as extras.
+- The color strip clips mid-swatch when it overflows, so the next color peeks.
 - The emoji/symbol control hides its extra macOS picker title. The section header already names it.
 
 ## [1.1.0] - 2026-08-18
