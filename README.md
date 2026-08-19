@@ -2,8 +2,8 @@
 
 A SwiftUI picker for a tint color plus an emoji or SF Symbol. Bind two values the consumer owns.
 
-- `IconPickerView` — a full picker for a sheet or pushed screen.
-- `IconPickerRow` — compact swatches and popovers for a form.
+- `IconPickerView` — a full picker for an iPhone or iPad sheet or pushed screen.
+- `IconPickerRow` — compact swatches and popovers for a form. On Mac, embed this in the form. Do not present `IconPickerView` in a sheet.
 
 ## Preview
 
@@ -42,7 +42,7 @@ In Xcode: **File > Add Package Dependencies…** and enter the URL above. You ne
 
 ## Usage
 
-Sheet with a Done button. Bindings update live; you own dismissal.
+On iPhone and iPad, present `IconPickerView` in a sheet. Bindings update live; you own dismissal. On Mac, skip the sheet and put `IconPickerRow` in the form instead.
 
 ```swift
 import SwiftUI
@@ -121,12 +121,15 @@ IconPickerView(icon: $icon, color: $color, suggestions: suggestions)
   <img src="Docs/Media/iconpickerkit-view-suggestions-dark.png" width="240" alt="IconPickerView in dark mode with the same Suggestions group and selected French flag.">
 </p>
 
-### In a form
+### On Mac
+
+Embed the compact row in the form. A full-picker sheet is the iPhone layout.
 
 ```swift
 Form {
     IconPickerRow(icon: self.$icon, color: self.$color)
 }
+.formStyle(.grouped)
 ```
 
 ### Palette, symbols, and labels
