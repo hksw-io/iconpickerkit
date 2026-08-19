@@ -26,9 +26,10 @@ All notable changes to IconPickerKit are recorded here. The format follows
 - `IconPickerRow` opens one mixed emoji and SF Symbol catalog popover.
 - Opening that popover focuses search. Escape dismisses it.
 - On Mac, custom color is a visible system color well. iOS keeps the spectrum swatch.
+- The full picker does not scroll to the current icon after the user has scrolled, and does not appear-scroll on a short Mac form.
 - `IconPickerView` shows one meaning-grouped catalog of emoji and SF Symbols. No Emojis/Symbols mode switch.
 - Preview is cell-sized; search sits under the color strip, above the catalog.
-- No hero preview. Opening the picker scrolls the current icon into view.
+- No hero preview. On iPhone the picker scrolls the current icon into view unless the user has already scrolled.
 - `IconCatalog.search` returns named sections; an empty query is the full catalog.
 - `IconCatalogPreset` (`.all`, `.compact`, `.work`) sets groups, order, and per-group caps.
 - `allowsCustomColor` appends a spectrum swatch on the far right that opens the system color picker. `IconPickerColor.custom(_:)`.

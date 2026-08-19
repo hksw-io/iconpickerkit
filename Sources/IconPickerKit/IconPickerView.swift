@@ -21,6 +21,7 @@ public struct IconPickerView: View {
     @State private var debounce = SearchDebounce()
     @State private var origin = ContinuousClock.now
     @State private var suggestions = IconSuggestions.empty
+    @State private var userHasScrolled = false
 
     @ScaledMetric(relativeTo: .title3) private var cellFont: CGFloat = 22
     @ScaledMetric(relativeTo: .title3) private var cellSize: CGFloat = 44
@@ -92,6 +93,11 @@ public struct IconPickerView: View {
                 }
                 .padding(.vertical)
             }
+            .onScrollPhaseChange { _, phase in
+                if phase == .interacting {
+                    self.userHasScrolled = true
+                }
+            }
             .task(id: self.hint ?? "") {
                 if let suggestionTask = self.suggestionTask {
                     self.suggestions = await suggestionTask.value
@@ -99,6 +105,11 @@ public struct IconPickerView: View {
                     !hint.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                 {
                     self.suggestions = await IconSuggestions.load(hint: hint)
+                }
+                guard IconPickerScrollPolicy.shouldScrollToSelection(
+                    userHasScrolled: self.userHasScrolled)
+                else {
+                    return
                 }
                 try? await Task.sleep(for: .milliseconds(16))
                 if let section = IconCatalog.section(

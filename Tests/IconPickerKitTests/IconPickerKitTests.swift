@@ -354,6 +354,29 @@ import Testing
     #expect(sections.count > 1)
 }
 
+@Test func scrollToSelectionSkipsAfterUserScrolls() {
+    #expect(
+        !IconPickerScrollPolicy.shouldScrollToSelection(userHasScrolled: true, shortForm: false))
+}
+
+@Test func scrollToSelectionSkipsShortMacForm() {
+    #expect(
+        !IconPickerScrollPolicy.shouldScrollToSelection(userHasScrolled: false, shortForm: true))
+}
+
+@Test func scrollToSelectionRunsOnTallFormBeforeUserScrolls() {
+    #expect(IconPickerScrollPolicy.shouldScrollToSelection(userHasScrolled: false, shortForm: false))
+}
+
+@Test func macFullPickerUsesShortFormPolicy() {
+    #if os(macOS)
+    #expect(IconPickerScrollPolicy.isShortForm)
+    #expect(!IconPickerScrollPolicy.shouldScrollToSelection(userHasScrolled: false))
+    #else
+    #expect(!IconPickerScrollPolicy.isShortForm)
+    #endif
+}
+
 @Test func macCustomColorUsesSystemWell() {
     #if os(macOS)
     #expect(IconPickerCustomColorStyle.usesSystemWell)
