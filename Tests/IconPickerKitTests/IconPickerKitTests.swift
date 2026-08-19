@@ -211,8 +211,9 @@ import Testing
     #expect(IconPickerLayout.colorStripInset == IconPickerLayout.horizontalInset)
 }
 
-@Test func searchMatchesModeControlHeight() {
-    #expect(IconPickerLayout.searchHeight == IconPickerLayout.controlHeight)
+@Test func searchIsTallerThanCompactControls() {
+    #expect(IconPickerLayout.searchHeight == 36)
+    #expect(IconPickerLayout.searchHeight > IconPickerLayout.controlHeight)
     #expect(IconPickerLayout.modeHeight == IconPickerLayout.controlHeight)
 }
 

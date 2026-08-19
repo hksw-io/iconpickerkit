@@ -33,7 +33,7 @@ enum IconPickerLayout {
     static var labelInset: CGFloat { self.horizontalInset }
     static var catalogInset: CGFloat { self.horizontalInset }
     static var colorStripInset: CGFloat { self.horizontalInset }
-    static var searchHeight: CGFloat { self.controlHeight }
+    static let searchHeight: CGFloat = 36
     static var modeHeight: CGFloat { self.controlHeight }
 }
 
