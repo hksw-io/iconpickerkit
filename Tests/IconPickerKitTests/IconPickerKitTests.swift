@@ -336,6 +336,16 @@ import Testing
     #expect(IconCatalog.sections().allSatisfy { $0.group != .suggestions })
 }
 
+@Test @MainActor func popoverSearchAutofocuses() {
+    let field = IconPickerSearchField(
+        text: .constant(""),
+        debounce: .constant(SearchDebounce()),
+        origin: .now,
+        prompt: "Search Icons",
+        autofocus: true)
+    #expect(field.autofocus)
+}
+
 @Test func rowPopoverShowsMixedCatalogNotModeLists() {
     let sections = IconPickerRowCatalog.sections(query: "", symbols: ["folder", "star"])
     let values = sections.flatMap(\.items).map(\.value)

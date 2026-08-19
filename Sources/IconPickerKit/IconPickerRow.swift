@@ -109,7 +109,8 @@ public struct IconPickerRow: View {
                 text: self.$query,
                 debounce: self.$debounce,
                 origin: self.origin,
-                prompt: self.labels.search)
+                prompt: self.labels.search,
+                autofocus: true)
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: IconPickerLayout.stackSpacing) {
                     ForEach(IconPickerRowCatalog.sections(query: self.debounce.applied, symbols: self.symbols))
@@ -121,6 +122,19 @@ public struct IconPickerRow: View {
         }
         .padding(12)
         .frame(width: 320, height: 280)
+        #if os(macOS)
+        .onExitCommand { self.showingCatalog = false }
+        #endif
+        .background {
+            Button {
+                self.showingCatalog = false
+            } label: {
+                EmptyView()
+            }
+            .keyboardShortcut(.cancelAction)
+            .opacity(0)
+            .accessibilityHidden(true)
+        }
     }
 
     private func section(_ section: IconSection) -> some View {

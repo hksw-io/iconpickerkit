@@ -15,6 +15,8 @@ struct IconPickerSearchField: View {
     @Binding var debounce: SearchDebounce
     var origin: ContinuousClock.Instant
     var prompt: String
+    var autofocus: Bool = false
+    @FocusState private var focused: Bool
 
     var body: some View {
         Group {
@@ -23,6 +25,12 @@ struct IconPickerSearchField: View {
                     .textFieldStyle(.roundedBorder)
             } else {
                 self.capsule
+            }
+        }
+        .focused(self.$focused)
+        .onAppear {
+            if self.autofocus {
+                self.focused = true
             }
         }
         .onChange(of: self.text) { _, new in
