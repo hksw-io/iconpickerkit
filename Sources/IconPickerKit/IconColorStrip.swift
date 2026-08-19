@@ -8,16 +8,14 @@ struct IconColorStrip: View {
     var swatchSize: CGFloat
 
     var body: some View {
-        HStack(spacing: IconPickerLayout.stackSpacing) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: IconPickerLayout.stackSpacing) {
-                    ForEach(self.colors) { swatch in
-                        self.presetSwatch(swatch)
-                    }
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: IconPickerLayout.stackSpacing) {
+                ForEach(self.colors) { swatch in
+                    self.presetSwatch(swatch)
                 }
-            }
-            if self.allowsCustomColor {
-                self.customSwatch
+                if self.allowsCustomColor {
+                    self.customSwatch
+                }
             }
         }
     }
