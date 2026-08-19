@@ -6,6 +6,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-08-19
+
 ### Added
 
 - Mac demo: `./scripts/run-demo.sh` launches a real app (Dock and Cmd-Tab). Delay suggestions 2 seconds to scroll before they land.

@@ -31,7 +31,7 @@ A SwiftUI picker for a tint color plus an emoji or SF Symbol. Bind two values th
 Internal to the `hksw-io` org. Add:
 
 ```swift
-.package(url: "https://github.com/hksw-io/iconpickerkit.git", from: "1.2.1")
+.package(url: "https://github.com/hksw-io/iconpickerkit.git", from: "1.2.2")
 ```
 
 ```swift
