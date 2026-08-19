@@ -26,12 +26,12 @@ struct GenerateMedia {
             to: out.appending(path: "iconpickerkit-view-dark.png"))
         try write(
             RowShot(scheme: .light),
-            size: CGSize(width: 520, height: 100),
+            size: CGSize(width: 580, height: 100),
             appearance: .aqua,
             to: out.appending(path: "iconpickerkit-row-light.png"))
         try write(
             RowShot(scheme: .dark),
-            size: CGSize(width: 520, height: 100),
+            size: CGSize(width: 580, height: 100),
             appearance: .darkAqua,
             to: out.appending(path: "iconpickerkit-row-dark.png"))
         try write(

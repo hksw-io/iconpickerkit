@@ -37,7 +37,19 @@ public struct IconPickerRow: View {
 
     public var body: some View {
         HStack(alignment: .center, spacing: IconPickerLayout.stackSpacing) {
+            Text(self.labels.icon)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize()
+                .accessibilityAddTraits(.isHeader)
             self.iconButton
+            Divider()
+                .frame(height: IconPickerLayout.rowIconButtonSize)
+            Text(self.labels.color)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize()
+                .accessibilityAddTraits(.isHeader)
             IconColorStrip(
                 color: self.$color,
                 colors: self.colors,

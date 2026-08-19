@@ -15,8 +15,8 @@ A SwiftUI picker for a tint color plus an emoji or SF Symbol. Bind two values th
 `IconPickerView`. Present it in a sheet; you own Done.
 
 <p>
-  <img src="Docs/Media/iconpickerkit-row-light.png" width="360" alt="IconPickerRow in a light form: the folder icon on the left and color swatches on the same row, blue selected.">
-  <img src="Docs/Media/iconpickerkit-row-dark.png" width="360" alt="IconPickerRow in a dark form with the folder icon on the left and color swatches on the same row.">
+  <img src="Docs/Media/iconpickerkit-row-light.png" width="360" alt="IconPickerRow in a light form: Icon label and folder button, a divider, then Color and swatches with blue selected.">
+  <img src="Docs/Media/iconpickerkit-row-dark.png" width="360" alt="IconPickerRow in a dark form with Icon and Color labels separated by a divider.">
 </p>
 
 `IconPickerRow` in a form.
