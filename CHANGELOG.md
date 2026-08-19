@@ -8,6 +8,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ### Added
 
+- `hint` on `IconPickerView` asks the on-device Foundation Model for suggested icons. Usable results appear as a Suggestions group at the top; the group is omitted when the model is off or returns nothing.
+- `IconSuggestions.preload(hint:)` starts that work before the picker appears.
 - README stills of `IconPickerView` and `IconPickerRow` in light and dark.
 - Platform search on both pickers, with debounce. The same query filters emojis or symbols.
 - Search is an in-catalog SwiftUI field so it is visible without a nav bar.

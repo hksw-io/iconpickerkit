@@ -34,6 +34,16 @@ struct GenerateMedia {
             size: CGSize(width: 520, height: 220),
             appearance: .darkAqua,
             to: out.appending(path: "iconpickerkit-row-dark.png"))
+        try write(
+            SuggestionsShot(scheme: .light),
+            size: CGSize(width: 390, height: 780),
+            appearance: .aqua,
+            to: out.appending(path: "iconpickerkit-view-suggestions-light.png"))
+        try write(
+            SuggestionsShot(scheme: .dark),
+            size: CGSize(width: 390, height: 780),
+            appearance: .darkAqua,
+            to: out.appending(path: "iconpickerkit-view-suggestions-dark.png"))
     }
 
     @MainActor
@@ -97,6 +107,27 @@ private struct ViewShot: View {
 
     var body: some View {
         IconPickerView(icon: self.$icon, color: self.$color, allowsCustomColor: true)
+            .preferredColorScheme(self.scheme)
+    }
+}
+
+private struct SuggestionsShot: View {
+    @State private var icon = "🇫🇷"
+    @State private var color = IconPickerColor.blue
+    let scheme: ColorScheme
+
+    var body: some View {
+        IconPickerView(
+            icon: self.$icon,
+            color: self.$color,
+            allowsCustomColor: true,
+            suggestions: IconSuggestions(items: [
+                IconItem(value: "🇫🇷", name: "France"),
+                IconItem(value: "🥖", name: "Baguette"),
+                IconItem(value: "flag", name: "flag"),
+                IconItem(value: "book", name: "book"),
+                IconItem(value: "globe.europe.africa", name: "globe europe africa"),
+            ]))
             .preferredColorScheme(self.scheme)
     }
 }

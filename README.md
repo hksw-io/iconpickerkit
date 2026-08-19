@@ -91,6 +91,36 @@ IconPickerView(
         limit: 8))
 ```
 
+### Suggested icons
+
+Pass a `hint` — a deck name, title, or other short label. When Apple's on-device Foundation Model is available it may return emoji or SF Symbol names (a deck called `"French"` can surface 🇫🇷). Those appear as a Suggestions group at the top of the catalog. If the model is off, unavailable, or returns nothing usable, the extra group is omitted. No API key.
+
+```swift
+IconPickerView(icon: $icon, color: $color, hint: deckName)
+```
+
+Start the work before presenting the sheet so the group can already be there:
+
+```swift
+let suggestions = IconSuggestions.preload(hint: deckName)
+
+.sheet(isPresented: $showingPicker) {
+    IconPickerView(icon: $icon, color: $color, suggestions: suggestions)
+}
+```
+
+Or await a finished result and pass that — the extra group is on the first frame:
+
+```swift
+let suggestions = await IconSuggestions.load(hint: deckName)
+IconPickerView(icon: $icon, color: $color, suggestions: suggestions)
+```
+
+<p>
+  <img src="Docs/Media/iconpickerkit-view-suggestions-light.png" width="240" alt="IconPickerView in light mode with a Suggestions group: the French flag selected, then baguette, flag, book, and globe icons, above Smileys.">
+  <img src="Docs/Media/iconpickerkit-view-suggestions-dark.png" width="240" alt="IconPickerView in dark mode with the same Suggestions group and selected French flag.">
+</p>
+
 ### In a form
 
 ```swift

@@ -12,11 +12,15 @@ public struct IconPickerView: View {
     let symbols: [String]
     let catalog: IconCatalogPreset
     let allowsCustomColor: Bool
+    let hint: String?
+    let suggestionTask: Task<IconSuggestions, Never>?
+    let readySuggestions: IconSuggestions
     private let labels: IconPickerLabels
 
     @State private var query = ""
     @State private var debounce = SearchDebounce()
     @State private var origin = ContinuousClock.now
+    @State private var suggestions = IconSuggestions.empty
 
     @ScaledMetric(relativeTo: .title3) private var cellFont: CGFloat = 22
     @ScaledMetric(relativeTo: .title3) private var cellSize: CGFloat = 44
@@ -27,6 +31,9 @@ public struct IconPickerView: View {
     /// including brand colors. Pass `symbols` to replace the built-in SF Symbol
     /// catalog. Pass `catalog` to choose groups, order, and per-group caps.
     /// Pass `allowsCustomColor` to append a system color picker on the far right.
+    /// Pass `hint` (a deck name, title, …) to ask the on-device Foundation Model
+    /// for suggested icons. Pass `suggestions` to reuse work started with
+    /// ``IconSuggestions/preload(hint:)`` before the picker appears.
     public init(
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
@@ -34,6 +41,8 @@ public struct IconPickerView: View {
         symbols: [String] = SymbolCatalog.ids,
         catalog: IconCatalogPreset = .all,
         allowsCustomColor: Bool = false,
+        hint: String? = nil,
+        suggestions: Task<IconSuggestions, Never>? = nil,
         labels: IconPickerLabels = .english)
     {
         self._icon = icon
@@ -42,7 +51,35 @@ public struct IconPickerView: View {
         self.symbols = symbols
         self.catalog = catalog
         self.allowsCustomColor = allowsCustomColor
+        self.hint = hint
+        self.suggestionTask = suggestions
+        self.readySuggestions = .empty
         self.labels = labels
+        self._suggestions = State(initialValue: .empty)
+    }
+
+    /// Creates a picker whose Suggestions group is already populated.
+    public init(
+        icon: Binding<String>,
+        color: Binding<IconPickerColor>,
+        colors: [IconPickerColor] = IconPickerColor.all,
+        symbols: [String] = SymbolCatalog.ids,
+        catalog: IconCatalogPreset = .all,
+        allowsCustomColor: Bool = false,
+        suggestions: IconSuggestions,
+        labels: IconPickerLabels = .english)
+    {
+        self._icon = icon
+        self._color = color
+        self.colors = colors
+        self.symbols = symbols
+        self.catalog = catalog
+        self.allowsCustomColor = allowsCustomColor
+        self.hint = nil
+        self.suggestionTask = nil
+        self.readySuggestions = suggestions
+        self.labels = labels
+        self._suggestions = State(initialValue: suggestions)
     }
 
     public var body: some View {
@@ -55,12 +92,20 @@ public struct IconPickerView: View {
                 }
                 .padding(.vertical)
             }
-            .task {
+            .task(id: self.hint ?? "") {
+                if let suggestionTask = self.suggestionTask {
+                    self.suggestions = await suggestionTask.value
+                } else if let hint = self.hint,
+                    !hint.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                {
+                    self.suggestions = await IconSuggestions.load(hint: hint)
+                }
                 try? await Task.sleep(for: .milliseconds(16))
                 if let section = IconCatalog.section(
                     containing: self.icon,
                     symbols: self.symbols,
-                    catalog: self.catalog)
+                    catalog: self.catalog,
+                    suggestions: self.suggestions.items)
                 {
                     proxy.scrollTo(section.id, anchor: .center)
                 }
@@ -100,7 +145,8 @@ public struct IconPickerView: View {
                 IconCatalog.search(
                     self.debounce.applied,
                     symbols: self.symbols,
-                    catalog: self.catalog))
+                    catalog: self.catalog,
+                    suggestions: self.suggestions.items))
             { section in
                 self.section(section)
                     .id(section.id)
@@ -111,7 +157,7 @@ public struct IconPickerView: View {
 
     private func section(_ section: IconSection) -> some View {
         VStack(alignment: .leading, spacing: IconPickerLayout.stackSpacing) {
-            Text(section.title)
+            Text(section.group == .suggestions ? self.labels.suggestions : section.title)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .accessibilityAddTraits(.isHeader)

@@ -6,6 +6,7 @@ public struct IconPickerLabels: Equatable, Sendable {
     public var symbols: String
     public var search: String
     public var customColor: String
+    public var suggestions: String
 
     public init(
         color: String = "Color",
@@ -13,7 +14,8 @@ public struct IconPickerLabels: Equatable, Sendable {
         emojis: String = "Emojis",
         symbols: String = "Symbols",
         search: String = "Search Icons",
-        customColor: String = "Custom")
+        customColor: String = "Custom",
+        suggestions: String = "Suggestions")
     {
         self.color = color
         self.icon = icon
@@ -21,6 +23,7 @@ public struct IconPickerLabels: Equatable, Sendable {
         self.symbols = symbols
         self.search = search
         self.customColor = customColor
+        self.suggestions = suggestions
     }
 
     public static let english = IconPickerLabels()

@@ -115,6 +115,7 @@ import Testing
     #expect(IconPickerLabels.english.symbols == "Symbols")
     #expect(IconPickerLabels.english.search == "Search Icons")
     #expect(IconPickerLabels.english.customColor == "Custom")
+    #expect(IconPickerLabels.english.suggestions == "Suggestions")
 }
 
 @Test func customLabelsKeepCallerCopy() {
@@ -272,4 +273,79 @@ import Testing
         let rank: [IconGroup] = [.work, .smileys, .home]
         return rank.firstIndex(of: lhs)! < rank.firstIndex(of: rhs)!
     })
+}
+
+@Test func cannedSuggestionsAppearAheadOfRegularGroups() async {
+    let loaded = await IconSuggestions.load(hint: "French") { _ in ["🇫🇷", "flag"] }
+    #expect(loaded.items.map(\.value) == ["🇫🇷", "flag"])
+    let sections = IconCatalog.sections(suggestions: loaded.items)
+    #expect(sections.first?.group == .suggestions)
+    #expect(sections.first?.items.map(\.value) == ["🇫🇷", "flag"])
+    #expect(sections.dropFirst().first?.group != .suggestions)
+    #expect(IconCatalog.section(containing: "🇫🇷", suggestions: loaded.items)?.group == .suggestions)
+}
+
+@Test func emptyHintYieldsNoExtraGroup() async {
+    let loaded = await IconSuggestions.load(hint: "   ") { _ in ["🇫🇷"] }
+    #expect(loaded.isEmpty)
+    #expect(IconCatalog.sections(suggestions: loaded.items).first?.group != .suggestions)
+}
+
+@Test func unavailableSuggestionsYieldNoExtraGroup() async {
+    let loaded = await IconSuggestions.load(hint: "French") { _ in [] }
+    #expect(loaded.isEmpty)
+    #expect(IconCatalog.sections(suggestions: loaded.items).first?.group != .suggestions)
+}
+
+@Test func failedSuggestionsYieldNoExtraGroup() async {
+    struct Boom: Error {}
+    let loaded = await IconSuggestions.load(hint: "French") { _ in throw Boom() }
+    #expect(loaded.isEmpty)
+    #expect(IconCatalog.sections(suggestions: loaded.items).first?.group != .suggestions)
+}
+
+@Test func unusableSuggestionsYieldNoExtraGroup() async {
+    let loaded = await IconSuggestions.load(hint: "French") { _ in
+        ["hello", "not an icon", "🇫🇷🥖", ""]
+    }
+    #expect(loaded.isEmpty)
+    #expect(IconCatalog.sections(suggestions: loaded.items).first?.group != .suggestions)
+}
+
+@Test func preloadFeedsCatalogWithoutRunningPickerBody() async {
+    let task = IconSuggestions.preload(hint: "French") { _ in ["🇫🇷"] }
+    let loaded = await task.value
+    let sections = IconCatalog.search("", suggestions: loaded.items)
+    #expect(sections.first?.group == .suggestions)
+    #expect(sections.first?.items.contains { $0.value == "🇫🇷" } == true)
+}
+
+@Test @MainActor func pickerAcceptsFinishedSuggestionsWithoutRunningBody() async {
+    let loaded = await IconSuggestions.load(hint: "French") { _ in ["🇫🇷"] }
+    let view = IconPickerView(
+        icon: .constant("folder"),
+        color: .constant(.blue),
+        suggestions: loaded)
+    let sections = IconCatalog.sections(suggestions: view.readySuggestions.items)
+    #expect(view.readySuggestions.items.map(\.value) == ["🇫🇷"])
+    #expect(sections.first?.group == .suggestions)
+    #expect(sections.first?.items.map(\.value) == ["🇫🇷"])
+}
+
+@Test func defaultCatalogOmitsEmptySuggestionsGroup() {
+    #expect(IconCatalog.sections().allSatisfy { $0.group != .suggestions })
+}
+
+@Test @MainActor func pickerAcceptsHintAndPreload() {
+    let task = IconSuggestions.preload(hint: "French") { _ in ["🇫🇷"] }
+    let hinted = IconPickerView(
+        icon: .constant("folder"),
+        color: .constant(.blue),
+        hint: "French")
+    #expect(hinted.hint == "French")
+    let preloaded = IconPickerView(
+        icon: .constant("folder"),
+        color: .constant(.blue),
+        suggestions: task)
+    #expect(preloaded.suggestionTask != nil)
 }
