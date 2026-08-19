@@ -6,37 +6,27 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-08-19
+
 ### Added
 
-- `hint` on `IconPickerView` asks the on-device Foundation Model for suggested icons. Usable results appear as a Suggestions group at the top; the group is omitted when the model is off or returns nothing.
-- `IconSuggestions.preload(hint:)` starts that work before the picker appears.
-- README stills of `IconPickerView` and `IconPickerRow` in light and dark.
-- Platform search on both pickers, with debounce. The same query filters emojis or symbols.
-- Search is an in-catalog SwiftUI field so it is visible without a nav bar.
-- One stack gap, inset, and control height for the full picker’s label, mode control, search, and catalog.
-- Section-to-section spacing uses that same gap, so Color → Icon matches Icon → controls.
-- `SymbolCatalog.search` and `SearchDebounce`.
+- `hint` on `IconPickerView` asks the on-device Foundation Model for suggested icons. Usable results appear as a Suggestions group at the top; the group is omitted when the model is off or returns nothing. `IconSuggestions.preload(hint:)` and `load(hint:)`.
+- Search Icons filters the mixed catalog, with debounce.
+- `IconCatalogPreset` (`.all`, `.compact`, `.work`) sets groups, order, and per-group caps.
+- `allowsCustomColor` appends a circular rainbow swatch that opens the system color picker. `IconPickerColor.custom(_:)`.
+- README stills of `IconPickerView` and `IconPickerRow` in light and dark, including suggestions.
 
 ### Changed
 
-- README: on Mac, embed `IconPickerRow` in the form. Do not present `IconPickerView` in a sheet.
-- On Mac, the compact row uses smaller swatches and buttons, help text, and a hover scale that turns off under Reduce Motion.
-- Selected swatches use a concentric primary ring with a gap, not a thin stroke on the fill.
-- Search uses a capsule field on every platform.
-- `IconPickerRow` opens one mixed emoji and SF Symbol catalog popover.
-- Opening that popover focuses search. Escape dismisses it.
-- Custom color is a circular rainbow swatch on every platform. It opens the system color picker.
-- `IconPickerRow` is one row: icon on the left, color swatches after it, with Icon and Color labels and a divider between them.
-- The full picker does not scroll to the current icon after the user has scrolled, and does not appear-scroll on a short Mac form.
-- `IconPickerView` shows one meaning-grouped catalog of emoji and SF Symbols. No Emojis/Symbols mode switch.
-- Preview is cell-sized; search sits under the color strip, above the catalog.
-- No hero preview. On iPhone the picker scrolls the current icon into view unless the user has already scrolled.
-- `IconCatalog.search` returns named sections; an empty query is the full catalog.
-- `IconCatalogPreset` (`.all`, `.compact`, `.work`) sets groups, order, and per-group caps.
-- `allowsCustomColor` appends a spectrum swatch on the far right that opens the system color picker. `IconPickerColor.custom(_:)`.
-- Default palette is one row of common hues. Teal, cyan, brown, and label stay as extras.
+- `IconPickerView` shows one meaning-grouped catalog of emoji and SF Symbols. No Emojis/Symbols mode switch and no hero preview.
+- On Mac, embed `IconPickerRow` in the form. Do not present `IconPickerView` in a sheet.
+- `IconPickerRow` is one row: Icon on the left, Color swatches after a divider, one mixed-catalog popover. Opening it focuses search; Escape dismisses.
+- On Mac the row uses smaller swatches and buttons, help text, and a hover scale that turns off under Reduce Motion.
+- Selected swatches use a concentric primary ring with a gap.
+- Search is a capsule field on every platform.
 - The color strip clips mid-swatch when it overflows, so the next color peeks.
-- The emoji/symbol control hides its extra macOS picker title. The section header already names it.
+- The full picker does not scroll to the current icon after the user has scrolled, and does not appear-scroll on a short Mac form.
+- Default palette is one row of common hues.
 
 ## [1.1.0] - 2026-08-18
 

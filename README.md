@@ -3,7 +3,7 @@
 A SwiftUI picker for a tint color plus an emoji or SF Symbol. Bind two values the consumer owns.
 
 - `IconPickerView` — a full picker for an iPhone or iPad sheet or pushed screen.
-- `IconPickerRow` — compact swatches and one catalog popover for a form. On Mac, embed this in the form. Do not present `IconPickerView` in a sheet.
+- `IconPickerRow` — one form row: Icon on the left, Color swatches after a divider, one mixed-catalog popover. On Mac, embed this in the form. Do not present `IconPickerView` in a sheet.
 
 ## Preview
 
@@ -31,7 +31,7 @@ A SwiftUI picker for a tint color plus an emoji or SF Symbol. Bind two values th
 Internal to the `hksw-io` org. Add:
 
 ```swift
-.package(url: "https://github.com/hksw-io/iconpickerkit.git", from: "1.0.0")
+.package(url: "https://github.com/hksw-io/iconpickerkit.git", from: "1.2.0")
 ```
 
 ```swift
@@ -146,9 +146,9 @@ IconPickerView(
     labels: IconPickerLabels(
         color: String(localized: "picker.color"),
         icon: String(localized: "picker.icon"),
-        emojis: String(localized: "picker.emojis"),
-        symbols: String(localized: "picker.symbols"),
-        search: String(localized: "picker.search")))
+        search: String(localized: "picker.search"),
+        customColor: String(localized: "picker.customColor"),
+        suggestions: String(localized: "picker.suggestions")))
 ```
 
 `IconPickerRow` takes the same `colors`, `symbols`, and `labels` arguments.
