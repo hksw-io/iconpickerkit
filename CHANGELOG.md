@@ -6,6 +6,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.2.3] - 2026-08-19
+
 ### Fixed
 
 - Catalog section titles keep the shared horizontal inset before Suggestions appear.
