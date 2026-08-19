@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct IconColorStrip: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Binding var color: IconPickerColor
     var colors: [IconPickerColor]
     var allowsCustomColor: Bool
@@ -57,7 +58,9 @@ struct IconColorStrip: View {
         .overlay {
             if self.color.isCustom {
                 Circle()
-                    .strokeBorder(Color.white, lineWidth: 2)
+                    .strokeBorder(
+                        IconPickerSwatchRing.color(for: self.color.color, scheme: self.colorScheme),
+                        lineWidth: 2)
                     .frame(width: self.swatchSize - 4, height: self.swatchSize - 4)
             }
         }
@@ -74,7 +77,9 @@ struct IconColorStrip: View {
                 .frame(width: self.swatchSize, height: self.swatchSize)
             if selected {
                 Circle()
-                    .strokeBorder(Color.white, lineWidth: 2)
+                    .strokeBorder(
+                        IconPickerSwatchRing.color(for: fill, scheme: self.colorScheme),
+                        lineWidth: 2)
                     .frame(width: self.swatchSize - 4, height: self.swatchSize - 4)
             }
         }
