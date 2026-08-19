@@ -96,11 +96,7 @@ private struct ViewShot: View {
     let scheme: ColorScheme
 
     var body: some View {
-        IconPickerView(
-            icon: self.$icon,
-            color: self.$color,
-            colors: Array(IconPickerColor.all.prefix(6)),
-            allowsCustomColor: true)
+        IconPickerView(icon: self.$icon, color: self.$color, allowsCustomColor: true)
             .preferredColorScheme(self.scheme)
     }
 }
@@ -112,11 +108,7 @@ private struct RowShot: View {
 
     var body: some View {
         Form {
-            IconPickerRow(
-                icon: self.$icon,
-                color: self.$color,
-                colors: Array(IconPickerColor.all.prefix(6)),
-                allowsCustomColor: true)
+            IconPickerRow(icon: self.$icon, color: self.$color, allowsCustomColor: true)
         }
         .formStyle(.grouped)
         .preferredColorScheme(self.scheme)

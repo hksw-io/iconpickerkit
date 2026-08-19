@@ -95,6 +95,11 @@ import Testing
     #expect(IconPickerColor.all.contains { $0.id == IconPickerColor.blue.id })
 }
 
+@Test func defaultPaletteFillsARow() {
+    #expect(IconPickerColor.all.count >= 8)
+    #expect(IconPickerColor.all.allSatisfy { !$0.isCustom })
+}
+
 @Test @MainActor func pickerAcceptsCustomPalette() {
     let brand = IconPickerColor(id: "brand", name: "Brand", color: .indigo)
     _ = IconPickerView(

@@ -27,8 +27,7 @@ public struct IconPickerColor: Identifiable, Hashable, Sendable {
     public static let primary = IconPickerColor(id: "primary", name: "Label", color: .primary)
 
     public static let all: [IconPickerColor] = [
-        .red, .orange, .yellow, .green, .mint, .teal, .cyan, .blue, .indigo, .purple, .pink, .brown,
-        .primary,
+        .red, .orange, .yellow, .green, .mint, .blue, .indigo, .purple, .pink,
     ]
 
     public static let customID = "custom"
