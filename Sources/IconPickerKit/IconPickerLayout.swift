@@ -43,6 +43,11 @@ enum IconPickerHover {
     static func scale(isHovered: Bool, reduceMotion: Bool) -> CGFloat {
         isHovered && !reduceMotion ? self.amount : 1
     }
+
+    /// Extra layout around a control so `scaleEffect` is not clipped.
+    static func overflow(for size: CGFloat) -> CGFloat {
+        (size * (self.amount - 1) / 2).rounded(.up) + 1
+    }
 }
 
 struct IconPickerHovering: ViewModifier {

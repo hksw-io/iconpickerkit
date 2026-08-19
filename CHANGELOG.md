@@ -6,6 +6,17 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Mac demo: `./scripts/run-demo.sh` launches a real app (Dock and Cmd-Tab). Delay suggestions 2 seconds to scroll before they land.
+
+### Changed
+
+- Color and search stay pinned above the catalog so they remain visible and do not overlap scrolling icons.
+- Suggestions insert without moving a scrolled catalog. The expand animation only runs when the catalog is still at the top.
+- Hover scale no longer clips color swatches or the row icon.
+- On Mac, the rainbow custom swatch opens the system color panel on the first click.
+
 ## [1.2.1] - 2026-08-19
 
 ### Changed

@@ -120,7 +120,7 @@ Passing only `hint:` still asks the model after appear. Usable emoji or SF Symbo
 IconPickerView(icon: $icon, color: $color, hint: deckName)
 ```
 
-The picker scrolls to the current icon on first layout without waiting for suggestions, animates that scroll, and skips it when the icon is already on screen. When suggestions arrive after appear, the group expands in at the top.
+Color and search stay pinned above the catalog. The picker scrolls to the current icon on first layout without waiting for suggestions, animates that scroll, and skips it when the icon is already on screen. When suggestions arrive after appear, the group expands in at the top if you are still there; a scrolled catalog keeps its place.
 
 <p>
   <img src="Docs/Media/iconpickerkit-view-suggestions-light.png" width="240" alt="IconPickerView in light mode with a Suggestions group: the French flag selected, then baguette, flag, book, and globe icons, above Smileys.">
@@ -171,9 +171,12 @@ let kind = IconKind.classify("🐶")  // .emoji
 ```sh
 swift test
 swift run GenerateMedia
+./scripts/run-demo.sh
 ```
 
 `GenerateMedia` rewrites the README stills in `Docs/Media`.
+
+`./scripts/run-demo.sh` builds a real Mac app and opens it (Dock and Cmd-Tab). Catalog is the full picker with color and search pinned. Form row is the compact control. The inspector hint plus **Delay 2 seconds** starts canned suggestions after a pause so you can scroll first. **Reload** runs that again. Turn Delay off to use the on-device model.
 
 ## License
 

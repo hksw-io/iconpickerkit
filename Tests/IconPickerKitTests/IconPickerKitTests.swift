@@ -395,6 +395,25 @@ import Testing
     #expect(IconPickerScrollPolicy.suggestionAppearAnimation(reduceMotion: false) != nil)
 }
 
+@Test func suggestionAppearAnimationSkipsWhenCatalogHasScrolled() {
+    #expect(
+        IconPickerScrollPolicy.suggestionAppearAnimation(
+            reduceMotion: false,
+            catalogIsAtTop: false) == nil)
+    #expect(
+        IconPickerScrollPolicy.suggestionAppearAnimation(
+            reduceMotion: false,
+            catalogIsAtTop: true) != nil)
+}
+
+@Test func catalogAtTopAccountsForInset() {
+    #expect(IconPickerScrollPolicy.catalogIsAtTop(offsetY: 0, insetTop: 0))
+    #expect(IconPickerScrollPolicy.catalogIsAtTop(offsetY: 8, insetTop: 0))
+    #expect(!IconPickerScrollPolicy.catalogIsAtTop(offsetY: 40, insetTop: 0))
+    #expect(IconPickerScrollPolicy.catalogIsAtTop(offsetY: 20, insetTop: 16))
+    #expect(!IconPickerScrollPolicy.catalogIsAtTop(offsetY: 32, insetTop: 16))
+}
+
 @Test func macFullPickerUsesShortFormPolicy() {
     #if os(macOS)
     #expect(IconPickerScrollPolicy.isShortForm)
@@ -422,6 +441,13 @@ import Testing
     #expect(IconPickerHover.scale(isHovered: true, reduceMotion: true) == 1)
     #expect(IconPickerHover.scale(isHovered: false, reduceMotion: false) == 1)
     #expect(IconPickerHover.scale(isHovered: true, reduceMotion: false) == IconPickerHover.amount)
+}
+
+@Test func hoverOverflowContainsScaledControl() {
+    for size: CGFloat in [20, 32, 36, 44] {
+        let overflow = IconPickerHover.overflow(for: size)
+        #expect(size + 2 * overflow >= size * IconPickerHover.amount)
+    }
 }
 
 @Test @MainActor func pickerAcceptsHintAndPreload() {

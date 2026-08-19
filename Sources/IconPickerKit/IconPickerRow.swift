@@ -86,6 +86,7 @@ public struct IconPickerRow: View {
         }
         .buttonStyle(.plain)
         .iconPickerHover()
+        .padding(IconPickerHover.overflow(for: IconPickerLayout.rowIconButtonSize))
         .help(self.labels.icon)
         .accessibilityLabel(self.labels.icon)
         .popover(isPresented: self.$showingCatalog) {

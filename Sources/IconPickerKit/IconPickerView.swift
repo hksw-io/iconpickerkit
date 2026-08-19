@@ -23,6 +23,8 @@ public struct IconPickerView: View {
     @State private var origin = ContinuousClock.now
     @State private var suggestions = IconSuggestions.empty
     @State private var userHasScrolled = false
+    @State private var catalogIsAtTop = true
+    @State private var scrollPosition = ScrollPosition(edge: .top)
     @State private var selectionVisibility = IconPickerSelectionVisibility()
 
     @ScaledMetric(relativeTo: .title3) private var cellFont: CGFloat = 22
@@ -88,26 +90,38 @@ public struct IconPickerView: View {
     }
 
     public var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                VStack(spacing: IconPickerLayout.sectionSpacing) {
-                    self.colorSection
-                    self.search
-                    self.catalogList
-                }
-                .padding(.vertical)
+        VStack(spacing: IconPickerLayout.sectionSpacing) {
+            self.colorSection
+            self.search
+            self.catalogScroll
+        }
+        .padding(.top)
+        .task {
+            await self.scrollToSelectionIfNeeded()
+        }
+        .task(id: self.hint ?? "") {
+            await self.applySuggestions()
+        }
+    }
+
+    private var catalogScroll: some View {
+        ScrollView {
+            self.catalogList
+                .padding(.bottom)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .scrollPosition($scrollPosition)
+        .onScrollPhaseChange { _, phase in
+            if phase == .interacting {
+                self.userHasScrolled = true
             }
-            .onScrollPhaseChange { _, phase in
-                if phase == .interacting {
-                    self.userHasScrolled = true
-                }
-            }
-            .task {
-                await self.scrollToSelectionIfNeeded(proxy: proxy)
-            }
-            .task(id: self.hint ?? "") {
-                await self.applySuggestions()
-            }
+        }
+        .onScrollGeometryChange(for: Bool.self) { geometry in
+            IconPickerScrollPolicy.catalogIsAtTop(
+                offsetY: geometry.contentOffset.y,
+                insetTop: geometry.contentInsets.top)
+        } action: { _, atTop in
+            self.catalogIsAtTop = atTop
         }
     }
 
@@ -124,13 +138,15 @@ public struct IconPickerView: View {
         }
         guard loaded != self.suggestions else { return }
         withAnimation(
-            IconPickerScrollPolicy.suggestionAppearAnimation(reduceMotion: self.reduceMotion)
+            IconPickerScrollPolicy.suggestionAppearAnimation(
+                reduceMotion: self.reduceMotion,
+                catalogIsAtTop: self.catalogIsAtTop)
         ) {
             self.suggestions = loaded
         }
     }
 
-    private func scrollToSelectionIfNeeded(proxy: ScrollViewProxy) async {
+    private func scrollToSelectionIfNeeded() async {
         try? await Task.sleep(for: IconPickerScrollPolicy.layoutSettle)
         guard IconPickerScrollPolicy.shouldScrollToSelection(
             userHasScrolled: self.userHasScrolled,
@@ -145,9 +161,9 @@ public struct IconPickerView: View {
             suggestions: self.suggestions.items)
         withAnimation(IconPickerScrollPolicy.scrollAnimation(reduceMotion: self.reduceMotion)) {
             if let section {
-                proxy.scrollTo(section.id, anchor: .center)
+                self.scrollPosition.scrollTo(id: section.id, anchor: .center)
             }
-            proxy.scrollTo(self.icon, anchor: .center)
+            self.scrollPosition.scrollTo(id: self.icon, anchor: .center)
         }
     }
 
@@ -183,20 +199,19 @@ public struct IconPickerView: View {
             catalog: self.catalog,
             suggestions: self.suggestions.items)
         let suggestion = sections.first { $0.group == .suggestions }
-        return VStack(alignment: .leading, spacing: IconPickerLayout.sectionSpacing) {
+        return LazyVStack(alignment: .leading, spacing: IconPickerLayout.sectionSpacing) {
             if let suggestion {
                 self.section(suggestion)
                     .id(suggestion.id)
                     .clipped()
                     .transition(IconPickerSuggestionAppear(reduceMotion: self.reduceMotion))
             }
-            LazyVStack(alignment: .leading, spacing: IconPickerLayout.sectionSpacing) {
-                ForEach(sections.filter { $0.group != .suggestions }) { section in
-                    self.section(section)
-                        .id(section.id)
-                }
+            ForEach(sections.filter { $0.group != .suggestions }) { section in
+                self.section(section)
+                    .id(section.id)
             }
         }
+        .scrollTargetLayout()
         .padding(.horizontal, IconPickerLayout.horizontalInset)
     }
 
