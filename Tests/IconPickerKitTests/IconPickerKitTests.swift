@@ -336,6 +336,17 @@ import Testing
     #expect(IconCatalog.sections().allSatisfy { $0.group != .suggestions })
 }
 
+@Test func macRowMetricsAreDenserThanFullPicker() {
+    #expect(IconPickerLayout.rowSwatchSize < IconPickerLayout.swatchSize)
+    #expect(IconPickerLayout.rowIconButtonSize < IconPickerLayout.viewCellSize)
+}
+
+@Test func hoverScaleRespectsReduceMotion() {
+    #expect(IconPickerHover.scale(isHovered: true, reduceMotion: true) == 1)
+    #expect(IconPickerHover.scale(isHovered: false, reduceMotion: false) == 1)
+    #expect(IconPickerHover.scale(isHovered: true, reduceMotion: false) == IconPickerHover.amount)
+}
+
 @Test @MainActor func pickerAcceptsHintAndPreload() {
     let task = IconSuggestions.preload(hint: "French") { _ in ["🇫🇷"] }
     let hinted = IconPickerView(

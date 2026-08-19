@@ -20,6 +20,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 ### Changed
 
 - README: on Mac, embed `IconPickerRow` in the form. Do not present `IconPickerView` in a sheet.
+- On Mac, the compact row uses smaller swatches and buttons, help text, and a hover scale that turns off under Reduce Motion.
 - `IconPickerView` shows one meaning-grouped catalog of emoji and SF Symbols. No Emojis/Symbols mode switch.
 - Preview is cell-sized; search sits under the color strip, above the catalog.
 - No hero preview. Opening the picker scrolls the current icon into view.

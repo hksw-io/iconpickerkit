@@ -31,6 +31,8 @@ struct IconColorStrip: View {
             self.circle(swatch.color, selected: isSelected)
         }
         .buttonStyle(.plain)
+        .iconPickerHover()
+        .help(swatch.name)
         .accessibilityLabel(swatch.name)
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
@@ -59,6 +61,8 @@ struct IconColorStrip: View {
                     .frame(width: self.swatchSize - 4, height: self.swatchSize - 4)
             }
         }
+        .iconPickerHover()
+        .help(self.customLabel)
         .accessibilityLabel(self.customLabel)
         .accessibilityAddTraits(self.color.isCustom ? [.isButton, .isSelected] : .isButton)
     }

@@ -59,7 +59,7 @@ public struct IconPickerRow: View {
                 colors: self.colors,
                 allowsCustomColor: self.allowsCustomColor,
                 customLabel: self.labels.customColor,
-                swatchSize: 24,
+                swatchSize: IconPickerLayout.rowSwatchSize,
                 contentInset: 0)
         }
     }
@@ -90,7 +90,9 @@ public struct IconPickerRow: View {
                 }
             }
             .font(.system(size: 20))
-            .frame(width: 44, height: 44)
+            .frame(
+                width: IconPickerLayout.rowIconButtonSize,
+                height: IconPickerLayout.rowIconButtonSize)
             .background(self.color.color.opacity(0.15))
             .clipShape(Circle())
             .overlay {
@@ -101,6 +103,8 @@ public struct IconPickerRow: View {
             }
         }
         .buttonStyle(.plain)
+        .iconPickerHover()
+        .help(self.labels.emojis)
         .accessibilityLabel(self.labels.emojis)
         .accessibilityAddTraits(self.isEmojiSelected ? .isSelected : [])
         .popover(isPresented: self.$showingEmojis) {
@@ -115,7 +119,9 @@ public struct IconPickerRow: View {
             Image(systemName: self.isEmojiSelected ? "list.bullet" : self.icon)
                 .font(.system(size: 16))
                 .foregroundStyle(self.color.color)
-                .frame(width: 44, height: 44)
+                .frame(
+                    width: IconPickerLayout.rowIconButtonSize,
+                    height: IconPickerLayout.rowIconButtonSize)
                 .background(self.color.color.opacity(0.15))
                 .clipShape(Circle())
                 .overlay {
@@ -127,6 +133,8 @@ public struct IconPickerRow: View {
                 .accessibilityHidden(true)
         }
         .buttonStyle(.plain)
+        .iconPickerHover()
+        .help(self.labels.symbols)
         .accessibilityLabel(self.labels.symbols)
         .accessibilityAddTraits(self.isEmojiSelected ? [] : .isSelected)
         .popover(isPresented: self.$showingSymbols) {
