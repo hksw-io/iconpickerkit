@@ -40,6 +40,10 @@ public struct IconSuggestions: Sendable, Equatable {
     }
 
     /// Starts `load(hint:)` immediately so the result can be ready before the picker appears.
+    ///
+    /// Call this from the screen that presents the picker — typically in a
+    /// `.task(id: hint)` on the edit form — and pass the task into
+    /// ``IconPickerView``. Do not start it from the picker's own appear path.
     public static func preload(
         hint: String,
         produce: @escaping @Sendable (String) async throws -> [String]

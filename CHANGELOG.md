@@ -9,6 +9,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 ### Changed
 
 - Search field is 36pt tall so body text has room inside the capsule.
+- `IconPickerView` scrolls to the current icon on first layout, independently of suggestion loading, and animates the scroll. It skips the scroll when the icon is already on screen. Reduce Motion turns the animation off. Start `IconSuggestions.preload(hint:)` before presenting so the Suggestions group can already be there.
+- Suggestions expand in from the top when the model returns, instead of popping in. Reduce Motion keeps a fade.
 
 ## [1.2.0] - 2026-08-19
 

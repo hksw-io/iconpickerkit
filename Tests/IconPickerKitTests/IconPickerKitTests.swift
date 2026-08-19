@@ -369,6 +369,32 @@ import Testing
     #expect(IconPickerScrollPolicy.shouldScrollToSelection(userHasScrolled: false, shortForm: false))
 }
 
+@Test func appearScrollDoesNotWaitForSuggestions() {
+    #expect(
+        IconPickerScrollPolicy.shouldScrollToSelection(
+            userHasScrolled: false,
+            selectionIsVisible: false,
+            shortForm: false))
+}
+
+@Test func appearScrollSkipsWhenSelectionIsOnScreen() {
+    #expect(
+        !IconPickerScrollPolicy.shouldScrollToSelection(
+            userHasScrolled: false,
+            selectionIsVisible: true,
+            shortForm: false))
+}
+
+@Test func appearScrollAnimationRespectsReduceMotion() {
+    #expect(IconPickerScrollPolicy.scrollAnimation(reduceMotion: true) == nil)
+    #expect(IconPickerScrollPolicy.scrollAnimation(reduceMotion: false) != nil)
+}
+
+@Test func suggestionAppearAnimationRespectsReduceMotion() {
+    #expect(IconPickerScrollPolicy.suggestionAppearAnimation(reduceMotion: true) == nil)
+    #expect(IconPickerScrollPolicy.suggestionAppearAnimation(reduceMotion: false) != nil)
+}
+
 @Test func macFullPickerUsesShortFormPolicy() {
     #if os(macOS)
     #expect(IconPickerScrollPolicy.isShortForm)

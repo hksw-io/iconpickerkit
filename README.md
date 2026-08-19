@@ -93,16 +93,14 @@ IconPickerView(
 
 ### Suggested icons
 
-Pass a `hint` — a deck name, title, or other short label. When Apple's on-device Foundation Model is available it may return emoji or SF Symbol names (a deck called `"French"` can surface 🇫🇷). Those appear as a Suggestions group at the top of the catalog. If the model is off, unavailable, or returns nothing usable, the extra group is omitted. No API key.
+Start the on-device model **before** presenting the picker so the Suggestions group can already be there. Hold the task on the screen that opens the sheet (an edit form, a deck name field, …) and pass it in:
 
 ```swift
-IconPickerView(icon: $icon, color: $color, hint: deckName)
-```
+@State private var suggestions: Task<IconSuggestions, Never>?
 
-Start the work before presenting the sheet so the group can already be there:
-
-```swift
-let suggestions = IconSuggestions.preload(hint: deckName)
+.task(id: deckName) {
+    suggestions = IconSuggestions.preload(hint: deckName)
+}
 
 .sheet(isPresented: $showingPicker) {
     IconPickerView(icon: $icon, color: $color, suggestions: suggestions)
@@ -115,6 +113,14 @@ Or await a finished result and pass that — the extra group is on the first fra
 let suggestions = await IconSuggestions.load(hint: deckName)
 IconPickerView(icon: $icon, color: $color, suggestions: suggestions)
 ```
+
+Passing only `hint:` still asks the model after appear. Usable emoji or SF Symbol names (a deck called `"French"` can surface 🇫🇷) show as a Suggestions group at the top. If the model is off, unavailable, or returns nothing usable, the extra group is omitted. No API key.
+
+```swift
+IconPickerView(icon: $icon, color: $color, hint: deckName)
+```
+
+The picker scrolls to the current icon on first layout without waiting for suggestions, animates that scroll, and skips it when the icon is already on screen. When suggestions arrive after appear, the group expands in at the top.
 
 <p>
   <img src="Docs/Media/iconpickerkit-view-suggestions-light.png" width="240" alt="IconPickerView in light mode with a Suggestions group: the French flag selected, then baguette, flag, book, and globe icons, above Smileys.">

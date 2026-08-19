@@ -17,11 +17,13 @@ public struct IconPickerView: View {
     let readySuggestions: IconSuggestions
     private let labels: IconPickerLabels
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var query = ""
     @State private var debounce = SearchDebounce()
     @State private var origin = ContinuousClock.now
     @State private var suggestions = IconSuggestions.empty
     @State private var userHasScrolled = false
+    @State private var selectionVisibility = IconPickerSelectionVisibility()
 
     @ScaledMetric(relativeTo: .title3) private var cellFont: CGFloat = 22
     @ScaledMetric(relativeTo: .title3) private var cellSize: CGFloat = 44
@@ -33,8 +35,10 @@ public struct IconPickerView: View {
     /// catalog. Pass `catalog` to choose groups, order, and per-group caps.
     /// Pass `allowsCustomColor` to append a system color picker on the far right.
     /// Pass `hint` (a deck name, title, …) to ask the on-device Foundation Model
-    /// for suggested icons. Pass `suggestions` to reuse work started with
-    /// ``IconSuggestions/preload(hint:)`` before the picker appears.
+    /// for suggested icons after appear. Pass `suggestions` to reuse work
+    /// started with ``IconSuggestions/preload(hint:)`` before the picker
+    /// appears — that is the path that can have the group ready on first
+    /// layout. Appear-scroll does not wait for either.
     public init(
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
@@ -98,30 +102,52 @@ public struct IconPickerView: View {
                     self.userHasScrolled = true
                 }
             }
-            .task(id: self.hint ?? "") {
-                if let suggestionTask = self.suggestionTask {
-                    self.suggestions = await suggestionTask.value
-                } else if let hint = self.hint,
-                    !hint.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                {
-                    self.suggestions = await IconSuggestions.load(hint: hint)
-                }
-                guard IconPickerScrollPolicy.shouldScrollToSelection(
-                    userHasScrolled: self.userHasScrolled)
-                else {
-                    return
-                }
-                try? await Task.sleep(for: .milliseconds(16))
-                if let section = IconCatalog.section(
-                    containing: self.icon,
-                    symbols: self.symbols,
-                    catalog: self.catalog,
-                    suggestions: self.suggestions.items)
-                {
-                    proxy.scrollTo(section.id, anchor: .center)
-                }
-                proxy.scrollTo(self.icon, anchor: .center)
+            .task {
+                await self.scrollToSelectionIfNeeded(proxy: proxy)
             }
+            .task(id: self.hint ?? "") {
+                await self.applySuggestions()
+            }
+        }
+    }
+
+    private func applySuggestions() async {
+        let loaded: IconSuggestions
+        if let suggestionTask = self.suggestionTask {
+            loaded = await suggestionTask.value
+        } else if let hint = self.hint,
+            !hint.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        {
+            loaded = await IconSuggestions.load(hint: hint)
+        } else {
+            return
+        }
+        guard loaded != self.suggestions else { return }
+        withAnimation(
+            IconPickerScrollPolicy.suggestionAppearAnimation(reduceMotion: self.reduceMotion)
+        ) {
+            self.suggestions = loaded
+        }
+    }
+
+    private func scrollToSelectionIfNeeded(proxy: ScrollViewProxy) async {
+        try? await Task.sleep(for: IconPickerScrollPolicy.layoutSettle)
+        guard IconPickerScrollPolicy.shouldScrollToSelection(
+            userHasScrolled: self.userHasScrolled,
+            selectionIsVisible: self.selectionVisibility.isOnScreen)
+        else {
+            return
+        }
+        let section = IconCatalog.section(
+            containing: self.icon,
+            symbols: self.symbols,
+            catalog: self.catalog,
+            suggestions: self.suggestions.items)
+        withAnimation(IconPickerScrollPolicy.scrollAnimation(reduceMotion: self.reduceMotion)) {
+            if let section {
+                proxy.scrollTo(section.id, anchor: .center)
+            }
+            proxy.scrollTo(self.icon, anchor: .center)
         }
     }
 
@@ -151,16 +177,24 @@ public struct IconPickerView: View {
     }
 
     private var catalogList: some View {
-        LazyVStack(alignment: .leading, spacing: IconPickerLayout.sectionSpacing) {
-            ForEach(
-                IconCatalog.search(
-                    self.debounce.applied,
-                    symbols: self.symbols,
-                    catalog: self.catalog,
-                    suggestions: self.suggestions.items))
-            { section in
-                self.section(section)
-                    .id(section.id)
+        let sections = IconCatalog.search(
+            self.debounce.applied,
+            symbols: self.symbols,
+            catalog: self.catalog,
+            suggestions: self.suggestions.items)
+        let suggestion = sections.first { $0.group == .suggestions }
+        return VStack(alignment: .leading, spacing: IconPickerLayout.sectionSpacing) {
+            if let suggestion {
+                self.section(suggestion)
+                    .id(suggestion.id)
+                    .clipped()
+                    .transition(IconPickerSuggestionAppear(reduceMotion: self.reduceMotion))
+            }
+            LazyVStack(alignment: .leading, spacing: IconPickerLayout.sectionSpacing) {
+                ForEach(sections.filter { $0.group != .suggestions }) { section in
+                    self.section(section)
+                        .id(section.id)
+                }
             }
         }
         .padding(.horizontal, IconPickerLayout.horizontalInset)
@@ -216,5 +250,14 @@ public struct IconPickerView: View {
         .buttonStyle(.plain)
         .accessibilityLabel(item.name)
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+        .onScrollVisibilityChange { visible in
+            guard isSelected else { return }
+            self.selectionVisibility.isOnScreen = visible
+        }
     }
+}
+
+@MainActor
+private final class IconPickerSelectionVisibility {
+    var isOnScreen = false
 }
