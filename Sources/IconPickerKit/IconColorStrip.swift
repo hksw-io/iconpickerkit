@@ -1,15 +1,5 @@
 import SwiftUI
 
-enum IconPickerCustomColorStyle {
-    static var usesSystemWell: Bool {
-        #if os(macOS)
-        true
-        #else
-        false
-        #endif
-    }
-}
-
 struct IconColorStrip: View {
     @Environment(\.colorScheme) private var colorScheme
     @Binding var color: IconPickerColor
@@ -52,36 +42,26 @@ struct IconColorStrip: View {
         let binding = Binding<Color>(
             get: { self.color.color },
             set: { self.color = .custom($0) })
-        return Group {
-            if IconPickerCustomColorStyle.usesSystemWell {
-                ColorPicker(self.customLabel, selection: binding, supportsOpacity: false)
-                    .labelsHidden()
-                    .frame(width: self.swatchSize, height: self.swatchSize)
-            } else {
-                ZStack {
-                    Circle()
-                        .fill(
-                            AngularGradient(
-                                colors: [.red, .orange, .yellow, .green, .cyan, .blue, .purple, .pink, .red],
-                                center: .center))
-                    ColorPicker(self.customLabel, selection: binding, supportsOpacity: false)
-                        .labelsHidden()
-                        .opacity(0.02)
-                        .scaleEffect(2)
-                }
-                .frame(width: self.swatchSize, height: self.swatchSize)
-                .clipShape(Circle())
-                .overlay {
-                    if self.color.isCustom {
-                        Circle()
-                            .strokeBorder(
-                                IconPickerSwatchRing.color(
-                                    for: self.color.color,
-                                    scheme: self.colorScheme),
-                                lineWidth: 2)
-                            .frame(width: self.swatchSize - 4, height: self.swatchSize - 4)
-                    }
-                }
+        return ZStack {
+            Circle()
+                .fill(
+                    AngularGradient(
+                        colors: [.red, .orange, .yellow, .green, .cyan, .blue, .purple, .pink, .red],
+                        center: .center))
+            ColorPicker(self.customLabel, selection: binding, supportsOpacity: false)
+                .labelsHidden()
+                .opacity(0.02)
+                .scaleEffect(2)
+        }
+        .frame(width: self.swatchSize, height: self.swatchSize)
+        .clipShape(Circle())
+        .overlay {
+            if self.color.isCustom {
+                Circle()
+                    .strokeBorder(
+                        IconPickerSwatchRing.color(for: self.color.color, scheme: self.colorScheme),
+                        lineWidth: 2)
+                    .frame(width: self.swatchSize - 4, height: self.swatchSize - 4)
             }
         }
         .iconPickerHover()
