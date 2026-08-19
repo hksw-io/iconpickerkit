@@ -354,6 +354,14 @@ import Testing
     #expect(sections.count > 1)
 }
 
+@Test func macCustomColorUsesSystemWell() {
+    #if os(macOS)
+    #expect(IconPickerCustomColorStyle.usesSystemWell)
+    #else
+    #expect(!IconPickerCustomColorStyle.usesSystemWell)
+    #endif
+}
+
 @Test func macSearchUsesRoundedBorder() {
     #if os(macOS)
     #expect(IconPickerSearchStyle.usesRoundedBorder)
