@@ -382,18 +382,13 @@ import Testing
     #expect(IconPickerLayout.rowIconButtonSize < IconPickerLayout.viewCellSize)
 }
 
-@Test func selectedSwatchRingContrastsYellowAndPrimaryInDark() {
-    let yellow = IconPickerSwatchRing.color(for: .yellow, scheme: .light)
-    let yellowFill = IconPickerSwatchRing.luminance(of: .yellow, scheme: .light)
-    let yellowRing = IconPickerSwatchRing.luminance(of: yellow, scheme: .light)
-    #expect(yellow != Color.white)
-    #expect(abs(yellowRing - yellowFill) > 0.3)
-
-    let primary = IconPickerSwatchRing.color(for: .primary, scheme: .dark)
-    let primaryFill = IconPickerSwatchRing.luminance(of: .primary, scheme: .dark)
-    let primaryRing = IconPickerSwatchRing.luminance(of: primary, scheme: .dark)
-    #expect(primary != Color.white)
-    #expect(abs(primaryRing - primaryFill) > 0.3)
+@Test func selectedSwatchInsetsFillForConcentricRing() {
+    let selected = IconPickerSwatchRing.fillSize(swatchSize: 20, selected: true)
+    let idle = IconPickerSwatchRing.fillSize(swatchSize: 20, selected: false)
+    #expect(selected < idle)
+    #expect(idle == 20)
+    #expect(selected == 20 - 2 * IconPickerSwatchRing.fillInset)
+    #expect(IconPickerSwatchRing.lineWidth >= 2)
 }
 
 @Test func hoverScaleRespectsReduceMotion() {
