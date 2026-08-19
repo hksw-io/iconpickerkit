@@ -211,8 +211,8 @@ public struct IconPickerView: View {
                     .id(section.id)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .scrollTargetLayout()
-        .padding(.horizontal, IconPickerLayout.horizontalInset)
     }
 
     private func section(_ section: IconSection) -> some View {
@@ -228,6 +228,8 @@ public struct IconPickerView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, IconPickerLayout.catalogInset)
     }
 
     private var columns: [GridItem] {
