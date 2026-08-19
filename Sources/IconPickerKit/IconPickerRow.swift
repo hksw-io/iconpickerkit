@@ -2,7 +2,8 @@ import SwiftUI
 
 /// A compact color + icon control for forms and edit sheets.
 ///
-/// Color swatches stay inline. Emoji and SF Symbol grids open in popovers.
+/// Color swatches stay inline. The mixed emoji and SF Symbol catalog opens in
+/// one popover.
 public struct IconPickerRow: View {
     @Binding private var icon: String
     @Binding private var color: IconPickerColor
@@ -11,18 +12,12 @@ public struct IconPickerRow: View {
     let allowsCustomColor: Bool
     private let labels: IconPickerLabels
 
-    @State private var showingEmojis = false
-    @State private var showingSymbols = false
+    @State private var showingCatalog = false
     @State private var query = ""
     @State private var debounce = SearchDebounce()
     @State private var origin = ContinuousClock.now
 
-    @ScaledMetric(relativeTo: .title3) private var gridEmojiSize: CGFloat = 22
-    @ScaledMetric(relativeTo: .body) private var gridSymbolSize: CGFloat = 18
-
-    private var isEmojiSelected: Bool {
-        self.icon.isEmoji
-    }
+    @ScaledMetric(relativeTo: .title3) private var cellFont: CGFloat = 18
 
     public init(
         icon: Binding<String>,
@@ -71,78 +66,44 @@ public struct IconPickerRow: View {
                 .foregroundStyle(.secondary)
                 .accessibilityAddTraits(.isHeader)
 
-            HStack(spacing: 8) {
-                self.emojiButton
-                self.symbolButton
-            }
+            self.iconButton
         }
     }
 
-    private var emojiButton: some View {
+    private var iconButton: some View {
         Button {
-            self.showingEmojis = true
+            self.showingCatalog = true
         } label: {
             Group {
-                if self.isEmojiSelected {
+                if self.icon.isEmoji {
                     Text(verbatim: self.icon)
+                        .font(.system(size: 20))
                 } else {
-                    Text(verbatim: "😀")
+                    Image(systemName: self.icon)
+                        .font(.system(size: 16))
+                        .foregroundStyle(self.color.color)
                 }
             }
-            .font(.system(size: 20))
             .frame(
                 width: IconPickerLayout.rowIconButtonSize,
                 height: IconPickerLayout.rowIconButtonSize)
             .background(self.color.color.opacity(0.15))
             .clipShape(Circle())
             .overlay {
-                if self.isEmojiSelected {
-                    Circle()
-                        .strokeBorder(Color.accentColor, lineWidth: 2)
-                }
+                Circle()
+                    .strokeBorder(Color.accentColor, lineWidth: 2)
             }
         }
         .buttonStyle(.plain)
         .iconPickerHover()
-        .help(self.labels.emojis)
-        .accessibilityLabel(self.labels.emojis)
-        .accessibilityAddTraits(self.isEmojiSelected ? .isSelected : [])
-        .popover(isPresented: self.$showingEmojis) {
-            self.emojiPopover
+        .help(self.labels.icon)
+        .accessibilityLabel(self.labels.icon)
+        .popover(isPresented: self.$showingCatalog) {
+            self.catalogPopover
         }
     }
 
-    private var symbolButton: some View {
-        Button {
-            self.showingSymbols = true
-        } label: {
-            Image(systemName: self.isEmojiSelected ? "list.bullet" : self.icon)
-                .font(.system(size: 16))
-                .foregroundStyle(self.color.color)
-                .frame(
-                    width: IconPickerLayout.rowIconButtonSize,
-                    height: IconPickerLayout.rowIconButtonSize)
-                .background(self.color.color.opacity(0.15))
-                .clipShape(Circle())
-                .overlay {
-                    if !self.isEmojiSelected {
-                        Circle()
-                            .strokeBorder(Color.accentColor, lineWidth: 2)
-                    }
-                }
-                .accessibilityHidden(true)
-        }
-        .buttonStyle(.plain)
-        .iconPickerHover()
-        .help(self.labels.symbols)
-        .accessibilityLabel(self.labels.symbols)
-        .accessibilityAddTraits(self.isEmojiSelected ? [] : .isSelected)
-        .popover(isPresented: self.$showingSymbols) {
-            self.symbolPopover
-        }
-    }
-
-    private var emojiPopover: some View {
+    private var catalogPopover: some View {
         VStack(spacing: IconPickerLayout.stackSpacing) {
             IconPickerSearchField(
                 text: self.$query,
@@ -150,49 +111,10 @@ public struct IconPickerRow: View {
                 origin: self.origin,
                 prompt: self.labels.search)
             ScrollView {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 36), spacing: 4)], spacing: 4) {
-                    ForEach(EmojiCatalog.search(self.debounce.applied)) { item in
-                        self.emojiCell(item)
-                    }
-                }
-            }
-        }
-        .padding(12)
-        .frame(width: 320, height: 240)
-    }
-
-    private func emojiCell(_ item: EmojiItem) -> some View {
-        let isSelected = self.icon == item.emoji
-        return Button {
-            self.icon = item.emoji
-            self.showingEmojis = false
-        } label: {
-            Text(verbatim: item.emoji)
-                .font(.system(size: self.gridEmojiSize))
-                .frame(width: 32, height: 32)
-                .background {
-                    if isSelected {
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(Color.accentColor.opacity(0.2))
-                    }
-                }
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(item.name)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-
-    private var symbolPopover: some View {
-        VStack(spacing: IconPickerLayout.stackSpacing) {
-            IconPickerSearchField(
-                text: self.$query,
-                debounce: self.$debounce,
-                origin: self.origin,
-                prompt: self.labels.search)
-            ScrollView {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 40), spacing: 6)], spacing: 6) {
-                    ForEach(SymbolCatalog.search(self.debounce.applied, in: self.symbols), id: \.self) { symbol in
-                        self.symbolCell(symbol)
+                LazyVStack(alignment: .leading, spacing: IconPickerLayout.stackSpacing) {
+                    ForEach(IconPickerRowCatalog.sections(query: self.debounce.applied, symbols: self.symbols))
+                    { section in
+                        self.section(section)
                     }
                 }
             }
@@ -201,25 +123,52 @@ public struct IconPickerRow: View {
         .frame(width: 320, height: 280)
     }
 
-    private func symbolCell(_ symbol: String) -> some View {
-        let isSelected = self.icon == symbol
-        return Button {
-            self.icon = symbol
-            self.showingSymbols = false
-        } label: {
-            Image(systemName: symbol)
-                .font(.system(size: self.gridSymbolSize))
-                .foregroundStyle(isSelected ? self.color.color : .secondary)
-                .frame(width: 36, height: 36)
-                .background {
-                    if isSelected {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(self.color.color.opacity(0.15))
-                    }
+    private func section(_ section: IconSection) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(section.title)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .accessibilityAddTraits(.isHeader)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 36), spacing: 4)], spacing: 4) {
+                ForEach(section.items) { item in
+                    self.cell(item)
                 }
+            }
+        }
+    }
+
+    private func cell(_ item: IconItem) -> some View {
+        let isSelected = self.icon == item.value
+        return Button {
+            self.icon = item.value
+            self.showingCatalog = false
+        } label: {
+            Group {
+                if item.value.isEmoji {
+                    Text(verbatim: item.value)
+                        .font(.system(size: self.cellFont))
+                } else {
+                    Image(systemName: item.value)
+                        .font(.system(size: self.cellFont * 0.8))
+                        .foregroundStyle(isSelected ? self.color.color : .secondary)
+                }
+            }
+            .frame(width: 32, height: 32)
+            .background {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(self.color.color.opacity(0.15))
+                }
+            }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(symbol)
+        .accessibilityLabel(item.name)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+}
+
+enum IconPickerRowCatalog {
+    static func sections(query: String, symbols: [String]) -> [IconSection] {
+        IconCatalog.search(query, symbols: symbols)
     }
 }

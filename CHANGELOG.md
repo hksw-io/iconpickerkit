@@ -23,6 +23,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 - On Mac, the compact row uses smaller swatches and buttons, help text, and a hover scale that turns off under Reduce Motion.
 - Selected swatch rings use a contrasting stroke instead of white, so yellow and the label swatch stay visible in dark mode.
 - Mac search uses the system rounded-border field. iOS keeps the in-content capsule.
+- `IconPickerRow` opens one mixed emoji and SF Symbol catalog popover.
 - `IconPickerView` shows one meaning-grouped catalog of emoji and SF Symbols. No Emojis/Symbols mode switch.
 - Preview is cell-sized; search sits under the color strip, above the catalog.
 - No hero preview. Opening the picker scrolls the current icon into view.

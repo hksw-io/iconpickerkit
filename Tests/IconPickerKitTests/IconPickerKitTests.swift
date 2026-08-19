@@ -336,6 +336,14 @@ import Testing
     #expect(IconCatalog.sections().allSatisfy { $0.group != .suggestions })
 }
 
+@Test func rowPopoverShowsMixedCatalogNotModeLists() {
+    let sections = IconPickerRowCatalog.sections(query: "", symbols: ["folder", "star"])
+    let values = sections.flatMap(\.items).map(\.value)
+    #expect(values.contains { $0.isEmoji })
+    #expect(values.contains { $0 == "folder" })
+    #expect(sections.count > 1)
+}
+
 @Test func macSearchUsesRoundedBorder() {
     #if os(macOS)
     #expect(IconPickerSearchStyle.usesRoundedBorder)

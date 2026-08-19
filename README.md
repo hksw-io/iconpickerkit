@@ -3,7 +3,7 @@
 A SwiftUI picker for a tint color plus an emoji or SF Symbol. Bind two values the consumer owns.
 
 - `IconPickerView` — a full picker for an iPhone or iPad sheet or pushed screen.
-- `IconPickerRow` — compact swatches and popovers for a form. On Mac, embed this in the form. Do not present `IconPickerView` in a sheet.
+- `IconPickerRow` — compact swatches and one catalog popover for a form. On Mac, embed this in the form. Do not present `IconPickerView` in a sheet.
 
 ## Preview
 
