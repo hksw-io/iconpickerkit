@@ -91,10 +91,17 @@ public struct IconPickerView: View {
 
     public var body: some View {
         VStack(spacing: IconPickerLayout.sectionSpacing) {
-            self.colorSection
+            if IconKind.offersColorChrome(for: self.icon) {
+                self.colorSection
+                    .clipped()
+                    .transition(IconPickerExpand.vertical(reduceMotion: self.reduceMotion))
+            }
             self.search
             self.catalogScroll
         }
+        .animation(
+            IconPickerScrollPolicy.colorChromeAnimation(reduceMotion: self.reduceMotion),
+            value: IconKind.offersColorChrome(for: self.icon))
         .padding(.top)
         .task {
             await self.scrollToSelectionIfNeeded()
@@ -204,7 +211,7 @@ public struct IconPickerView: View {
                 self.section(suggestion)
                     .id(suggestion.id)
                     .clipped()
-                    .transition(IconPickerSuggestionAppear(reduceMotion: self.reduceMotion))
+                    .transition(IconPickerExpand.vertical(reduceMotion: self.reduceMotion))
             }
             ForEach(sections.filter { $0.group != .suggestions }) { section in
                 self.section(section)

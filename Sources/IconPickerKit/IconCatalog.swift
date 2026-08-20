@@ -24,18 +24,18 @@ public struct IconItem: Identifiable, Sendable, Equatable {
 
 /// A meaning-themed group the consumer can reorder or omit.
 public enum IconGroup: String, CaseIterable, Sendable, Identifiable {
-    case smileys
-    case people
-    case animals
-    case food
-    case activity
-    case health
     case work
     case home
+    case health
     case places
     case nature
     case objects
+    case activity
+    case people
     case symbols
+    case food
+    case smileys
+    case animals
     case suggestions
 
     public var id: String { self.rawValue }
@@ -100,12 +100,12 @@ public struct IconCatalogPreset: Sendable, Equatable {
         groups: IconGroup.allCases.filter { $0 != .suggestions })
 
     public static let compact = IconCatalogPreset([
-        IconSectionLimit(.people, limit: 8),
         IconSectionLimit(.work, limit: 12),
         IconSectionLimit(.home, limit: 8),
         IconSectionLimit(.places, limit: 8),
         IconSectionLimit(.objects, limit: 12),
         IconSectionLimit(.symbols, limit: 8),
+        IconSectionLimit(.people, limit: 8),
     ])
 
     public static let work = IconCatalogPreset([

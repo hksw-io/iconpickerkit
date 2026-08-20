@@ -377,6 +377,11 @@ public enum IconKind: Equatable, Sendable {
     public static func classify(_ value: String) -> IconKind {
         value.isEmoji ? .emoji : .symbol
     }
+
+    /// Color chrome only tints SF Symbols. Emoji keep their own glyphs.
+    public static func offersColorChrome(for value: String) -> Bool {
+        self.classify(value) == .symbol
+    }
 }
 
 extension Character {

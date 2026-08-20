@@ -17,6 +17,7 @@ public struct IconPickerRow: View {
     @State private var debounce = SearchDebounce()
     @State private var origin = ContinuousClock.now
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @ScaledMetric(relativeTo: .title3) private var cellFont: CGFloat = 18
 
     public init(
@@ -43,21 +44,30 @@ public struct IconPickerRow: View {
                 .fixedSize()
                 .accessibilityAddTraits(.isHeader)
             self.iconButton
-            Divider()
-                .frame(height: IconPickerLayout.rowIconButtonSize)
-            Text(self.labels.color)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .fixedSize()
-                .accessibilityAddTraits(.isHeader)
-            IconColorStrip(
-                color: self.$color,
-                colors: self.colors,
-                allowsCustomColor: self.allowsCustomColor,
-                customLabel: self.labels.customColor,
-                swatchSize: IconPickerLayout.rowSwatchSize,
-                contentInset: 0)
+            if IconKind.offersColorChrome(for: self.icon) {
+                HStack(alignment: .center, spacing: IconPickerLayout.stackSpacing) {
+                    Divider()
+                        .frame(height: IconPickerLayout.rowIconButtonSize)
+                    Text(self.labels.color)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize()
+                        .accessibilityAddTraits(.isHeader)
+                    IconColorStrip(
+                        color: self.$color,
+                        colors: self.colors,
+                        allowsCustomColor: self.allowsCustomColor,
+                        customLabel: self.labels.customColor,
+                        swatchSize: IconPickerLayout.rowSwatchSize,
+                        contentInset: 0)
+                }
+                .clipped()
+                .transition(IconPickerExpand.horizontal(reduceMotion: self.reduceMotion))
+            }
         }
+        .animation(
+            IconPickerScrollPolicy.colorChromeAnimation(reduceMotion: self.reduceMotion),
+            value: IconKind.offersColorChrome(for: self.icon))
     }
 
     private var iconButton: some View {

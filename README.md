@@ -72,7 +72,7 @@ struct EditItemView: View {
 
 `icon` is either an emoji (`"🐶"`) or an SF Symbol name (`"folder"`). Persist `icon` and `color.id`.
 
-One mixed catalog, grouped by meaning (People, Work, Home, …). Search Icons filters the whole library. Keystrokes debounce for 250 ms.
+One mixed catalog, grouped by meaning. Tintable groups (Work, Home, …) come first; Smileys and Animals sit last. Search Icons filters the whole library. Keystrokes debounce for 250 ms.
 
 Presets set which groups appear, their order, and how many items each shows:
 
@@ -80,14 +80,14 @@ Presets set which groups appear, their order, and how many items each shows:
 IconPickerView(icon: $icon, color: $color, catalog: .compact)
 ```
 
-`.all` is every group, uncapped. `.compact` and `.work` cap each section. Or build your own — Smileys last, 8 each:
+`.all` is every group, uncapped. `.compact` and `.work` cap each section. Or build your own — Smileys first, 8 each:
 
 ```swift
 IconPickerView(
     icon: $icon,
     color: $color,
     catalog: IconCatalogPreset(
-        groups: IconGroup.allCases.filter { $0 != .smileys } + [.smileys],
+        groups: [.smileys] + IconGroup.allCases.filter { $0 != .smileys && $0 != .suggestions },
         limit: 8))
 ```
 

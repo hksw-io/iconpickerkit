@@ -101,7 +101,7 @@ struct GenerateMedia {
 }
 
 private struct ViewShot: View {
-    @State private var icon = "😀"
+    @State private var icon = "folder"
     @State private var color = IconPickerColor.blue
     let scheme: ColorScheme
 

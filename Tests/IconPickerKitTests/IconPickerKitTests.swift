@@ -56,8 +56,22 @@ import Testing
     #expect(IconKind.classify("folder") == .symbol)
 }
 
+@Test func colorChromeIsNotOfferedForEmoji() {
+    #expect(!IconKind.offersColorChrome(for: "🐶"))
+}
+
+@Test func colorChromeIsOfferedForSymbol() {
+    #expect(IconKind.offersColorChrome(for: "folder"))
+}
+
+@Test func colorChromeAnimationRespectsReduceMotion() {
+    #expect(IconPickerScrollPolicy.colorChromeAnimation(reduceMotion: true) == nil)
+    #expect(IconPickerScrollPolicy.colorChromeAnimation(reduceMotion: false) != nil)
+}
+
 @Test @MainActor func publicPickerCompiles() {
     _ = IconPickerView(icon: .constant("folder"), color: .constant(.blue))
+    _ = IconPickerView(icon: .constant("🐶"), color: .constant(.blue))
 }
 
 @Test func primarySwatchNameIsLabel() {
@@ -142,6 +156,7 @@ import Testing
 
 @Test @MainActor func inlineRowCompiles() {
     _ = IconPickerRow(icon: .constant("folder"), color: .constant(.blue))
+    _ = IconPickerRow(icon: .constant("🐶"), color: .constant(.blue))
 }
 
 @Test @MainActor func inlineRowAcceptsPaletteAndLabels() {
@@ -260,6 +275,17 @@ import Testing
 @Test func catalogRespectsGroupOrder() {
     let sections = IconCatalog.sections(groups: [.work, .smileys])
     #expect(sections.map(\.group) == [.work, .smileys])
+}
+
+@Test func defaultCatalogLeadsWithTintableGroups() {
+    let groups = IconCatalog.sections(catalog: .all).map(\.group)
+    let tintable: Set<IconGroup> = [.work, .home, .health, .places, .nature]
+    let emojiHeavy: Set<IconGroup> = [.smileys, .animals, .food]
+    let lastTintable = groups.lastIndex { tintable.contains($0) }
+    let firstEmojiHeavy = groups.firstIndex { emojiHeavy.contains($0) }
+    #expect(lastTintable != nil && firstEmojiHeavy != nil)
+    #expect(lastTintable! < firstEmojiHeavy!)
+    #expect(groups.prefix(5).allSatisfy { tintable.contains($0) })
 }
 
 @Test func catalogOmitsUnlistedGroups() {
