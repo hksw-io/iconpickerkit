@@ -6,6 +6,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.2.4] - 2026-08-20
+
 ### Changed
 
 - Color chrome is hidden when the icon is an emoji. SF Symbols still show the swatches. The full picker expands it vertically; the row collapses it sideways.
