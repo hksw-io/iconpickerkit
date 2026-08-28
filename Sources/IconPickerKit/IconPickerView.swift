@@ -206,33 +206,50 @@ public struct IconPickerView: View {
             catalog: self.catalog,
             suggestions: self.suggestions.items)
         let suggestion = sections.first { $0.group == .suggestions }
-        return LazyVStack(alignment: .leading, spacing: IconPickerLayout.sectionSpacing) {
+        return LazyVStack(
+            alignment: .leading,
+            spacing: IconPickerLayout.sectionSpacing,
+            pinnedViews: .sectionHeaders)
+        {
             if let suggestion {
-                self.section(suggestion)
-                    .id(suggestion.id)
-                    .clipped()
-                    .transition(IconPickerExpand.vertical(reduceMotion: self.reduceMotion))
+                Section {
+                    self.sectionGrid(suggestion)
+                } header: {
+                    self.sectionHeader(suggestion)
+                }
+                .id(suggestion.id)
+                .clipped()
+                .transition(IconPickerExpand.vertical(reduceMotion: self.reduceMotion))
             }
             ForEach(sections.filter { $0.group != .suggestions }) { section in
-                self.section(section)
-                    .id(section.id)
+                Section {
+                    self.sectionGrid(section)
+                } header: {
+                    self.sectionHeader(section)
+                }
+                .id(section.id)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .scrollTargetLayout()
     }
 
-    private func section(_ section: IconSection) -> some View {
-        VStack(alignment: .leading, spacing: IconPickerLayout.stackSpacing) {
-            Text(section.group == .suggestions ? self.labels.suggestions : section.title)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .accessibilityAddTraits(.isHeader)
-            LazyVGrid(columns: self.columns, spacing: IconPickerLayout.stackSpacing) {
-                ForEach(section.items) { item in
-                    self.iconButton(item)
-                        .id(item.value)
-                }
+    private func sectionHeader(_ section: IconSection) -> some View {
+        Text(section.group == .suggestions ? self.labels.suggestions : section.title)
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, IconPickerLayout.catalogInset)
+            .padding(.vertical, 6)
+            .background(.background)
+            .accessibilityAddTraits(.isHeader)
+    }
+
+    private func sectionGrid(_ section: IconSection) -> some View {
+        LazyVGrid(columns: self.columns, spacing: IconPickerLayout.stackSpacing) {
+            ForEach(section.items) { item in
+                self.iconButton(item)
+                    .id(item.value)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

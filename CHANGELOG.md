@@ -6,6 +6,12 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.2.5] - 2026-08-28
+
+### Changed
+
+- Catalog section titles stay pinned while that section is on screen.
+
 ## [1.2.4] - 2026-08-20
 
 ### Changed
