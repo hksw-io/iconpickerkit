@@ -105,7 +105,8 @@ public struct IconPickerRow: View {
     }
 
     private var catalogPopover: some View {
-        VStack(spacing: IconPickerLayout.stackSpacing) {
+        let sections = IconPickerRowCatalog.sections(query: self.debounce.applied, symbols: self.symbols)
+        return VStack(spacing: IconPickerLayout.stackSpacing) {
             IconPickerSearchField(
                 text: self.$query,
                 debounce: self.$debounce,
@@ -114,8 +115,10 @@ public struct IconPickerRow: View {
                 autofocus: true)
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: IconPickerLayout.stackSpacing) {
-                    ForEach(IconPickerRowCatalog.sections(query: self.debounce.applied, symbols: self.symbols))
-                    { section in
+                    if sections.isEmpty {
+                        ContentUnavailableView.search(text: self.debounce.applied)
+                    }
+                    ForEach(sections) { section in
                         self.section(section)
                     }
                 }

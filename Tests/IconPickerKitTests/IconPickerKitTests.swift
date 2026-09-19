@@ -2,6 +2,15 @@ import SwiftUI
 import Testing
 @testable import IconPickerKit
 
+@Test func searchIgnoresPositiveBrowseCapsAndTrimsQueriesWithoutAddingExcludedGroups() {
+    let catalog = IconCatalogPreset([.init(.home, limit: 1), .init(.work, limit: 0)])
+    #expect(IconCatalog.search(" ", catalog: catalog).first?.items.map(\.value) == ["house"])
+    #expect(IconCatalog.search("  folder  ", catalog: catalog).flatMap(\.items).contains { $0.value == "folder" })
+    #expect(IconCatalog.search("book", catalog: catalog).isEmpty)
+    #expect(IconCatalog.search("heart", catalog: catalog).isEmpty)
+    #expect(IconItem(value: "folder", name: "Böcker").matches("BOCKER"))
+}
+
 @Test func emojiClassificationUsesUnicodePresentationInsteadOfCodePointRanges() {
     for value in ["⌚", "⌛", "1️⃣", "🇸🇪", "👨‍👩‍👧", "👍🏽", "❤️"] {
         #expect(IconKind.classify(value) == .emoji)

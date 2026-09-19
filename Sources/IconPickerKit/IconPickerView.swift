@@ -202,6 +202,9 @@ public struct IconPickerView: View {
             spacing: IconPickerLayout.sectionSpacing,
             pinnedViews: .sectionHeaders)
         {
+            if sections.isEmpty {
+                ContentUnavailableView.search(text: self.debounce.applied)
+            }
             if let suggestion {
                 Section {
                     self.sectionGrid(suggestion)

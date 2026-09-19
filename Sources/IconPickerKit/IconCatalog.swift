@@ -15,10 +15,9 @@ public struct IconItem: Identifiable, Sendable, Equatable {
     }
 
     public func matches(_ query: String) -> Bool {
-        let needle = query.lowercased()
-        return self.name.lowercased().contains(needle)
-            || self.value.lowercased().contains(needle)
-            || self.keywords.contains { $0.lowercased().contains(needle) }
+        self.name.localizedStandardContains(query)
+            || self.value.localizedStandardContains(query)
+            || self.keywords.contains { $0.localizedStandardContains(query) }
     }
 }
 
@@ -167,7 +166,13 @@ public enum IconCatalog {
         catalog: IconCatalogPreset = .all,
         suggestions: [IconItem] = []) -> [IconSection]
     {
-        let all = self.sections(symbols: symbols, catalog: catalog, suggestions: suggestions)
+        let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Positive limits keep browsing compact; search includes every item in the enabled groups.
+        let searchCatalog = IconCatalogPreset(catalog.sections.map {
+            IconSectionLimit($0.group, limit: ($0.limit ?? 1) <= 0 ? 0 : nil)
+        })
+        let all = self.sections(
+            symbols: symbols, catalog: query.isEmpty ? catalog : searchCatalog, suggestions: suggestions)
         guard !query.isEmpty else { return all }
         return all.compactMap { section in
             let items = section.items.filter { $0.matches(query) }

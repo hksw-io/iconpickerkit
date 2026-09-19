@@ -82,6 +82,9 @@ IconPickerView(icon: $icon, color: $color, catalog: .compact)
 
 `.all` is every group, uncapped. `.compact` and `.work` cap each section. Or build your own — Smileys first, 8 each:
 
+Search ignores positive browse caps and trims surrounding whitespace. Omitted groups and groups
+with a zero or negative limit remain excluded. A miss shows the system's search-empty state.
+
 ```swift
 IconPickerView(
     icon: $icon,
