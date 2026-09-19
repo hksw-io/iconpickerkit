@@ -6,6 +6,10 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Maintenance
+
+- CI explicitly tests macOS and builds iOS Simulator with Xcode 26.6 and 27.0 while preserving OS 26 and Swift tools 6.2 minimums.
+
 ### Added
 
 - Caller-localized group titles, icon names and search keywords, color names, Clear, and empty-catalog text. The row announces the selected icon's name.

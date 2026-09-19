@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Xcode ${{ matrix.xcode }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-26
+            xcode: '26.6'
+          # https://github.com/actions/runner-images/issues/14404
+          - runner: xcode-27
+            xcode: '27.0'
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v7
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Test macOS
+        run: swift test
+      # The aggregate package test scheme also builds the macOS-only demo and media tool.
+      # Hosted iOS interaction checks run in the native review app; this gate builds the library.
+      - name: Build iOS Simulator
+        run: xcodebuild build -scheme IconPickerKit -destination 'generic/platform=iOS Simulator' -quiet CODE_SIGNING_ALLOWED=NO
