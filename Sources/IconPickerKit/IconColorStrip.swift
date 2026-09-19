@@ -7,6 +7,7 @@ struct IconColorStrip: View {
     var customLabel: String
     var swatchSize: CGFloat
     var contentInset: CGFloat = IconPickerLayout.horizontalInset
+    var colorNames: [String: String] = [:]
 
     var body: some View {
         let overflow = IconPickerHover.overflow(for: self.swatchSize)
@@ -27,6 +28,7 @@ struct IconColorStrip: View {
     }
 
     private func presetSwatch(_ swatch: IconPickerColor) -> some View {
+        let name = self.colorNames[swatch.id] ?? swatch.name
         let isSelected = !self.color.isCustom && self.color.id == swatch.id
         return Button {
             self.color = swatch
@@ -35,8 +37,8 @@ struct IconColorStrip: View {
         }
         .buttonStyle(.plain)
         .iconPickerHover()
-        .help(swatch.name)
-        .accessibilityLabel(swatch.name)
+        .help(name)
+        .accessibilityLabel(name)
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 

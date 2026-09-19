@@ -59,7 +59,8 @@ public struct IconPickerRow: View {
                         allowsCustomColor: self.allowsCustomColor,
                         customLabel: self.labels.customColor,
                         swatchSize: IconPickerLayout.rowSwatchSize,
-                        contentInset: 0)
+                        contentInset: 0,
+                        colorNames: self.labels.colorNames)
                 }
                 .clipped()
                 .transition(IconPickerExpand.horizontal(reduceMotion: self.reduceMotion))
@@ -99,24 +100,26 @@ public struct IconPickerRow: View {
         .padding(IconPickerHover.overflow(for: IconPickerLayout.rowIconButtonSize))
         .help(self.labels.icon)
         .accessibilityLabel(self.labels.icon)
+        .accessibilityValue(self.labels.iconNames[self.icon] ?? self.icon.replacingOccurrences(of: ".", with: " "))
         .popover(isPresented: self.$showingCatalog) {
             self.catalogPopover
         }
     }
 
     private var catalogPopover: some View {
-        let sections = IconPickerRowCatalog.sections(query: self.debounce.applied, symbols: self.symbols)
+        let sections = IconPickerRowCatalog.sections(query: self.debounce.applied, symbols: self.symbols, labels: self.labels)
         return VStack(spacing: IconPickerLayout.stackSpacing) {
             IconPickerSearchField(
                 text: self.$query,
                 debounce: self.$debounce,
                 origin: self.origin,
                 prompt: self.labels.search,
-                autofocus: true)
+                autofocus: true,
+                clearLabel: self.labels.clear)
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: IconPickerLayout.stackSpacing) {
                     if sections.isEmpty {
-                        ContentUnavailableView.search(text: self.debounce.applied)
+                        IconPickerEmptyState(query: self.debounce.applied, noIcons: self.labels.noIcons)
                     }
                     ForEach(sections) { section in
                         self.section(section)
@@ -186,7 +189,7 @@ public struct IconPickerRow: View {
 }
 
 enum IconPickerRowCatalog {
-    static func sections(query: String, symbols: [String]) -> [IconSection] {
-        IconCatalog.search(query, symbols: symbols)
+    static func sections(query: String, symbols: [String], labels: IconPickerLabels = .english) -> [IconSection] {
+        IconCatalog.search(query, symbols: symbols, labels: labels)
     }
 }

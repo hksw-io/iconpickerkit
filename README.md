@@ -175,6 +175,24 @@ IconPickerView(
 Supplied SF Symbols outside the curated groups appear in Symbols, in caller order, without
 duplicates. Include `.symbols` when using a custom preset if these icons should be available.
 
+Localize the catalog as well as its chrome through `IconPickerLabels`. Metadata is keyed by
+stable icon values and color IDs, so changing language never changes saved selections:
+
+```swift
+let labels = IconPickerLabels(
+    color: "Färg", icon: "Ikon", search: "Sök ikoner", customColor: "Anpassad",
+    suggestions: "Förslag", clear: "Rensa", noIcons: "Inga ikoner",
+    groupTitles: [.home: "Hem", .work: "Arbete"],
+    iconNames: ["folder": "Mapp", "📚": "Böcker"],
+    iconKeywords: ["folder": ["dokument"]],
+    colorNames: ["blue": "Blå"])
+```
+
+Use your app's localized strings for these values. Names feed both search and VoiceOver;
+localized keywords supplement existing keywords, and raw symbol IDs remain searchable.
+The public `IconCatalog` methods also accept `labels:` and return localized section titles
+and item metadata. Missing overrides retain the English defaults.
+
 Search and classification are also public if you want the catalogs without the view:
 
 ```swift

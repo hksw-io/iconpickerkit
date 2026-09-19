@@ -156,7 +156,8 @@ public struct IconPickerView: View {
             containing: self.icon,
             symbols: self.symbols,
             catalog: self.catalog,
-            suggestions: self.suggestions.items)
+            suggestions: self.suggestions.items,
+            labels: self.labels)
         withAnimation(IconPickerScrollPolicy.scrollAnimation(reduceMotion: self.reduceMotion)) {
             if let section {
                 self.scrollPosition.scrollTo(id: section.id, anchor: .center)
@@ -170,7 +171,8 @@ public struct IconPickerView: View {
             text: self.$query,
             debounce: self.$debounce,
             origin: self.origin,
-            prompt: self.labels.search)
+            prompt: self.labels.search,
+            clearLabel: self.labels.clear)
             .padding(.horizontal, IconPickerLayout.horizontalInset)
     }
 
@@ -186,7 +188,8 @@ public struct IconPickerView: View {
                 colors: self.colors,
                 allowsCustomColor: self.allowsCustomColor,
                 customLabel: self.labels.customColor,
-                swatchSize: IconPickerLayout.swatchSize)
+                swatchSize: IconPickerLayout.swatchSize,
+                colorNames: self.labels.colorNames)
         }
     }
 
@@ -195,7 +198,8 @@ public struct IconPickerView: View {
             self.debounce.applied,
             symbols: self.symbols,
             catalog: self.catalog,
-            suggestions: self.suggestions.items)
+            suggestions: self.suggestions.items,
+            labels: self.labels)
         let suggestion = sections.first { $0.group == .suggestions }
         return LazyVStack(
             alignment: .leading,
@@ -203,7 +207,7 @@ public struct IconPickerView: View {
             pinnedViews: .sectionHeaders)
         {
             if sections.isEmpty {
-                ContentUnavailableView.search(text: self.debounce.applied)
+                IconPickerEmptyState(query: self.debounce.applied, noIcons: self.labels.noIcons)
             }
             if let suggestion {
                 Section {
@@ -229,7 +233,7 @@ public struct IconPickerView: View {
     }
 
     private func sectionHeader(_ section: IconSection) -> some View {
-        Text(section.group == .suggestions ? self.labels.suggestions : section.title)
+        Text(section.title)
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)

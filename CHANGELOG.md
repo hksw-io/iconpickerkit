@@ -6,6 +6,10 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Caller-localized group titles, icon names and search keywords, color names, Clear, and empty-catalog text. The row announces the selected icon's name.
+
 ### Fixed
 
 - Search reaches items beyond positive browse caps, trims whitespace, matches localized text, and displays a native empty state.

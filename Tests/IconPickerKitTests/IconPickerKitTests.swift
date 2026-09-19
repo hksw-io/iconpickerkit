@@ -2,6 +2,23 @@ import SwiftUI
 import Testing
 @testable import IconPickerKit
 
+@Test func localizedCatalogNamesAndKeywordsPreserveIdentifiersAndHeadings() {
+    let labels = IconPickerLabels(
+        clear: "Rensa",
+        groupTitles: [.home: "Hem"],
+        iconNames: ["folder": "Mapp"],
+        iconKeywords: ["folder": ["dokument"]],
+        colorNames: ["blue": "Blå"])
+    let sections = IconCatalog.search("DOKUMENT", symbols: ["folder"], groups: [.home], labels: labels)
+    #expect(sections.first?.title == "Hem")
+    #expect(sections.first?.items.first?.value == "folder")
+    #expect(sections.first?.items.first?.name == "Mapp")
+    #expect(IconCatalog.search("folder", symbols: ["folder"], labels: labels).flatMap(\.items)
+        .contains { $0.value == "folder" && $0.name == "Mapp" })
+    let suggested = IconCatalog.sections(suggestions: [.init(value: "folder", name: "folder")], labels: labels)
+    #expect(suggested.first?.items.first?.name == "Mapp")
+}
+
 @Test func searchIgnoresPositiveBrowseCapsAndTrimsQueriesWithoutAddingExcludedGroups() {
     let catalog = IconCatalogPreset([.init(.home, limit: 1), .init(.work, limit: 0)])
     #expect(IconCatalog.search(" ", catalog: catalog).first?.items.map(\.value) == ["house"])
