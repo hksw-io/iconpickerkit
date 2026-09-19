@@ -159,6 +159,9 @@ IconPickerView(
 
 `IconPickerRow` takes the same `colors`, `symbols`, and `labels` arguments.
 
+Supplied SF Symbols outside the curated groups appear in Symbols, in caller order, without
+duplicates. Include `.symbols` when using a custom preset if these icons should be available.
+
 Search and classification are also public if you want the catalogs without the view:
 
 ```swift

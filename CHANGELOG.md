@@ -6,6 +6,10 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Caller-supplied symbols outside the curated catalog appear once in the Symbols group.
+
 ## [1.2.5] - 2026-08-28
 
 ### Changed

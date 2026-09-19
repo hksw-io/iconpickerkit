@@ -117,6 +117,8 @@ public struct IconCatalogPreset: Sendable, Equatable {
 
 /// One catalog of emoji and SF Symbols, grouped by meaning.
 public enum IconCatalog {
+    private static let groupedSymbols = Set(IconGroup.allCases.flatMap { IconCatalog.content(for: $0).1 })
+
     /// Sections for `symbols` using `catalog` order, membership, and caps.
     public static func sections(
         symbols: [String] = SymbolCatalog.ids,
@@ -124,11 +126,14 @@ public enum IconCatalog {
         suggestions: [IconItem] = []) -> [IconSection]
     {
         let allowed = Set(symbols)
+        var seen = Set<String>()
+        let ungrouped = symbols.filter { !self.groupedSymbols.contains($0) && seen.insert($0).inserted }
         var result = catalog.sections.compactMap { spec in
             let (emojis, symbolIDs) = self.content(for: spec.group)
+            let sectionSymbols = symbolIDs + (spec.group == .symbols ? ungrouped : [])
             var mixed =
                 emojis.map(Self.emojiItem)
-                + symbolIDs.filter { allowed.contains($0) }.map(Self.symbolItem)
+                + sectionSymbols.filter { allowed.contains($0) }.map(Self.symbolItem)
             if let limit = spec.limit {
                 mixed = Array(mixed.prefix(limit))
             }

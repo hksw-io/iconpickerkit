@@ -2,6 +2,16 @@ import SwiftUI
 import Testing
 @testable import IconPickerKit
 
+@Test func callerSymbolsOutsideTheCuratedCatalogAppearOnceInSymbols() {
+    let supplied = ["folder.fill", "heart", "folder.fill"]
+    let sections = IconCatalog.sections(symbols: supplied)
+    let custom = sections.first { $0.group == .symbols }?.items.filter { $0.value == "folder.fill" }
+    #expect(custom?.count == 1)
+    #expect(Set(sections.flatMap(\.items).map(\.value).filter { !$0.isEmoji }) == Set(supplied))
+    #expect(!IconCatalog.sections(symbols: supplied, groups: [.home]).flatMap(\.items)
+        .contains { $0.value == "folder.fill" })
+}
+
 @Test func searchHitMatchesNameOrKeywords() {
     let query = "dog"
     let results = EmojiCatalog.search(query)
