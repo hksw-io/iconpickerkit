@@ -8,6 +8,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ### Fixed
 
+- Custom colors use a visible native ColorPicker; removed the retained global panel callback and opening no longer changes the selection.
+
 - Negative catalog limits show no items instead of trapping; repeated groups use their first specification.
 
 - Caller-supplied symbols outside the curated catalog appear once in the Symbols group.
