@@ -99,7 +99,13 @@ Start the on-device model **before** presenting the picker so the Suggestions gr
 @State private var suggestions: Task<IconSuggestions, Never>?
 
 .task(id: deckName) {
-    suggestions = IconSuggestions.preload(hint: deckName)
+    let task = IconSuggestions.preload(hint: deckName)
+    suggestions = task
+    await withTaskCancellationHandler {
+        _ = await task.value
+    } onCancel: {
+        task.cancel()
+    }
 }
 
 .sheet(isPresented: $showingPicker) {
@@ -113,6 +119,10 @@ Or await a finished result and pass that — the extra group is on the first fra
 let suggestions = await IconSuggestions.load(hint: deckName)
 IconPickerView(icon: $icon, color: $color, suggestions: suggestions)
 ```
+
+Replacing the task, ready result, or hint refreshes suggestions in an already-presented picker.
+The picker ignores cancelled requests; the caller owns cancellation of supplied preload tasks,
+as in the example above. Clearing the hint or supplied result clears the old suggestions.
 
 Passing only `hint:` still asks the model after appear. Usable emoji or SF Symbol names (a deck called `"French"` can surface 🇫🇷) show as a Suggestions group at the top. If the model is off, unavailable, or returns nothing usable, the extra group is omitted. No API key.
 

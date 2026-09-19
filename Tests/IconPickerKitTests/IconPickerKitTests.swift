@@ -2,6 +2,30 @@ import SwiftUI
 import Testing
 @testable import IconPickerKit
 
+@Test @MainActor func suggestionRequestsRefreshAndDiscardCancelledWaiters() async {
+    let result = IconSuggestions(items: [.init(value: "folder", name: "Folder")])
+    let gate = AsyncStream<IconSuggestions>.makeStream()
+    let producer = Task {
+        var iterator = gate.stream.makeAsyncIterator()
+        return await iterator.next() ?? .empty
+    }
+    let request = IconSuggestionRequest(hint: nil, task: producer, ready: .empty)
+    let replacement = Task { IconSuggestions.empty }
+    #expect(request != IconSuggestionRequest(hint: nil, task: replacement, ready: .empty))
+    #expect(request != IconSuggestionRequest(hint: "new", task: producer, ready: .empty))
+
+    let waiter = Task { await request.value() }
+    await Task.yield()
+    waiter.cancel()
+    gate.continuation.yield(result)
+    gate.continuation.finish()
+    #expect(await waiter.value == nil)
+    #expect(await producer.value == result)
+    #expect(!producer.isCancelled)
+    #expect(await IconSuggestionRequest(hint: nil, task: nil, ready: result).value() == result)
+    #expect(await IconSuggestionRequest(hint: nil, task: nil, ready: .empty).value() == .empty)
+}
+
 @Test func invalidCatalogLimitsAndRepeatedGroupsAreNormalized() {
     let sections = IconCatalog.sections(catalog: IconCatalogPreset([
         .init(.work, limit: -1), .init(.home, limit: 2), .init(.home, limit: 8),

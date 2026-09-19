@@ -90,6 +90,7 @@ public struct IconPickerView: View {
     }
 
     public var body: some View {
+        let request = IconSuggestionRequest(hint: self.hint, task: self.suggestionTask, ready: self.readySuggestions)
         VStack(spacing: IconPickerLayout.sectionSpacing) {
             if IconKind.offersColorChrome(for: self.icon) {
                 self.colorSection
@@ -106,8 +107,8 @@ public struct IconPickerView: View {
         .task {
             await self.scrollToSelectionIfNeeded()
         }
-        .task(id: self.hint ?? "") {
-            await self.applySuggestions()
+        .task(id: request) {
+            await self.applySuggestions(request)
         }
     }
 
@@ -132,18 +133,8 @@ public struct IconPickerView: View {
         }
     }
 
-    private func applySuggestions() async {
-        let loaded: IconSuggestions
-        if let suggestionTask = self.suggestionTask {
-            loaded = await suggestionTask.value
-        } else if let hint = self.hint,
-            !hint.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        {
-            loaded = await IconSuggestions.load(hint: hint)
-        } else {
-            return
-        }
-        guard loaded != self.suggestions else { return }
+    private func applySuggestions(_ request: IconSuggestionRequest) async {
+        guard let loaded = await request.value(), loaded != self.suggestions else { return }
         withAnimation(
             IconPickerScrollPolicy.suggestionAppearAnimation(
                 reduceMotion: self.reduceMotion,

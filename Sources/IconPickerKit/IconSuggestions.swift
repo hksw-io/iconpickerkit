@@ -8,6 +8,26 @@ import AppKit
 import UIKit
 #endif
 
+/// The actual inputs to a picker request, including replacement tasks and ready results.
+struct IconSuggestionRequest: Equatable {
+    let hint: String?
+    let task: Task<IconSuggestions, Never>?
+    let ready: IconSuggestions
+
+    func value() async -> IconSuggestions? {
+        guard !Task.isCancelled else { return nil }
+        let result: IconSuggestions
+        if let task {
+            result = await task.value
+        } else if let hint {
+            result = await IconSuggestions.load(hint: hint)
+        } else {
+            result = self.ready
+        }
+        return Task.isCancelled ? nil : result
+    }
+}
+
 /// Icons produced for a consumer hint. Empty means the extra group is omitted.
 public struct IconSuggestions: Sendable, Equatable {
     public let items: [IconItem]
