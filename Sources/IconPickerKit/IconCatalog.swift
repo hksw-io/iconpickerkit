@@ -73,7 +73,7 @@ public struct IconSection: Identifiable, Sendable, Equatable {
     }
 }
 
-/// How many items to show from one group. `limit` nil means the whole group.
+/// How many items to show from one group. `nil` means the whole group; negative limits show none.
 public struct IconSectionLimit: Sendable, Equatable {
     public var group: IconGroup
     public var limit: Int?
@@ -128,14 +128,16 @@ public enum IconCatalog {
         let allowed = Set(symbols)
         var seen = Set<String>()
         let ungrouped = symbols.filter { !self.groupedSymbols.contains($0) && seen.insert($0).inserted }
-        var result = catalog.sections.compactMap { spec in
+        var seenGroups = Set<IconGroup>()
+        var result = catalog.sections.compactMap { spec -> IconSection? in
+            guard seenGroups.insert(spec.group).inserted else { return nil }
             let (emojis, symbolIDs) = self.content(for: spec.group)
             let sectionSymbols = symbolIDs + (spec.group == .symbols ? ungrouped : [])
             var mixed =
                 emojis.map(Self.emojiItem)
                 + sectionSymbols.filter { allowed.contains($0) }.map(Self.symbolItem)
             if let limit = spec.limit {
-                mixed = Array(mixed.prefix(limit))
+                mixed = Array(mixed.prefix(max(0, limit)))
             }
             return mixed.isEmpty ? nil : IconSection(group: spec.group, items: mixed)
         }

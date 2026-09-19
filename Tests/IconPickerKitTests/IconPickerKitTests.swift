@@ -2,6 +2,14 @@ import SwiftUI
 import Testing
 @testable import IconPickerKit
 
+@Test func invalidCatalogLimitsAndRepeatedGroupsAreNormalized() {
+    let sections = IconCatalog.sections(catalog: IconCatalogPreset([
+        .init(.work, limit: -1), .init(.home, limit: 2), .init(.home, limit: 8),
+    ]))
+    #expect(sections.map(\.group) == [.home])
+    #expect(sections.first?.items.count == 2)
+}
+
 @Test func callerSymbolsOutsideTheCuratedCatalogAppearOnceInSymbols() {
     let supplied = ["folder.fill", "heart", "folder.fill"]
     let sections = IconCatalog.sections(symbols: supplied)
