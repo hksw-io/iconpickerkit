@@ -9,6 +9,23 @@ enum IconPickerLayout {
     static let swatchSize: CGFloat = 32
     static let viewCellSize: CGFloat = 44
 
+    static func hitSize(for visualSize: CGFloat) -> CGFloat {
+        #if os(macOS)
+        visualSize
+        #else
+        max(44, visualSize)
+        #endif
+    }
+
+    static var rowCellSize: CGFloat { self.hitSize(for: 32) }
+    static var autofocusRowSearch: Bool {
+        #if os(macOS)
+        true
+        #else
+        false
+        #endif
+    }
+
     static var rowSwatchSize: CGFloat {
         #if os(macOS)
         20
@@ -33,7 +50,7 @@ enum IconPickerLayout {
     static var labelInset: CGFloat { self.horizontalInset }
     static var catalogInset: CGFloat { self.horizontalInset }
     static var colorStripInset: CGFloat { self.horizontalInset }
-    static let searchHeight: CGFloat = 36
+    static var searchHeight: CGFloat { self.hitSize(for: 36) }
     static var modeHeight: CGFloat { self.controlHeight }
 }
 

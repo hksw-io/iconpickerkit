@@ -17,6 +17,7 @@ struct IconPickerSearchField: View {
                 .accessibilityHidden(true)
             TextField(self.prompt, text: self.$text)
                 .font(.body)
+                .padding(.vertical, 6)
                 .textFieldStyle(.plain)
                 .autocorrectionDisabled()
 #if os(iOS)
@@ -28,6 +29,10 @@ struct IconPickerSearchField: View {
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundStyle(.secondary)
+                        .frame(
+                            minWidth: IconPickerLayout.hitSize(for: 28),
+                            minHeight: IconPickerLayout.hitSize(for: 28))
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(self.clearLabel)
@@ -35,7 +40,7 @@ struct IconPickerSearchField: View {
         }
         .padding(.horizontal, 10)
         .frame(maxWidth: .infinity)
-        .frame(height: IconPickerLayout.searchHeight)
+        .frame(minHeight: IconPickerLayout.searchHeight)
         .background(.quaternary, in: Capsule())
         .focused(self.$focused)
         .onAppear {

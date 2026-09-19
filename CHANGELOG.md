@@ -12,6 +12,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ### Fixed
 
+- Touch swatches, Clear, and popover cells have 44-point minimum targets. Search and popover cells grow with text, and touch popovers no longer summon the keyboard automatically.
+
 - Search reaches items beyond positive browse caps, trims whitespace, matches localized text, and displays a native empty state.
 
 - Emoji classification uses Unicode presentation properties, including watch/hourglass, keycaps, flags, and joined emoji while respecting explicit text presentation.

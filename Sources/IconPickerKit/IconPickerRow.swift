@@ -18,7 +18,9 @@ public struct IconPickerRow: View {
     @State private var origin = ContinuousClock.now
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @ScaledMetric(relativeTo: .title3) private var cellFont: CGFloat = 18
+    @ScaledMetric(relativeTo: .title3) private var cellSize: CGFloat = IconPickerLayout.rowCellSize
 
     public init(
         icon: Binding<String>,
@@ -37,17 +39,24 @@ public struct IconPickerRow: View {
     }
 
     public var body: some View {
-        HStack(alignment: .center, spacing: IconPickerLayout.stackSpacing) {
-            Text(self.labels.icon)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .fixedSize()
-                .accessibilityAddTraits(.isHeader)
-            self.iconButton
+        let layout = self.dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: IconPickerLayout.stackSpacing))
+            : AnyLayout(HStackLayout(alignment: .center, spacing: IconPickerLayout.stackSpacing))
+        return layout {
+            HStack(spacing: IconPickerLayout.stackSpacing) {
+                Text(self.labels.icon)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize()
+                    .accessibilityAddTraits(.isHeader)
+                self.iconButton
+            }
             if IconKind.offersColorChrome(for: self.icon) {
                 HStack(alignment: .center, spacing: IconPickerLayout.stackSpacing) {
-                    Divider()
-                        .frame(height: IconPickerLayout.rowIconButtonSize)
+                    if !self.dynamicTypeSize.isAccessibilitySize {
+                        Divider()
+                            .frame(height: IconPickerLayout.rowIconButtonSize)
+                    }
                     Text(self.labels.color)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -114,7 +123,7 @@ public struct IconPickerRow: View {
                 debounce: self.$debounce,
                 origin: self.origin,
                 prompt: self.labels.search,
-                autofocus: true,
+                autofocus: IconPickerLayout.autofocusRowSearch,
                 clearLabel: self.labels.clear)
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: IconPickerLayout.stackSpacing) {
@@ -128,7 +137,10 @@ public struct IconPickerRow: View {
             }
         }
         .padding(12)
-        .frame(width: 320, height: 280)
+        .frame(idealWidth: 320, idealHeight: 280)
+        #if os(macOS)
+        .frame(minWidth: 280, minHeight: 280)
+        #endif
         #if os(macOS)
         .onExitCommand { self.showingCatalog = false }
         #endif
@@ -150,7 +162,7 @@ public struct IconPickerRow: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .accessibilityAddTraits(.isHeader)
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 36), spacing: 4)], spacing: 4) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: max(36, self.cellSize)), spacing: 4)], spacing: 4) {
                 ForEach(section.items) { item in
                     self.cell(item)
                 }
@@ -174,7 +186,8 @@ public struct IconPickerRow: View {
                         .foregroundStyle(isSelected ? self.color.color : .secondary)
                 }
             }
-            .frame(width: 32, height: 32)
+            .frame(width: self.cellSize, height: self.cellSize)
+            .contentShape(Rectangle())
             .background {
                 if isSelected {
                     RoundedRectangle(cornerRadius: 6)

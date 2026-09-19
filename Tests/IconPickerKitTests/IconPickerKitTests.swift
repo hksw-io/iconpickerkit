@@ -306,9 +306,23 @@ import Testing
 }
 
 @Test func searchIsTallerThanCompactControls() {
-    #expect(IconPickerLayout.searchHeight == 36)
+    #expect(IconPickerLayout.searchHeight >= 36)
     #expect(IconPickerLayout.searchHeight > IconPickerLayout.controlHeight)
     #expect(IconPickerLayout.modeHeight == IconPickerLayout.controlHeight)
+}
+
+@Test func touchTargetsGrowWithoutExpandingMacControls() {
+    #if os(macOS)
+    #expect(IconPickerLayout.hitSize(for: 20) == 20)
+    #expect(IconPickerLayout.autofocusRowSearch)
+    #else
+    for size: CGFloat in [20, 24, 32, 44, 60] {
+        #expect(IconPickerLayout.hitSize(for: size) >= 44)
+        #expect(IconPickerLayout.hitSize(for: size) >= size)
+    }
+    #expect(IconPickerLayout.rowCellSize >= 44)
+    #expect(!IconPickerLayout.autofocusRowSearch)
+    #endif
 }
 
 @Test func mixedCatalogIdleHasNamedSectionsAndBothKinds() {
