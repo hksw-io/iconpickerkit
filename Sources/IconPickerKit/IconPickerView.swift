@@ -104,6 +104,7 @@ public struct IconPickerView: View {
             IconPickerScrollPolicy.colorChromeAnimation(reduceMotion: self.reduceMotion),
             value: IconKind.offersColorChrome(for: self.icon))
         .padding(.top)
+        .background(.background)
         .task {
             await self.scrollToSelectionIfNeeded()
         }
