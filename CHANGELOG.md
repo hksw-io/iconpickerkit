@@ -8,6 +8,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ### Fixed
 
+- Emoji classification uses Unicode presentation properties, including watch/hourglass, keycaps, flags, and joined emoji while respecting explicit text presentation.
+
 - Replacing suggestion inputs refreshes an open picker, and cancelled requests cannot overwrite current suggestions. The preload example cancels work with its owner.
 
 - Custom colors use a visible native ColorPicker; removed the retained global panel callback and opening no longer changes the selection.

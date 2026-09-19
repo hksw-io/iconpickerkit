@@ -2,6 +2,17 @@ import SwiftUI
 import Testing
 @testable import IconPickerKit
 
+@Test func emojiClassificationUsesUnicodePresentationInsteadOfCodePointRanges() {
+    for value in ["⌚", "⌛", "1️⃣", "🇸🇪", "👨‍👩‍👧", "👍🏽", "❤️"] {
+        #expect(IconKind.classify(value) == .emoji)
+        #expect(value.isSingleEmoji)
+    }
+    for value in ["1", "#", "1.square", "1\u{0301}", "⌚\u{FE0E}"] {
+        #expect(IconKind.classify(value) == .symbol)
+    }
+    #expect(!"🇸🇪🇫🇮".isSingleEmoji)
+}
+
 @Test @MainActor func suggestionRequestsRefreshAndDiscardCancelledWaiters() async {
     let result = IconSuggestions(items: [.init(value: "folder", name: "Folder")])
     let gate = AsyncStream<IconSuggestions>.makeStream()

@@ -386,8 +386,10 @@ public enum IconKind: Equatable, Sendable {
 
 extension Character {
     var isEmoji: Bool {
-        guard let scalar = self.unicodeScalars.first else { return false }
-        return scalar.properties.isEmoji && (scalar.value > 0x238C || self.unicodeScalars.count > 1)
+        guard let scalar = self.unicodeScalars.first, scalar.properties.isEmoji else { return false }
+        guard !self.unicodeScalars.contains(where: { $0.value == 0xFE0E }) else { return false }
+        return scalar.properties.isEmojiPresentation
+            || self.unicodeScalars.contains { $0.value == 0xFE0F || $0.value == 0x20E3 }
     }
 }
 
