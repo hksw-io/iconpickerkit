@@ -38,7 +38,7 @@ hides Color, because only SF Symbols take the tint.
 Internal to the `hksw-io` org. Add:
 
 ```swift
-.package(url: "https://github.com/hksw-io/iconpickerkit.git", from: "1.2.5")
+.package(url: "https://github.com/hksw-io/iconpickerkit.git", from: "1.3.0")
 ```
 
 ```swift
@@ -47,9 +47,6 @@ Internal to the `hksw-io` org. Add:
 
 In Xcode: **File > Add Package Dependencies…** and enter the URL above. You need access to the org.
 Add only the `IconPickerKit` library product; `IconPickerKitDemo` is a Mac-only demo app.
-
-Localized catalog metadata, search beyond browse caps, suggestion refresh, and caller symbols
-outside the curated groups are on `master` but not in 1.2.5. They ship in the next tagged release.
 
 ## Usage
 

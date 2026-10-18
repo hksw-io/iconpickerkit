@@ -6,6 +6,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-18
+
 ### Maintenance
 
 - CI explicitly tests macOS and builds iOS Simulator with Xcode 26.6 and 27.0 while preserving OS 26 and Swift tools 6.2 minimums.
