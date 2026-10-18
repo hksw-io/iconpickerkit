@@ -16,6 +16,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ### Fixed
 
+- On iPhone and iPad the full picker scrolls to the selected icon on first appear again. Since 1.2.2 the scroll targeted an icon inside a section that had not laid out yet, so the catalog stayed at the top.
+
 - The full picker and its pinned section headers share the same system surface, avoiding contrasting header stripes in iPad sheets.
 
 - Touch swatches, Clear, and popover cells have 44-point minimum targets. Search and popover cells grow with text, and touch popovers no longer summon the keyboard automatically.

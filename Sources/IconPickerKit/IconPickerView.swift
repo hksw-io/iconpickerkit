@@ -159,10 +159,13 @@ public struct IconPickerView: View {
             catalog: self.catalog,
             suggestions: self.suggestions.items,
             labels: self.labels)
+        // The icon's id sits inside a lazy grid that has no layout until its section is on
+        // screen, so bring the section in first and target the icon once it has laid out.
+        if let section {
+            self.scrollPosition.scrollTo(id: section.id, anchor: .center)
+            try? await Task.sleep(for: IconPickerScrollPolicy.layoutSettle)
+        }
         withAnimation(IconPickerScrollPolicy.scrollAnimation(reduceMotion: self.reduceMotion)) {
-            if let section {
-                self.scrollPosition.scrollTo(id: section.id, anchor: .center)
-            }
             self.scrollPosition.scrollTo(id: self.icon, anchor: .center)
         }
     }
