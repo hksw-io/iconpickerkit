@@ -8,15 +8,15 @@ A SwiftUI picker for a tint color plus an emoji or SF Symbol. Bind two values th
 ## Preview
 
 <p>
-  <img src="Docs/Media/iconpickerkit-demo.webp" width="240" alt="IconPickerView in an iPhone sheet: tapping the green swatch tints the selection, tapping the graduation cap selects it, the catalog scrolls under the pinned color and search controls, searching dog shows a hot dog and a dog, and choosing the dog emoji hides the Color section.">
+  <img src="Docs/Media/iconpickerkit-demo.webp" width="240" alt="IconPickerView in an iPhone sheet: it opens scrolled to the selected folder in the Home section, tapping the green swatch tints the folder, tapping the lightbulb selects it, searching dog shows a hot dog and a dog, and choosing the dog emoji hides the Color section.">
 </p>
 
-Pick a color and a symbol, scroll, then search. Choosing an emoji hides Color, because only SF
-Symbols take the tint.
+The picker opens on the selected icon. Pick a color and a symbol, then search. Choosing an emoji
+hides Color, because only SF Symbols take the tint.
 
 <p>
-  <img src="Docs/Media/iconpickerkit-iphone-light.jpg" width="240" alt="IconPickerView in an iPhone sheet in light mode: an Icon title with a Done button, Color swatches with blue selected, Search Icons, and the Work section.">
-  <img src="Docs/Media/iconpickerkit-iphone-dark.jpg" width="240" alt="IconPickerView in an iPhone sheet in dark mode with the same Color swatches, search field, and Work section.">
+  <img src="Docs/Media/iconpickerkit-iphone-light.jpg" width="240" alt="IconPickerView in an iPhone sheet in light mode: an Icon title with a Done button, Color swatches with blue selected, Search Icons, and the catalog scrolled to the selected folder in the Home section.">
+  <img src="Docs/Media/iconpickerkit-iphone-dark.jpg" width="240" alt="IconPickerView in an iPhone sheet in dark mode with the same Color swatches and search field, scrolled to the selected folder in Home.">
 </p>
 
 `IconPickerView`. Present it in a sheet; you own Done.
