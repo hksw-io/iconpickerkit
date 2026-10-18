@@ -15,16 +15,6 @@ struct GenerateMedia {
         try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
 
         try write(
-            ViewShot(scheme: .light),
-            size: CGSize(width: 390, height: 780),
-            appearance: .aqua,
-            to: out.appending(path: "iconpickerkit-view-light.png"))
-        try write(
-            ViewShot(scheme: .dark),
-            size: CGSize(width: 390, height: 780),
-            appearance: .darkAqua,
-            to: out.appending(path: "iconpickerkit-view-dark.png"))
-        try write(
             RowShot(scheme: .light),
             size: CGSize(width: 580, height: 100),
             appearance: .aqua,
@@ -34,16 +24,6 @@ struct GenerateMedia {
             size: CGSize(width: 580, height: 100),
             appearance: .darkAqua,
             to: out.appending(path: "iconpickerkit-row-dark.png"))
-        try write(
-            SuggestionsShot(scheme: .light),
-            size: CGSize(width: 390, height: 780),
-            appearance: .aqua,
-            to: out.appending(path: "iconpickerkit-view-suggestions-light.png"))
-        try write(
-            SuggestionsShot(scheme: .dark),
-            size: CGSize(width: 390, height: 780),
-            appearance: .darkAqua,
-            to: out.appending(path: "iconpickerkit-view-suggestions-dark.png"))
     }
 
     @MainActor
@@ -97,38 +77,6 @@ struct GenerateMedia {
             throw Exit("could not finalize \(url.lastPathComponent)")
         }
         print(url.path)
-    }
-}
-
-private struct ViewShot: View {
-    @State private var icon = "folder"
-    @State private var color = IconPickerColor.blue
-    let scheme: ColorScheme
-
-    var body: some View {
-        IconPickerView(icon: self.$icon, color: self.$color, allowsCustomColor: true)
-            .preferredColorScheme(self.scheme)
-    }
-}
-
-private struct SuggestionsShot: View {
-    @State private var icon = "🇫🇷"
-    @State private var color = IconPickerColor.blue
-    let scheme: ColorScheme
-
-    var body: some View {
-        IconPickerView(
-            icon: self.$icon,
-            color: self.$color,
-            allowsCustomColor: true,
-            suggestions: IconSuggestions(items: [
-                IconItem(value: "🇫🇷", name: "France"),
-                IconItem(value: "🥖", name: "Baguette"),
-                IconItem(value: "flag", name: "flag"),
-                IconItem(value: "book", name: "book"),
-                IconItem(value: "globe.europe.africa", name: "globe europe africa"),
-            ]))
-            .preferredColorScheme(self.scheme)
     }
 }
 
