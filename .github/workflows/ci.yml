@@ -39,5 +39,6 @@ jobs:
         run: swift test
       # The aggregate package test scheme also builds the macOS-only demo and media tool.
       # Hosted iOS interaction checks run in the native review app; this gate builds the library.
+      # The Intelligence scheme builds IconPickerKit as its dependency.
       - name: Build iOS Simulator
-        run: xcodebuild build -scheme IconPickerKit -destination 'generic/platform=iOS Simulator' -quiet CODE_SIGNING_ALLOWED=NO
+        run: xcodebuild build -scheme IconPickerKitIntelligence -destination 'generic/platform=iOS Simulator' -quiet CODE_SIGNING_ALLOWED=NO

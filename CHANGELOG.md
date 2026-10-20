@@ -6,6 +6,19 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- On-device model suggestions moved to the new `IconPickerKitIntelligence` product. `IconPickerKit` no longer links FoundationModels, which made every app initialize about 180 more system frameworks at launch even without suggestions. **Action needed** if you call `IconPickerView(hint:)`, `IconSuggestions.load(hint:)`, or `preload(hint:)`: add the `IconPickerKitIntelligence` product and `import IconPickerKitIntelligence`, or those calls stop compiling. The `produce:` variants and supplied suggestions stay in `IconPickerKit`.
+- While suggestions load, the picker reserves one Suggestions row of placeholders from the first frame and fills it in place. The row shows as many suggestions as fit on one line.
+
+### Added
+
+- `IconPickerLabels.noSuggestions`, shown in the reserved row when the model answers late with nothing usable.
+
+### Fixed
+
+- Suggestions that arrived after the sheet settled (about 0.5–1.5 s with the on-device model) pushed the whole catalog down by up to two rows, moving the selected icon off screen and briefly dropping the last rows of the first section. Results now fill the reserved row in place, so nothing below it moves; an empty result within 250 ms of a request removes the row, and a later one shows No Suggestions.
+
 ## [1.3.0] - 2026-10-18
 
 ### Maintenance

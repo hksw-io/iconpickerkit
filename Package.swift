@@ -11,6 +11,9 @@ let package = Package(
         .library(
             name: "IconPickerKit",
             targets: ["IconPickerKit"]),
+        .library(
+            name: "IconPickerKitIntelligence",
+            targets: ["IconPickerKitIntelligence"]),
         .executable(
             name: "IconPickerKitDemo",
             targets: ["IconPickerKitDemo"]),
@@ -18,14 +21,18 @@ let package = Package(
     targets: [
         .target(
             name: "IconPickerKit"),
+        // Only this target imports FoundationModels, so apps without suggestions never load it.
+        .target(
+            name: "IconPickerKitIntelligence",
+            dependencies: ["IconPickerKit"]),
         .executableTarget(
             name: "GenerateMedia",
             dependencies: ["IconPickerKit"]),
         .executableTarget(
             name: "IconPickerKitDemo",
-            dependencies: ["IconPickerKit"],
+            dependencies: ["IconPickerKit", "IconPickerKitIntelligence"],
             exclude: ["Info.plist"]),
         .testTarget(
             name: "IconPickerKitTests",
-            dependencies: ["IconPickerKit"]),
+            dependencies: ["IconPickerKit", "IconPickerKitIntelligence"]),
     ])

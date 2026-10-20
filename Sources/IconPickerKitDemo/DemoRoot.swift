@@ -1,4 +1,5 @@
 import IconPickerKit
+import IconPickerKitIntelligence
 import SwiftUI
 
 struct DemoRoot: View {

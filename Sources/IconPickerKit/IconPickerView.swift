@@ -13,6 +13,7 @@ public struct IconPickerView: View {
     let catalog: IconCatalogPreset
     let allowsCustomColor: Bool
     let hint: String?
+    let produce: @Sendable (String) async throws -> [String]
     let suggestionTask: Task<IconSuggestions, Never>?
     let readySuggestions: IconSuggestions
     private let labels: IconPickerLabels
@@ -22,8 +23,8 @@ public struct IconPickerView: View {
     @State private var debounce = SearchDebounce()
     @State private var origin = ContinuousClock.now
     @State private var suggestions = IconSuggestions.empty
+    @State private var suggestionSlot = IconSuggestionSlot.none
     @State private var userHasScrolled = false
-    @State private var catalogIsAtTop = true
     @State private var scrollPosition = ScrollPosition(edge: .top)
     @State private var selectionVisibility = IconPickerSelectionVisibility()
 
@@ -36,11 +37,11 @@ public struct IconPickerView: View {
     /// including brand colors. Pass `symbols` to replace the built-in SF Symbol
     /// catalog. Pass `catalog` to choose groups, order, and per-group caps.
     /// Pass `allowsCustomColor` to append a system color picker on the far right.
-    /// Pass `hint` (a deck name, title, …) to ask the on-device Foundation Model
-    /// for suggested icons after appear. Pass `suggestions` to reuse work
-    /// started with ``IconSuggestions/preload(hint:)`` before the picker
-    /// appears — that is the path that can have the group ready on first
-    /// layout. Appear-scroll does not wait for either.
+    /// Pass `suggestions` to reuse work started with
+    /// ``IconSuggestions/preload(hint:produce:)`` before the picker appears —
+    /// that is the path that can have the group ready on first layout.
+    /// Appear-scroll does not wait for it. On-device model suggestions live in
+    /// the separate `IconPickerKitIntelligence` product.
     public init(
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
@@ -48,9 +49,34 @@ public struct IconPickerView: View {
         symbols: [String] = SymbolCatalog.ids,
         catalog: IconCatalogPreset = .all,
         allowsCustomColor: Bool = false,
-        hint: String? = nil,
         suggestions: Task<IconSuggestions, Never>? = nil,
         labels: IconPickerLabels = .english)
+    {
+        self.init(
+            icon: icon,
+            color: color,
+            colors: colors,
+            symbols: symbols,
+            catalog: catalog,
+            allowsCustomColor: allowsCustomColor,
+            hint: nil,
+            produce: { _ in [] },
+            suggestions: suggestions,
+            labels: labels)
+    }
+
+    /// Asks `produce` for suggestions for `hint` after appear, unless `suggestions` is supplied.
+    package init(
+        icon: Binding<String>,
+        color: Binding<IconPickerColor>,
+        colors: [IconPickerColor],
+        symbols: [String],
+        catalog: IconCatalogPreset,
+        allowsCustomColor: Bool,
+        hint: String?,
+        produce: @escaping @Sendable (String) async throws -> [String],
+        suggestions: Task<IconSuggestions, Never>?,
+        labels: IconPickerLabels)
     {
         self._icon = icon
         self._color = color
@@ -59,10 +85,14 @@ public struct IconPickerView: View {
         self.catalog = catalog
         self.allowsCustomColor = allowsCustomColor
         self.hint = hint
+        self.produce = produce
         self.suggestionTask = suggestions
         self.readySuggestions = .empty
         self.labels = labels
         self._suggestions = State(initialValue: .empty)
+        // Reserve the row on the first frame so arrival fills it instead of pushing the catalog down.
+        let request = IconSuggestionRequest(hint: hint, task: suggestions, ready: .empty)
+        self._suggestionSlot = State(initialValue: request.loads ? .loading : .none)
     }
 
     /// Creates a picker whose Suggestions group is already populated.
@@ -83,6 +113,7 @@ public struct IconPickerView: View {
         self.catalog = catalog
         self.allowsCustomColor = allowsCustomColor
         self.hint = nil
+        self.produce = { _ in [] }
         self.suggestionTask = nil
         self.readySuggestions = suggestions
         self.labels = labels
@@ -125,23 +156,23 @@ public struct IconPickerView: View {
                 self.userHasScrolled = true
             }
         }
-        .onScrollGeometryChange(for: Bool.self) { geometry in
-            IconPickerScrollPolicy.catalogIsAtTop(
-                offsetY: geometry.contentOffset.y,
-                insetTop: geometry.contentInsets.top)
-        } action: { _, atTop in
-            self.catalogIsAtTop = atTop
-        }
     }
 
     private func applySuggestions(_ request: IconSuggestionRequest) async {
-        guard let loaded = await request.value(), loaded != self.suggestions else { return }
-        withAnimation(
-            IconPickerScrollPolicy.suggestionAppearAnimation(
-                reduceMotion: self.reduceMotion,
-                catalogIsAtTop: self.catalogIsAtTop)
-        ) {
+        let start = ContinuousClock.now
+        if request.loads, self.suggestions.isEmpty {
+            self.suggestionSlot = .loading
+        }
+        guard let loaded = await request.value(produce: self.produce) else { return }
+        let slot = IconSuggestionSlot.after(loaded, loads: request.loads, waited: ContinuousClock.now - start)
+        guard loaded != self.suggestions || slot != self.suggestionSlot else { return }
+        // Only a change that keeps the row on screen animates, as a crossfade. Adding or
+        // removing the row stays instant, so a scrolled catalog keeps its place.
+        let rowStays =
+            self.suggestionSlot.showsRow(hasItems: !self.suggestions.isEmpty) && slot.showsRow(hasItems: !loaded.isEmpty)
+        withAnimation(rowStays ? .smooth : nil) {
             self.suggestions = loaded
+            self.suggestionSlot = slot
         }
     }
 
@@ -205,6 +236,7 @@ public struct IconPickerView: View {
             suggestions: self.suggestions.items,
             labels: self.labels)
         let suggestion = sections.first { $0.group == .suggestions }
+        let slot = self.debounce.applied.isEmpty ? self.suggestionSlot : .none
         return LazyVStack(
             alignment: .leading,
             spacing: IconPickerLayout.sectionSpacing,
@@ -213,21 +245,21 @@ public struct IconPickerView: View {
             if sections.isEmpty {
                 IconPickerEmptyState(query: self.debounce.applied, noIcons: self.labels.noIcons)
             }
-            if let suggestion {
+            if slot.showsRow(hasItems: suggestion != nil) {
                 Section {
-                    self.sectionGrid(suggestion)
+                    self.suggestionRow(suggestion?.items ?? [], slot: slot)
                 } header: {
-                    self.sectionHeader(suggestion)
+                    // An empty heading while loading would read as a group with nothing in it.
+                    self.sectionHeader(self.labels.title(for: .suggestions))
+                        .accessibilityHidden(suggestion == nil && slot == .loading)
                 }
-                .id(suggestion.id)
-                .clipped()
-                .transition(IconPickerExpand.vertical(reduceMotion: self.reduceMotion))
+                .id(IconGroup.suggestions.id)
             }
             ForEach(sections.filter { $0.group != .suggestions }) { section in
                 Section {
                     self.sectionGrid(section)
                 } header: {
-                    self.sectionHeader(section)
+                    self.sectionHeader(section.title)
                 }
                 .id(section.id)
             }
@@ -236,8 +268,8 @@ public struct IconPickerView: View {
         .scrollTargetLayout()
     }
 
-    private func sectionHeader(_ section: IconSection) -> some View {
-        Text(section.title)
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -255,6 +287,39 @@ public struct IconPickerView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, IconPickerLayout.catalogInset)
+    }
+
+    /// One row of the catalog grid in every state: placeholders, icons, or a no-results note.
+    private func suggestionRow(_ items: [IconItem], slot: IconSuggestionSlot) -> some View {
+        GeometryReader { proxy in
+            let count = IconPickerLayout.columnCount(width: proxy.size.width, cellSize: self.cellSize)
+            if items.isEmpty, slot == .noResults {
+                Text(self.labels.noSuggestions)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            } else {
+                LazyVGrid(columns: self.columns, spacing: IconPickerLayout.stackSpacing) {
+                    if items.isEmpty {
+                        ForEach(0..<min(count, IconSuggestionSlot.placeholderCount), id: \.self) { _ in
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(.quaternary)
+                                .frame(width: self.cellFont, height: self.cellFont)
+                                .frame(width: self.cellSize, height: self.cellSize)
+                        }
+                        .accessibilityHidden(true)
+                    } else {
+                        ForEach(items.prefix(count, keeping: self.icon)) { item in
+                            self.iconButton(item)
+                                .id(item.value)
+                        }
+                    }
+                }
+            }
+        }
+        .frame(height: self.cellSize)
         .padding(.horizontal, IconPickerLayout.catalogInset)
     }
 

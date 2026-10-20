@@ -1,7 +1,4 @@
 import Foundation
-#if canImport(FoundationModels)
-import FoundationModels
-#endif
 #if canImport(AppKit)
 import AppKit
 #elseif canImport(UIKit)
@@ -14,13 +11,19 @@ struct IconSuggestionRequest: Equatable {
     let task: Task<IconSuggestions, Never>?
     let ready: IconSuggestions
 
-    func value() async -> IconSuggestions? {
+    /// Whether the result arrives later, so the picker reserves the Suggestions row meanwhile.
+    /// A blank hint never produces icons, so it reserves nothing.
+    var loads: Bool {
+        self.task != nil || !(self.hint ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    func value(produce: @Sendable (String) async throws -> [String]) async -> IconSuggestions? {
         guard !Task.isCancelled else { return nil }
         let result: IconSuggestions
         if let task {
             result = await task.value
         } else if let hint {
-            result = await IconSuggestions.load(hint: hint)
+            result = await IconSuggestions.load(hint: hint, produce: produce)
         } else {
             result = self.ready
         }
@@ -28,7 +31,30 @@ struct IconSuggestionRequest: Equatable {
     }
 }
 
-/// Icons produced for a consumer hint. Empty means the extra group is omitted.
+/// What the Suggestions row holds while it has no icons. Every state is one row tall,
+/// so loading, filling in, and an empty result never move the catalog below.
+enum IconSuggestionSlot: Equatable {
+    case none
+    case loading
+    case noResults
+
+    /// How long the opening transition hides a removed row. A later empty result keeps it instead.
+    static let settle: Duration = .milliseconds(250)
+
+    /// Placeholders while loading. The on-device model returns at most eight icons.
+    static let placeholderCount = 8
+
+    /// Whether the Suggestions row is on screen.
+    func showsRow(hasItems: Bool) -> Bool {
+        hasItems || self != .none
+    }
+
+    static func after(_ loaded: IconSuggestions, loads: Bool, waited: Duration) -> Self {
+        loaded.isEmpty && loads && waited >= self.settle ? .noResults : .none
+    }
+}
+
+/// Icons produced for a consumer hint. Empty means the Suggestions group has no icons.
 public struct IconSuggestions: Sendable, Equatable {
     public let items: [IconItem]
 
@@ -54,12 +80,7 @@ public struct IconSuggestions: Sendable, Equatable {
         }
     }
 
-    /// Loads suggestions for `hint` with the on-device Foundation Model.
-    public static func load(hint: String) async -> IconSuggestions {
-        await self.load(hint: hint, produce: self.foundationModels)
-    }
-
-    /// Starts `load(hint:)` immediately so the result can be ready before the picker appears.
+    /// Starts `load(hint:produce:)` immediately so the result can be ready before the picker appears.
     ///
     /// Call this from the screen that presents the picker — typically in a
     /// `.task(id: hint)` on the edit form — and pass the task into
@@ -69,11 +90,6 @@ public struct IconSuggestions: Sendable, Equatable {
         produce: @escaping @Sendable (String) async throws -> [String]
     ) -> Task<IconSuggestions, Never> {
         Task { await self.load(hint: hint, produce: produce) }
-    }
-
-    /// Starts `load(hint:)` with the on-device Foundation Model.
-    public static func preload(hint: String) -> Task<IconSuggestions, Never> {
-        self.preload(hint: hint, produce: self.foundationModels)
     }
 
     static func items(from raw: [String]) -> [IconItem] {
@@ -95,28 +111,6 @@ public struct IconSuggestions: Sendable, Equatable {
         return items
     }
 
-    static func foundationModels(_ hint: String) async throws -> [String] {
-        #if canImport(FoundationModels)
-        guard case .available = SystemLanguageModel.default.availability else {
-            return []
-        }
-        let session = LanguageModelSession(
-            instructions: """
-                Suggest icons for a named item.
-                Return at most 8 values.
-                Each value is one emoji (including country flags) or one SF Symbol name \
-                such as folder or flag.fill.
-                No sentences, no punctuation, no explanations.
-                """)
-        let response = try await session.respond(
-            to: "Icons for: \(hint)",
-            generating: IconSuggestionDraft.self)
-        return response.content.icons
-        #else
-        return []
-        #endif
-    }
-
     private static func isKnownSymbol(_ name: String) -> Bool {
         #if canImport(AppKit)
         NSImage(systemSymbolName: name, accessibilityDescription: nil) != nil
@@ -128,17 +122,20 @@ public struct IconSuggestions: Sendable, Equatable {
     }
 }
 
+extension [IconItem] {
+    /// The first `count` items, with `selected` swapped into the last slot when it would be cut off.
+    func prefix(_ count: Int, keeping selected: String) -> [IconItem] {
+        var shown = Array(self.prefix(count))
+        if !shown.isEmpty, let item = self.dropFirst(count).first(where: { $0.value == selected }) {
+            shown[shown.count - 1] = item
+        }
+        return shown
+    }
+}
+
 extension String {
     var isSingleEmoji: Bool {
         guard self.count == 1, let first = self.first else { return false }
         return String(first).isEmoji
     }
 }
-
-#if canImport(FoundationModels)
-@Generable
-nonisolated struct IconSuggestionDraft {
-    @Guide(description: "At most eight emoji characters or SF Symbol names")
-    var icons: [String]
-}
-#endif

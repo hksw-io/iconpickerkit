@@ -46,7 +46,8 @@ Internal to the `hksw-io` org. Add:
 ```
 
 In Xcode: **File > Add Package Dependencies…** and enter the URL above. You need access to the org.
-Add only the `IconPickerKit` library product; `IconPickerKitDemo` is a Mac-only demo app.
+Add the `IconPickerKit` library product. Add `IconPickerKitIntelligence` too only if you want
+[on-device model suggestions](#suggested-icons); `IconPickerKitDemo` is a Mac-only demo app.
 
 ## Usage
 
@@ -115,12 +116,26 @@ with a zero or negative limit remain excluded. A miss shows the system's search-
 
 ### Suggested icons
 
+On-device model suggestions live in the separate `IconPickerKitIntelligence` product, the only
+part of the package that links FoundationModels. Leave it out and your app never loads the model
+framework or its dependencies at launch. Add it and import it next to `IconPickerKit`:
+
+```swift
+.product(name: "IconPickerKitIntelligence", package: "IconPickerKit"),
+```
+
+```swift
+import IconPickerKit
+import IconPickerKitIntelligence
+```
+
 Start the on-device model **before** presenting the picker so the Suggestions group can already be there. Hold the task on the screen that opens the sheet (an edit form, a deck name field, …) and pass it in:
 
 ```swift
 @State private var suggestions: Task<IconSuggestions, Never>?
 
 .task(id: deckName) {
+    guard !deckName.isEmpty else { suggestions = nil; return }
     let task = IconSuggestions.preload(hint: deckName)
     suggestions = task
     await withTaskCancellationHandler {
@@ -152,13 +167,21 @@ Replacing the task, ready result, or hint refreshes suggestions in an already-pr
 The picker ignores cancelled requests; the caller owns cancellation of supplied preload tasks,
 as in the example above. Clearing the hint or supplied result clears the old suggestions.
 
-Passing only `hint:` still asks the model after appear. Usable emoji or SF Symbol names (a deck called `"French"` can surface 🇫🇷) show as a Suggestions group at the top. If the model is off, unavailable, or returns nothing usable, the extra group is omitted. No API key. If you pass both `hint:` and a `suggestions:` task, the task wins.
+Passing only `hint:` still asks the model after appear. Usable emoji or SF Symbol names (a deck called `"French"` can surface 🇫🇷) show as a Suggestions group at the top. If the model is off or unavailable, the extra group is omitted. No API key. If you pass both `hint:` and a `suggestions:` task, the task wins.
+To supply your own suggestions without the model, pass `IconSuggestions.preload(hint:produce:)`
+or `load(hint:produce:)` from `IconPickerKit` alone.
 
 ```swift
 IconPickerView(icon: $icon, color: $color, hint: deckName)
 ```
 
-Color, search, and the current section title stay pinned above the catalog. On iPhone and iPad the picker scrolls to the current icon on first layout without waiting for suggestions, animates that scroll (Reduce Motion jumps instead), and skips it when the icon is already on screen or you have scrolled. On macOS it stays at the top. When suggestions arrive after appear, the group expands in at the top if you are still there; a scrolled catalog keeps its place.
+Color, search, and the current section title stay pinned above the catalog. On iPhone and iPad the picker scrolls to the current icon on first layout without waiting for suggestions, animates that scroll (Reduce Motion jumps instead), and skips it when the icon is already on screen or you have scrolled. On macOS it stays at the top.
+
+While a hint or task is loading, the Suggestions group holds one row of placeholders from the
+first frame. Results fill that row in place, so nothing below it moves when the model answers,
+whether or not you have scrolled. The row shows as many suggestions as fit on one line, always including the selected icon. If the
+result is empty within the opening transition, the row is removed while the sheet is still
+moving; a later empty result shows `noSuggestions` ("No Suggestions") instead of collapsing.
 
 <p>
   <img src="Docs/Media/iconpickerkit-iphone-suggestions-light.jpg" width="240" alt="IconPickerView in light mode with an emoji selected, so Color is hidden: Search Icons, then a Suggestions group with the French flag selected, baguette, flag, book, and globe icons, above Work.">
@@ -212,7 +235,7 @@ stable icon values and color IDs, so changing language never changes saved selec
 ```swift
 let labels = IconPickerLabels(
     color: "Färg", icon: "Ikon", search: "Sök ikoner", customColor: "Anpassad",
-    suggestions: "Förslag", clear: "Rensa", noIcons: "Inga ikoner",
+    suggestions: "Förslag", clear: "Rensa", noIcons: "Inga ikoner", noSuggestions: "Inga förslag",
     groupTitles: [.home: "Hem", .work: "Arbete"],
     iconNames: ["folder": "Mapp", "📚": "Böcker"],
     iconKeywords: ["folder": ["dokument"]],
