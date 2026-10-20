@@ -6,6 +6,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-20
+
 ### Changed
 
 - On-device model suggestions moved to the new `IconPickerKitIntelligence` product. `IconPickerKit` no longer links FoundationModels, which made every app initialize about 180 more system frameworks at launch even without suggestions. **Action needed** if you call `IconPickerView(hint:)`, `IconSuggestions.load(hint:)`, or `preload(hint:)`: add the `IconPickerKitIntelligence` product and `import IconPickerKitIntelligence`, or those calls stop compiling. The `produce:` variants and supplied suggestions stay in `IconPickerKit`.
