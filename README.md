@@ -38,7 +38,7 @@ hides Color, because only SF Symbols take the tint.
 Internal to the `hksw-io` org. Add:
 
 ```swift
-.package(url: "https://github.com/hksw-io/iconpickerkit.git", from: "1.4.0")
+.package(url: "https://github.com/hksw-io/iconpickerkit.git", from: "1.4.1")
 ```
 
 ```swift

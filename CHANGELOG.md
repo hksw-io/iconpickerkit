@@ -6,6 +6,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-10-20
+
 ### Changed
 
 - Suggestions slide in at the top when they arrive, as in 1.3.0, instead of the picker reserving a row of placeholders while it waits. The picker assumes there are none, so with no suggestions the Suggestions group never shows. The group can wrap to a second row again, and it pushes the catalog down as it slides in; a scrolled catalog keeps its place.
