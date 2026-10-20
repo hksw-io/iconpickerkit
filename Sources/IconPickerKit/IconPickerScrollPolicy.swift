@@ -25,6 +25,25 @@ enum IconPickerScrollPolicy {
         reduceMotion ? nil : .smooth
     }
 
+    static let catalogTopSlop: CGFloat = 8
+
+    static func catalogIsAtTop(
+        offsetY: CGFloat,
+        insetTop: CGFloat,
+        slop: CGFloat = catalogTopSlop) -> Bool
+    {
+        offsetY <= insetTop + slop
+    }
+
+    /// Expand only while the catalog is still at the top. A scrolled catalog
+    /// keeps its visible identity, so an insert above it would otherwise jitter.
+    static func suggestionAppearAnimation(
+        reduceMotion: Bool,
+        catalogIsAtTop: Bool = true) -> Animation?
+    {
+        reduceMotion || !catalogIsAtTop ? nil : .smooth
+    }
+
     static func colorChromeAnimation(reduceMotion: Bool) -> Animation? {
         reduceMotion ? nil : .smooth
     }

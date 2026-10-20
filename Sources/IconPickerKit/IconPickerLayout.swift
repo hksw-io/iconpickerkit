@@ -18,12 +18,6 @@ enum IconPickerLayout {
     }
 
     static var rowCellSize: CGFloat { self.hitSize(for: 32) }
-
-    /// Columns the catalog's adaptive grid fits in `width`, so one Suggestions row never wraps.
-    static func columnCount(width: CGFloat, cellSize: CGFloat) -> Int {
-        max(1, Int((width + self.stackSpacing) / (cellSize + self.stackSpacing)))
-    }
-
     static var autofocusRowSearch: Bool {
         #if os(macOS)
         true

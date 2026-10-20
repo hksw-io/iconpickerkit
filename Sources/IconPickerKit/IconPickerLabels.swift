@@ -9,8 +9,6 @@ public struct IconPickerLabels: Equatable, Sendable {
     public var suggestions: String
     public var clear: String
     public var noIcons: String
-    /// Shown in the Suggestions row when loading ends with no usable icons after the picker settles.
-    public var noSuggestions: String
     public var groupTitles: [IconGroup: String]
     public var iconNames: [String: String]
     public var iconKeywords: [String: [String]]
@@ -26,7 +24,6 @@ public struct IconPickerLabels: Equatable, Sendable {
         suggestions: String = "Suggestions",
         clear: String = "Clear",
         noIcons: String = "No Icons",
-        noSuggestions: String = "No Suggestions",
         groupTitles: [IconGroup: String] = [:],
         iconNames: [String: String] = [:],
         iconKeywords: [String: [String]] = [:],
@@ -41,7 +38,6 @@ public struct IconPickerLabels: Equatable, Sendable {
         self.suggestions = suggestions
         self.clear = clear
         self.noIcons = noIcons
-        self.noSuggestions = noSuggestions
         self.groupTitles = groupTitles
         self.iconNames = iconNames
         self.iconKeywords = iconKeywords

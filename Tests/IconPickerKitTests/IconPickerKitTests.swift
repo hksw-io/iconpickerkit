@@ -210,7 +210,6 @@ import IconPickerKitIntelligence
     #expect(IconPickerLabels.english.search == "Search Icons")
     #expect(IconPickerLabels.english.customColor == "Custom")
     #expect(IconPickerLabels.english.suggestions == "Suggestions")
-    #expect(IconPickerLabels.english.noSuggestions == "No Suggestions")
 }
 
 @Test func customLabelsKeepCallerCopy() {
@@ -511,62 +510,29 @@ import IconPickerKitIntelligence
     #expect(IconPickerScrollPolicy.scrollAnimation(reduceMotion: false) != nil)
 }
 
-@Test func loadingRequestsReserveTheSuggestionRow() {
-    #expect(IconSuggestionRequest(hint: "French", task: nil, ready: .empty).loads)
-    #expect(IconSuggestionRequest(hint: nil, task: Task { .empty }, ready: .empty).loads)
-    #expect(!IconSuggestionRequest(hint: nil, task: nil, ready: .empty).loads)
-    #expect(!IconSuggestionRequest(hint: "  ", task: nil, ready: .empty).loads)
+@Test func suggestionAppearAnimationRespectsReduceMotion() {
+    #expect(IconPickerScrollPolicy.suggestionAppearAnimation(reduceMotion: true) == nil)
+    #expect(IconPickerScrollPolicy.suggestionAppearAnimation(reduceMotion: false) != nil)
 }
 
-@Test func onlyChangesThatKeepTheSuggestionRowAnimate() {
-    #expect(!IconSuggestionSlot.none.showsRow(hasItems: false))
-    #expect(IconSuggestionSlot.none.showsRow(hasItems: true))
-    #expect(IconSuggestionSlot.loading.showsRow(hasItems: false))
-    #expect(IconSuggestionSlot.noResults.showsRow(hasItems: false))
+@Test func suggestionAppearAnimationSkipsWhenCatalogHasScrolled() {
+    #expect(
+        IconPickerScrollPolicy.suggestionAppearAnimation(
+            reduceMotion: false,
+            catalogIsAtTop: false) == nil)
+    #expect(
+        IconPickerScrollPolicy.suggestionAppearAnimation(
+            reduceMotion: false,
+            catalogIsAtTop: true) != nil)
 }
 
-@Test func suggestionRowKeepsTheSelectionWhenItWouldBeCutOff() {
-    let items = ["a", "b", "c", "d"].map { IconItem(value: $0, name: $0) }
-    #expect(items.prefix(2, keeping: "d").map(\.value) == ["a", "d"])
-    #expect(items.prefix(2, keeping: "b").map(\.value) == ["a", "b"])
-    #expect(items.prefix(2, keeping: "z").map(\.value) == ["a", "b"])
-    #expect(items.prefix(0, keeping: "d").isEmpty)
+@Test func catalogAtTopAccountsForInset() {
+    #expect(IconPickerScrollPolicy.catalogIsAtTop(offsetY: 0, insetTop: 0))
+    #expect(IconPickerScrollPolicy.catalogIsAtTop(offsetY: 8, insetTop: 0))
+    #expect(!IconPickerScrollPolicy.catalogIsAtTop(offsetY: 40, insetTop: 0))
+    #expect(IconPickerScrollPolicy.catalogIsAtTop(offsetY: 20, insetTop: 16))
+    #expect(!IconPickerScrollPolicy.catalogIsAtTop(offsetY: 32, insetTop: 16))
 }
-
-@Test func lateEmptySuggestionsKeepTheRowSoTheCatalogDoesNotMove() {
-    let late = IconSuggestionSlot.settle
-    let quick = IconSuggestionSlot.settle - .milliseconds(1)
-    let found = IconSuggestions(items: [.init(value: "folder", name: "Folder")])
-    #expect(IconSuggestionSlot.after(.empty, loads: true, waited: late) == .noResults)
-    #expect(IconSuggestionSlot.after(.empty, loads: true, waited: quick) == .none)
-    #expect(IconSuggestionSlot.after(.empty, loads: false, waited: late) == .none)
-    #expect(IconSuggestionSlot.after(found, loads: true, waited: late) == .none)
-}
-
-#if os(macOS)
-@Test @MainActor func suggestionRowColumnCountMatchesTheAdaptiveCatalogGrid() {
-    // The Suggestions row shows `columnCount` icons; one more must wrap, or the row would grow.
-    func rows(width: CGFloat, cell: CGFloat, items: Int) -> Int {
-        let spacing = IconPickerLayout.stackSpacing
-        let grid = LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: cell, maximum: cell * 1.4), spacing: spacing)],
-            spacing: spacing)
-        {
-            ForEach(0..<items, id: \.self) { _ in Color.clear.frame(width: cell, height: cell) }
-        }
-        .frame(width: width)
-        let height = NSHostingView(rootView: grid).fittingSize.height
-        return Int(((height + spacing) / (cell + spacing)).rounded())
-    }
-    for cell: CGFloat in [44, 53, 61, 88] {
-        for width: CGFloat in [40, 88, 311, 343, 370, 498, 704, 1000] {
-            let count = IconPickerLayout.columnCount(width: width, cellSize: cell)
-            #expect(rows(width: width, cell: cell, items: count) == 1, "cell \(cell) width \(width)")
-            #expect(rows(width: width, cell: cell, items: count + 1) == 2, "cell \(cell) width \(width)")
-        }
-    }
-}
-#endif
 
 @Test func macFullPickerUsesShortFormPolicy() {
     #if os(macOS)

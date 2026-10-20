@@ -23,8 +23,8 @@ public struct IconPickerView: View {
     @State private var debounce = SearchDebounce()
     @State private var origin = ContinuousClock.now
     @State private var suggestions = IconSuggestions.empty
-    @State private var suggestionSlot = IconSuggestionSlot.none
     @State private var userHasScrolled = false
+    @State private var catalogIsAtTop = true
     @State private var scrollPosition = ScrollPosition(edge: .top)
     @State private var selectionVisibility = IconPickerSelectionVisibility()
 
@@ -90,9 +90,6 @@ public struct IconPickerView: View {
         self.readySuggestions = .empty
         self.labels = labels
         self._suggestions = State(initialValue: .empty)
-        // Reserve the row on the first frame so arrival fills it instead of pushing the catalog down.
-        let request = IconSuggestionRequest(hint: hint, task: suggestions, ready: .empty)
-        self._suggestionSlot = State(initialValue: request.loads ? .loading : .none)
     }
 
     /// Creates a picker whose Suggestions group is already populated.
@@ -156,23 +153,23 @@ public struct IconPickerView: View {
                 self.userHasScrolled = true
             }
         }
+        .onScrollGeometryChange(for: Bool.self) { geometry in
+            IconPickerScrollPolicy.catalogIsAtTop(
+                offsetY: geometry.contentOffset.y,
+                insetTop: geometry.contentInsets.top)
+        } action: { _, atTop in
+            self.catalogIsAtTop = atTop
+        }
     }
 
     private func applySuggestions(_ request: IconSuggestionRequest) async {
-        let start = ContinuousClock.now
-        if request.loads, self.suggestions.isEmpty {
-            self.suggestionSlot = .loading
-        }
-        guard let loaded = await request.value(produce: self.produce) else { return }
-        let slot = IconSuggestionSlot.after(loaded, loads: request.loads, waited: ContinuousClock.now - start)
-        guard loaded != self.suggestions || slot != self.suggestionSlot else { return }
-        // Only a change that keeps the row on screen animates, as a crossfade. Adding or
-        // removing the row stays instant, so a scrolled catalog keeps its place.
-        let rowStays =
-            self.suggestionSlot.showsRow(hasItems: !self.suggestions.isEmpty) && slot.showsRow(hasItems: !loaded.isEmpty)
-        withAnimation(rowStays ? .smooth : nil) {
+        guard let loaded = await request.value(produce: self.produce), loaded != self.suggestions else { return }
+        withAnimation(
+            IconPickerScrollPolicy.suggestionAppearAnimation(
+                reduceMotion: self.reduceMotion,
+                catalogIsAtTop: self.catalogIsAtTop)
+        ) {
             self.suggestions = loaded
-            self.suggestionSlot = slot
         }
     }
 
@@ -236,7 +233,6 @@ public struct IconPickerView: View {
             suggestions: self.suggestions.items,
             labels: self.labels)
         let suggestion = sections.first { $0.group == .suggestions }
-        let slot = self.debounce.applied.isEmpty ? self.suggestionSlot : .none
         return LazyVStack(
             alignment: .leading,
             spacing: IconPickerLayout.sectionSpacing,
@@ -245,21 +241,21 @@ public struct IconPickerView: View {
             if sections.isEmpty {
                 IconPickerEmptyState(query: self.debounce.applied, noIcons: self.labels.noIcons)
             }
-            if slot.showsRow(hasItems: suggestion != nil) {
+            if let suggestion {
                 Section {
-                    self.suggestionRow(suggestion?.items ?? [], slot: slot)
+                    self.sectionGrid(suggestion)
                 } header: {
-                    // An empty heading while loading would read as a group with nothing in it.
-                    self.sectionHeader(self.labels.title(for: .suggestions))
-                        .accessibilityHidden(suggestion == nil && slot == .loading)
+                    self.sectionHeader(suggestion)
                 }
-                .id(IconGroup.suggestions.id)
+                .id(suggestion.id)
+                .clipped()
+                .transition(IconPickerExpand.vertical(reduceMotion: self.reduceMotion))
             }
             ForEach(sections.filter { $0.group != .suggestions }) { section in
                 Section {
                     self.sectionGrid(section)
                 } header: {
-                    self.sectionHeader(section.title)
+                    self.sectionHeader(section)
                 }
                 .id(section.id)
             }
@@ -268,8 +264,8 @@ public struct IconPickerView: View {
         .scrollTargetLayout()
     }
 
-    private func sectionHeader(_ title: String) -> some View {
-        Text(title)
+    private func sectionHeader(_ section: IconSection) -> some View {
+        Text(section.title)
             .font(.subheadline)
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -287,39 +283,6 @@ public struct IconPickerView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, IconPickerLayout.catalogInset)
-    }
-
-    /// One row of the catalog grid in every state: placeholders, icons, or a no-results note.
-    private func suggestionRow(_ items: [IconItem], slot: IconSuggestionSlot) -> some View {
-        GeometryReader { proxy in
-            let count = IconPickerLayout.columnCount(width: proxy.size.width, cellSize: self.cellSize)
-            if items.isEmpty, slot == .noResults {
-                Text(self.labels.noSuggestions)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            } else {
-                LazyVGrid(columns: self.columns, spacing: IconPickerLayout.stackSpacing) {
-                    if items.isEmpty {
-                        ForEach(0..<min(count, IconSuggestionSlot.placeholderCount), id: \.self) { _ in
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(.quaternary)
-                                .frame(width: self.cellFont, height: self.cellFont)
-                                .frame(width: self.cellSize, height: self.cellSize)
-                        }
-                        .accessibilityHidden(true)
-                    } else {
-                        ForEach(items.prefix(count, keeping: self.icon)) { item in
-                            self.iconButton(item)
-                                .id(item.value)
-                        }
-                    }
-                }
-            }
-        }
-        .frame(height: self.cellSize)
         .padding(.horizontal, IconPickerLayout.catalogInset)
     }
 
