@@ -163,7 +163,21 @@ public struct IconPickerView: View {
             text: self.$query,
             prompt: self.labels.search,
             clearLabel: self.labels.clear)
-            .padding(.horizontal, IconPickerLayout.horizontalInset)
+        {
+            if let pick = IconCatalog.submitPick(self.query, in: self.sections) {
+                self.icon = pick
+            }
+        }
+        .padding(.horizontal, IconPickerLayout.horizontalInset)
+    }
+
+    private var sections: [IconSection] {
+        IconCatalog.search(
+            self.query,
+            catalog: self.catalog,
+            suggestions: self.suggestions.items,
+            labels: self.labels,
+            selected: self.openedWith)
     }
 
     private var colorSection: some View {
@@ -182,12 +196,7 @@ public struct IconPickerView: View {
     }
 
     private var catalogList: some View {
-        let sections = IconCatalog.search(
-            self.query,
-            catalog: self.catalog,
-            suggestions: self.suggestions.items,
-            labels: self.labels,
-            selected: self.openedWith)
+        let sections = self.sections
         let suggestion = sections.first { $0.group == .suggestions }
         return LazyVStack(
             alignment: .leading,

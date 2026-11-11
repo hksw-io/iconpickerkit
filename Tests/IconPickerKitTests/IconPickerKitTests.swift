@@ -169,6 +169,14 @@ extension IconPickerLabels {
     #expect(items.allSatisfy { $0.matches(query) })
 }
 
+@Test func returnPicksTheFirstSearchResult() {
+    let sections = IconCatalog.search("dog", labels: .fixture)
+    #expect(sections.first?.items.first != nil)
+    #expect(IconCatalog.submitPick("dog", in: sections) == sections.first?.items.first?.value)
+    #expect(IconCatalog.submitPick("  ", in: IconCatalog.search("  ", labels: .fixture)) == nil)
+    #expect(IconCatalog.submitPick("zzzznotanicon", in: []) == nil)
+}
+
 @Test func mixedCatalogSearchMissIsEmpty() {
     #expect(IconCatalog.search("zzzznotanicon", labels: .fixture).isEmpty)
 }
@@ -295,7 +303,8 @@ extension IconPickerLabels {
         text: .constant(""),
         prompt: "Search Icons",
         autofocus: true,
-        clearLabel: "Clear")
+        clearLabel: "Clear",
+        onSubmit: {})
     #expect(field.autofocus)
 }
 

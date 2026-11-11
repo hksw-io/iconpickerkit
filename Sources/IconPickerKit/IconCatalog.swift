@@ -131,6 +131,11 @@ public enum IconCatalog {
         }
     }
 
+    /// What Return picks in the search field: the first result. An empty query picks nothing.
+    static func submitPick(_ query: String, in sections: [IconSection]) -> String? {
+        query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : sections.first?.items.first?.value
+    }
+
     private static func emojiItem(_ item: EmojiItem) -> IconItem {
         IconItem(value: item.emoji, name: item.name, keywords: item.keywords)
     }

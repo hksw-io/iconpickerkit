@@ -6,6 +6,10 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Return in the search field picks the first result, and in `IconPickerRow` also closes the popover, so the Mac row works from the keyboard.
+
 ### Changed
 
 - **Breaking.** The kit ships no strings; every one comes from the app. `labels:` is required on `IconPickerView`, `IconPickerRow`, and the `IconCatalog` functions, and `IconPickerLabels` has no defaults for `color`, `icon`, `search`, `clear`, or `noIcons`. Group titles come from `groupTitle`, a closure over `IconGroup` that also names Suggestions, replacing `groupTitles` and `suggestions`. Color names come from `colorName`, a closure over `IconPickerColor`, replacing `colorNames`. `iconNames` and `iconKeywords` still override the catalog's built-in English icon metadata. `IconPickerLabels` is no longer `Equatable`.

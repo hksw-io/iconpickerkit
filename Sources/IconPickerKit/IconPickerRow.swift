@@ -126,6 +126,12 @@ private struct IconPickerRowCatalog: View {
                 prompt: self.labels.search,
                 autofocus: IconPickerLayout.autofocusRowSearch,
                 clearLabel: self.labels.clear)
+            {
+                if let pick = IconCatalog.submitPick(self.query, in: sections) {
+                    self.icon = pick
+                    self.isPresented = false
+                }
+            }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: IconPickerLayout.stackSpacing) {
                     if sections.isEmpty {

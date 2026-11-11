@@ -90,6 +90,7 @@ struct EditItemView: View {
 One mixed catalog, grouped by meaning. The default order is Work, Home, Health, Places, Nature,
 Objects, Activity, People, Symbols, Food, Smileys, Animals: tintable symbol groups first,
 emoji-heavy groups last. Search Icons filters every group in the current catalog as you type.
+Return picks the first result, and in `IconPickerRow` also closes the popover.
 
 Pass `catalog` to choose which groups appear and in what order. Smileys first, say:
 

@@ -5,6 +5,8 @@ struct IconPickerSearchField: View {
     var prompt: String
     var autofocus: Bool = false
     var clearLabel: String
+    /// Return in the field.
+    var onSubmit: () -> Void
     @FocusState private var focused: Bool
 
     var body: some View {
@@ -18,6 +20,7 @@ struct IconPickerSearchField: View {
                 .padding(.vertical, 6)
                 .textFieldStyle(.plain)
                 .autocorrectionDisabled()
+                .onSubmit(self.onSubmit)
 #if os(iOS)
                 .textInputAutocapitalization(.never)
 #endif
