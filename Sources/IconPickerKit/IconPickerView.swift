@@ -17,8 +17,6 @@ public struct IconPickerView: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var query = ""
-    @State private var debounce = SearchDebounce()
-    @State private var origin = ContinuousClock.now
     @State private var suggestions = IconSuggestions.empty
     @State private var userHasScrolled = false
     @State private var catalogIsAtTop = true
@@ -159,8 +157,6 @@ public struct IconPickerView: View {
     private var search: some View {
         IconPickerSearchField(
             text: self.$query,
-            debounce: self.$debounce,
-            origin: self.origin,
             prompt: self.labels.search,
             clearLabel: self.labels.clear)
             .padding(.horizontal, IconPickerLayout.horizontalInset)
@@ -183,7 +179,7 @@ public struct IconPickerView: View {
 
     private var catalogList: some View {
         let sections = IconCatalog.search(
-            self.debounce.applied,
+            self.query,
             catalog: self.catalog,
             suggestions: self.suggestions.items,
             labels: self.labels)
@@ -194,7 +190,7 @@ public struct IconPickerView: View {
             pinnedViews: .sectionHeaders)
         {
             if sections.isEmpty {
-                IconPickerEmptyState(query: self.debounce.applied, noIcons: self.labels.noIcons)
+                IconPickerEmptyState(query: self.query, noIcons: self.labels.noIcons)
             }
             if let suggestion {
                 Section {

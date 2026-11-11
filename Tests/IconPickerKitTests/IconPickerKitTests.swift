@@ -67,18 +67,6 @@ import IconPickerKitIntelligence
     #expect(sections.map(\.group) == [.home, .work])
 }
 
-@Test func debounceAppliesLatestQueryAfterPause() {
-    var debounce = SearchDebounce(interval: .milliseconds(250))
-    debounce.push("d", at: .milliseconds(0))
-    debounce.push("do", at: .milliseconds(10))
-    debounce.push("dog", at: .milliseconds(20))
-    debounce.flush(at: .milliseconds(20))
-    #expect(debounce.applied != "d")
-    #expect(debounce.applied != "do")
-    debounce.flush(at: .milliseconds(270))
-    #expect(debounce.applied == "dog")
-}
-
 @Test func classifyEmoji() {
     #expect(IconKind.classify("🐶") == .emoji)
 }
@@ -319,8 +307,6 @@ import IconPickerKitIntelligence
 @Test @MainActor func popoverSearchAutofocuses() {
     let field = IconPickerSearchField(
         text: .constant(""),
-        debounce: .constant(SearchDebounce()),
-        origin: .now,
         prompt: "Search Icons",
         autofocus: true)
     #expect(field.autofocus)

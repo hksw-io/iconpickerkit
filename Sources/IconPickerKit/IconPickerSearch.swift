@@ -2,8 +2,6 @@ import SwiftUI
 
 struct IconPickerSearchField: View {
     @Binding var text: String
-    @Binding var debounce: SearchDebounce
-    var origin: ContinuousClock.Instant
     var prompt: String
     var autofocus: Bool = false
     var clearLabel: String = "Clear"
@@ -47,14 +45,6 @@ struct IconPickerSearchField: View {
             if self.autofocus {
                 self.focused = true
             }
-        }
-        .onChange(of: self.text) { _, new in
-            self.debounce.push(new, at: ContinuousClock.now - self.origin)
-        }
-        .task(id: self.text) {
-            try? await Task.sleep(for: self.debounce.interval)
-            guard !Task.isCancelled else { return }
-            self.debounce.flush(at: ContinuousClock.now - self.origin)
         }
     }
 }

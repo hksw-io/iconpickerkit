@@ -6,8 +6,13 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Search filters on every keystroke. The 250 ms debounce is gone: filtering the whole catalog takes about 2 ms, so the pause only delayed results.
+
 ### Removed
 
+- **Breaking.** `SearchDebounce`, which only the search field used.
 - **Breaking.** API that no app called:
   - `IconPickerView(suggestions:)` taking a `Task`, and `IconSuggestions.preload(hint:)` and `preload(hint:produce:)`. Pass `hint:`, or await `IconSuggestions.load` and pass the result as `suggestions:`.
   - `allowsCustomColor` on both pickers, with `IconPickerLabels.customColor` and `IconPickerColor.custom(_:)`, `customID`, and `isCustom`.

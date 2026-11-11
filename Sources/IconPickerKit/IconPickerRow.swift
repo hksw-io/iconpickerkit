@@ -12,8 +12,6 @@ public struct IconPickerRow: View {
 
     @State private var showingCatalog = false
     @State private var query = ""
-    @State private var debounce = SearchDebounce()
-    @State private var origin = ContinuousClock.now
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
@@ -108,19 +106,17 @@ public struct IconPickerRow: View {
     }
 
     private var catalogPopover: some View {
-        let sections = IconCatalog.search(self.debounce.applied, labels: self.labels)
+        let sections = IconCatalog.search(self.query, labels: self.labels)
         return VStack(spacing: IconPickerLayout.stackSpacing) {
             IconPickerSearchField(
                 text: self.$query,
-                debounce: self.$debounce,
-                origin: self.origin,
                 prompt: self.labels.search,
                 autofocus: IconPickerLayout.autofocusRowSearch,
                 clearLabel: self.labels.clear)
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: IconPickerLayout.stackSpacing) {
                     if sections.isEmpty {
-                        IconPickerEmptyState(query: self.debounce.applied, noIcons: self.labels.noIcons)
+                        IconPickerEmptyState(query: self.query, noIcons: self.labels.noIcons)
                     }
                     ForEach(sections) { section in
                         self.section(section)
