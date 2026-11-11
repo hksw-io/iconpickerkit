@@ -42,7 +42,7 @@ public struct IconPickerView: View {
         colors: [IconPickerColor] = IconPickerColor.all,
         catalog: IconCatalogPreset = .all,
         suggestions: IconSuggestions = .empty,
-        labels: IconPickerLabels = .english)
+        labels: IconPickerLabels)
     {
         self.init(
             icon: icon,
@@ -177,7 +177,7 @@ public struct IconPickerView: View {
                 color: self.$color,
                 colors: self.colors,
                 swatchSize: IconPickerLayout.swatchSize,
-                colorNames: self.labels.colorNames)
+                colorName: self.labels.colorName)
         }
     }
 

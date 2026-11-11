@@ -6,13 +6,23 @@ import Testing
 @testable import IconPickerKit
 import IconPickerKitIntelligence
 
+extension IconPickerLabels {
+    /// English stand-ins for the strings an app passes. The kit has none of its own.
+    static let fixture = IconPickerLabels(
+        color: "Color",
+        icon: "Icon",
+        search: "Search Icons",
+        clear: "Clear",
+        noIcons: "No Icons",
+        groupTitle: { $0.rawValue.capitalized },
+        colorName: { $0.id.capitalized })
+}
+
 @Test func localizedCatalogNamesAndKeywordsPreserveIdentifiersAndHeadings() {
-    let labels = IconPickerLabels(
-        clear: "Rensa",
-        groupTitles: [.home: "Hem"],
-        iconNames: ["folder": "Mapp"],
-        iconKeywords: ["folder": ["dokument"]],
-        colorNames: ["blue": "Blå"])
+    var labels = IconPickerLabels.fixture
+    labels.groupTitle = { $0 == .home ? "Hem" : $0.rawValue }
+    labels.iconNames = ["folder": "Mapp"]
+    labels.iconKeywords = ["folder": ["dokument"]]
     let sections = IconCatalog.search("DOKUMENT", catalog: IconCatalogPreset(groups: [.home]), labels: labels)
     #expect(sections.first?.title == "Hem")
     #expect(sections.first?.items.first?.value == "folder")
@@ -25,9 +35,9 @@ import IconPickerKitIntelligence
 
 @Test func searchTrimsQueriesWithoutAddingExcludedGroups() {
     let catalog = IconCatalogPreset(groups: [.home])
-    #expect(IconCatalog.search(" ", catalog: catalog).map(\.group) == [.home])
-    #expect(IconCatalog.search("  folder  ", catalog: catalog).flatMap(\.items).contains { $0.value == "folder" })
-    #expect(IconCatalog.search("book", catalog: catalog).isEmpty)
+    #expect(IconCatalog.search(" ", catalog: catalog, labels: .fixture).map(\.group) == [.home])
+    #expect(IconCatalog.search("  folder  ", catalog: catalog, labels: .fixture).flatMap(\.items).contains { $0.value == "folder" })
+    #expect(IconCatalog.search("book", catalog: catalog, labels: .fixture).isEmpty)
     #expect(IconItem(value: "folder", name: "Böcker").matches("BOCKER"))
 }
 
@@ -66,7 +76,7 @@ import IconPickerKitIntelligence
 }
 
 @Test func repeatedGroupsAppearOnce() {
-    let sections = IconCatalog.sections(catalog: IconCatalogPreset(groups: [.home, .work, .home]))
+    let sections = IconCatalog.sections(catalog: IconCatalogPreset(groups: [.home, .work, .home]), labels: .fixture)
     #expect(sections.map(\.group) == [.home, .work])
 }
 
@@ -92,18 +102,8 @@ import IconPickerKitIntelligence
 }
 
 @Test @MainActor func publicPickerCompiles() {
-    _ = IconPickerView(icon: .constant("folder"), color: .constant(.blue))
-    _ = IconPickerView(icon: .constant("🐶"), color: .constant(.blue))
-}
-
-@Test func primarySwatchNameIsLabel() {
-    #expect(IconPickerColor.primary.name == "Label")
-}
-
-@Test func customColorKeepsCallerIdentity() {
-    let brand = IconPickerColor(id: "brand", name: "Brand", color: .indigo)
-    #expect(brand.id == "brand")
-    #expect(brand.name == "Brand")
+    _ = IconPickerView(icon: .constant("folder"), color: .constant(.blue), labels: .fixture)
+    _ = IconPickerView(icon: .constant("🐶"), color: .constant(.blue), labels: .fixture)
 }
 
 @Test func defaultPaletteIncludesBlue() {
@@ -115,54 +115,22 @@ import IconPickerKitIntelligence
 }
 
 @Test @MainActor func pickerAcceptsCustomPalette() {
-    let brand = IconPickerColor(id: "brand", name: "Brand", color: .indigo)
+    let brand = IconPickerColor(id: "brand", color: .indigo)
     _ = IconPickerView(
         icon: .constant("folder"),
         color: .constant(brand),
-        colors: [brand, .blue])
-}
-
-@Test func englishLabelsAreTheDefaults() {
-    #expect(IconPickerLabels.english.color == "Color")
-    #expect(IconPickerLabels.english.icon == "Icon")
-    #expect(IconPickerLabels.english.search == "Search Icons")
-    #expect(IconPickerLabels.english.suggestions == "Suggestions")
-}
-
-@Test func customLabelsKeepCallerCopy() {
-    let labels = IconPickerLabels(
-        color: "Färg",
-        icon: "Ikon",
-        search: "Sök")
-    #expect(labels.color == "Färg")
-    #expect(labels.icon == "Ikon")
-    #expect(labels.search == "Sök")
-    #expect(labels.clear == "Clear")
-}
-
-@Test @MainActor func pickerAcceptsLabels() {
-    _ = IconPickerView(
-        icon: .constant("folder"),
-        color: .constant(.blue),
-        labels: IconPickerLabels(color: "Färg", search: "Sök"))
+        colors: [brand, .blue],
+        labels: .fixture)
 }
 
 @Test @MainActor func inlineRowCompiles() {
-    _ = IconPickerRow(icon: .constant("folder"), color: .constant(.blue))
-    _ = IconPickerRow(icon: .constant("🐶"), color: .constant(.blue))
-}
-
-@Test @MainActor func inlineRowAcceptsPaletteAndLabels() {
-    _ = IconPickerRow(
-        icon: .constant("🐶"),
-        color: .constant(.blue),
-        colors: [.blue, .red],
-        labels: IconPickerLabels(color: "Färg"))
+    _ = IconPickerRow(icon: .constant("folder"), color: .constant(.blue), labels: .fixture)
+    _ = IconPickerRow(icon: .constant("🐶"), color: .constant(.blue), labels: .fixture)
 }
 
 @Test @MainActor func pickerStoresCallerCatalog() {
     let catalog = IconCatalogPreset(groups: [.home, .smileys])
-    let view = IconPickerView(icon: .constant("folder"), color: .constant(.blue), catalog: catalog)
+    let view = IconPickerView(icon: .constant("folder"), color: .constant(.blue), catalog: catalog, labels: .fixture)
     #expect(view.catalog == catalog)
 }
 
@@ -185,7 +153,7 @@ import IconPickerKitIntelligence
 }
 
 @Test func mixedCatalogIdleHasNamedSectionsAndBothKinds() {
-    let sections = IconCatalog.search("")
+    let sections = IconCatalog.search("", labels: .fixture)
     #expect(sections.count > 1)
     let values = sections.flatMap(\.items).map(\.value)
     #expect(values.contains { $0.isEmoji })
@@ -195,55 +163,55 @@ import IconPickerKitIntelligence
 
 @Test func mixedCatalogSearchHitMatchesNameKeywordsOrId() {
     let query = "dog"
-    let items = IconCatalog.search(query).flatMap(\.items)
+    let items = IconCatalog.search(query, labels: .fixture).flatMap(\.items)
     #expect(!items.isEmpty)
     #expect(items.allSatisfy { $0.matches(query) })
 }
 
 @Test func mixedCatalogSearchMissIsEmpty() {
-    #expect(IconCatalog.search("zzzznotanicon").isEmpty)
+    #expect(IconCatalog.search("zzzznotanicon", labels: .fixture).isEmpty)
 }
 
 @Test func mixedCatalogAssignsEveryBuiltInSymbol() {
     let assigned = Set(
-        IconCatalog.sections().flatMap(\.items).map(\.value).filter { !$0.isEmoji })
+        IconCatalog.sections(labels: .fixture).flatMap(\.items).map(\.value).filter { !$0.isEmoji })
     #expect(assigned == Set(SymbolCatalog.ids))
 }
 
 @Test func catalogSectionContainsKnownSymbol() {
-    let section = IconCatalog.section(containing: "folder")
+    let section = IconCatalog.section(containing: "folder", labels: .fixture)
     #expect(section?.items.contains { $0.value == "folder" } == true)
 }
 
 @Test func catalogSectionContainsKnownEmoji() {
-    let section = IconCatalog.section(containing: "🐶")
+    let section = IconCatalog.section(containing: "🐶", labels: .fixture)
     #expect(section?.items.contains { $0.value == "🐶" } == true)
 }
 
 @Test func catalogSectionMissIsNil() {
-    #expect(IconCatalog.section(containing: "zzzznotanicon") == nil)
+    #expect(IconCatalog.section(containing: "zzzznotanicon", labels: .fixture) == nil)
 }
 
 @Test func selectedIconOutsideTheCatalogLeadsTheFirstGroup() {
     let catalog = IconCatalogPreset(groups: [.home, .work])
-    let plain = IconCatalog.sections(catalog: catalog)
+    let plain = IconCatalog.sections(catalog: catalog, labels: .fixture)
     let sections = IconCatalog.sections(
-        catalog: catalog, suggestions: [.init(value: "🥖", name: "🥖")], selected: "🇫🇷")
+        catalog: catalog, suggestions: [.init(value: "🥖", name: "🥖")], labels: .fixture, selected: "🇫🇷")
     #expect(sections.map(\.group) == [.suggestions, .home, .work])
     #expect(sections[1].items.map(\.value) == ["🇫🇷"] + plain[0].items.map(\.value))
     #expect(sections[2] == plain[1])
-    #expect(IconCatalog.section(containing: "🇫🇷", catalog: catalog)?.group == .home)
-    #expect(IconCatalog.sections(catalog: catalog, selected: "folder") == plain)
-    #expect(IconCatalog.sections(catalog: catalog, selected: "not an icon") == plain)
+    #expect(IconCatalog.section(containing: "🇫🇷", catalog: catalog, labels: .fixture)?.group == .home)
+    #expect(IconCatalog.sections(catalog: catalog, labels: .fixture, selected: "folder") == plain)
+    #expect(IconCatalog.sections(catalog: catalog, labels: .fixture, selected: "not an icon") == plain)
 }
 
 @Test func catalogRespectsGroupOrder() {
-    let sections = IconCatalog.sections(catalog: IconCatalogPreset(groups: [.work, .smileys]))
+    let sections = IconCatalog.sections(catalog: IconCatalogPreset(groups: [.work, .smileys]), labels: .fixture)
     #expect(sections.map(\.group) == [.work, .smileys])
 }
 
 @Test func defaultCatalogLeadsWithTintableGroups() {
-    let groups = IconCatalog.sections(catalog: .all).map(\.group)
+    let groups = IconCatalog.sections(catalog: .all, labels: .fixture).map(\.group)
     let tintable: Set<IconGroup> = [.work, .home, .health, .places, .nature]
     let emojiHeavy: Set<IconGroup> = [.smileys, .animals, .food]
     let lastTintable = groups.lastIndex { tintable.contains($0) }
@@ -254,12 +222,12 @@ import IconPickerKitIntelligence
 }
 
 @Test func catalogOmitsUnlistedGroups() {
-    let sections = IconCatalog.sections(catalog: IconCatalogPreset(groups: [.home]))
+    let sections = IconCatalog.sections(catalog: IconCatalogPreset(groups: [.home]), labels: .fixture)
     #expect(sections.allSatisfy { $0.group == .home })
 }
 
 @Test func searchPreservesCallerGroupOrder() {
-    let sections = IconCatalog.search("a", catalog: IconCatalogPreset(groups: [.work, .smileys, .home]))
+    let sections = IconCatalog.search("a", catalog: IconCatalogPreset(groups: [.work, .smileys, .home]), labels: .fixture)
     let order = sections.map(\.group)
     #expect(order == order.sorted { lhs, rhs in
         let rank: [IconGroup] = [.work, .smileys, .home]
@@ -270,30 +238,30 @@ import IconPickerKitIntelligence
 @Test func cannedSuggestionsAppearAheadOfRegularGroups() async {
     let loaded = await IconSuggestions.load(hint: "French") { _ in ["🇫🇷", "flag"] }
     #expect(loaded.items.map(\.value) == ["🇫🇷", "flag"])
-    let sections = IconCatalog.sections(suggestions: loaded.items)
+    let sections = IconCatalog.sections(suggestions: loaded.items, labels: .fixture)
     #expect(sections.first?.group == .suggestions)
     #expect(sections.first?.items.map(\.value) == ["🇫🇷", "flag"])
     #expect(sections.dropFirst().first?.group != .suggestions)
-    #expect(IconCatalog.section(containing: "🇫🇷", suggestions: loaded.items)?.group == .suggestions)
+    #expect(IconCatalog.section(containing: "🇫🇷", suggestions: loaded.items, labels: .fixture)?.group == .suggestions)
 }
 
 @Test func emptyHintYieldsNoExtraGroup() async {
     let loaded = await IconSuggestions.load(hint: "   ") { _ in ["🇫🇷"] }
     #expect(loaded.isEmpty)
-    #expect(IconCatalog.sections(suggestions: loaded.items).first?.group != .suggestions)
+    #expect(IconCatalog.sections(suggestions: loaded.items, labels: .fixture).first?.group != .suggestions)
 }
 
 @Test func unavailableSuggestionsYieldNoExtraGroup() async {
     let loaded = await IconSuggestions.load(hint: "French") { _ in [] }
     #expect(loaded.isEmpty)
-    #expect(IconCatalog.sections(suggestions: loaded.items).first?.group != .suggestions)
+    #expect(IconCatalog.sections(suggestions: loaded.items, labels: .fixture).first?.group != .suggestions)
 }
 
 @Test func failedSuggestionsYieldNoExtraGroup() async {
     struct Boom: Error {}
     let loaded = await IconSuggestions.load(hint: "French") { _ in throw Boom() }
     #expect(loaded.isEmpty)
-    #expect(IconCatalog.sections(suggestions: loaded.items).first?.group != .suggestions)
+    #expect(IconCatalog.sections(suggestions: loaded.items, labels: .fixture).first?.group != .suggestions)
 }
 
 @Test func unusableSuggestionsYieldNoExtraGroup() async {
@@ -301,7 +269,7 @@ import IconPickerKitIntelligence
         ["hello", "not an icon", "🇫🇷🥖", ""]
     }
     #expect(loaded.isEmpty)
-    #expect(IconCatalog.sections(suggestions: loaded.items).first?.group != .suggestions)
+    #expect(IconCatalog.sections(suggestions: loaded.items, labels: .fixture).first?.group != .suggestions)
 }
 
 @Test @MainActor func pickerAcceptsFinishedSuggestionsWithoutRunningBody() async {
@@ -309,22 +277,24 @@ import IconPickerKitIntelligence
     let view = IconPickerView(
         icon: .constant("folder"),
         color: .constant(.blue),
-        suggestions: loaded)
-    let sections = IconCatalog.sections(suggestions: view.readySuggestions.items)
+        suggestions: loaded,
+        labels: .fixture)
+    let sections = IconCatalog.sections(suggestions: view.readySuggestions.items, labels: .fixture)
     #expect(view.readySuggestions.items.map(\.value) == ["🇫🇷"])
     #expect(sections.first?.group == .suggestions)
     #expect(sections.first?.items.map(\.value) == ["🇫🇷"])
 }
 
 @Test func defaultCatalogOmitsEmptySuggestionsGroup() {
-    #expect(IconCatalog.sections().allSatisfy { $0.group != .suggestions })
+    #expect(IconCatalog.sections(labels: .fixture).allSatisfy { $0.group != .suggestions })
 }
 
 @Test @MainActor func popoverSearchAutofocuses() {
     let field = IconPickerSearchField(
         text: .constant(""),
         prompt: "Search Icons",
-        autofocus: true)
+        autofocus: true,
+        clearLabel: "Clear")
     #expect(field.autofocus)
 }
 

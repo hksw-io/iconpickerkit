@@ -22,7 +22,7 @@ public struct IconPickerRow: View {
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
         colors: [IconPickerColor] = IconPickerColor.all,
-        labels: IconPickerLabels = .english)
+        labels: IconPickerLabels)
     {
         self._icon = icon
         self._color = color
@@ -58,8 +58,8 @@ public struct IconPickerRow: View {
                         color: self.$color,
                         colors: self.colors,
                         swatchSize: IconPickerLayout.rowSwatchSize,
-                        contentInset: 0,
-                        colorNames: self.labels.colorNames)
+                        colorName: self.labels.colorName,
+                        contentInset: 0)
                 }
                 .clipped()
                 .transition(IconPickerExpand.horizontal(reduceMotion: self.reduceMotion))

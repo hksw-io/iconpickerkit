@@ -85,9 +85,18 @@ private struct RowShot: View {
     @State private var color = IconPickerColor.blue
     let scheme: ColorScheme
 
+    private static let labels = IconPickerLabels(
+        color: "Color",
+        icon: "Icon",
+        search: "Search Icons",
+        clear: "Clear",
+        noIcons: "No Icons",
+        groupTitle: { $0.rawValue.capitalized },
+        colorName: { $0.id.capitalized })
+
     var body: some View {
         Form {
-            IconPickerRow(icon: self.$icon, color: self.$color)
+            IconPickerRow(icon: self.$icon, color: self.$color, labels: Self.labels)
         }
         .formStyle(.grouped)
         .preferredColorScheme(self.scheme)

@@ -4,8 +4,8 @@ struct IconColorStrip: View {
     @Binding var color: IconPickerColor
     var colors: [IconPickerColor]
     var swatchSize: CGFloat
+    var colorName: (IconPickerColor) -> String
     var contentInset: CGFloat = IconPickerLayout.horizontalInset
-    var colorNames: [String: String] = [:]
 
     var body: some View {
         let overflow = IconPickerHover.overflow(for: self.swatchSize)
@@ -23,7 +23,7 @@ struct IconColorStrip: View {
     }
 
     private func presetSwatch(_ swatch: IconPickerColor) -> some View {
-        let name = self.colorNames[swatch.id] ?? swatch.name
+        let name = self.colorName(swatch)
         let isSelected = self.color.id == swatch.id
         return Button {
             self.color = swatch

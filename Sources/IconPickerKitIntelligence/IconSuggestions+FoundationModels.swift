@@ -38,7 +38,7 @@ extension IconPickerView {
         colors: [IconPickerColor] = IconPickerColor.all,
         catalog: IconCatalogPreset = .all,
         hint: String?,
-        labels: IconPickerLabels = .english)
+        labels: IconPickerLabels)
     {
         self.init(
             icon: icon,

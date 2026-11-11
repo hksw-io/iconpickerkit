@@ -67,6 +67,18 @@ struct DemoRoot: View {
     }
 }
 
+extension IconPickerLabels {
+    /// The demo speaks English only. An app passes its localized strings, as in the README.
+    static let demo = IconPickerLabels(
+        color: "Color",
+        icon: "Icon",
+        search: "Search Icons",
+        clear: "Clear",
+        noIcons: "No Icons",
+        groupTitle: { $0.rawValue.capitalized },
+        colorName: { $0.id.capitalized })
+}
+
 private enum DemoPane: String, CaseIterable, Identifiable {
     case catalog
     case row
@@ -111,9 +123,9 @@ private struct DemoCatalogPane: View {
 
     var body: some View {
         if let hint {
-            IconPickerView(icon: self.$icon, color: self.$color, hint: hint)
+            IconPickerView(icon: self.$icon, color: self.$color, hint: hint, labels: .demo)
         } else {
-            IconPickerView(icon: self.$icon, color: self.$color, suggestions: self.suggestions)
+            IconPickerView(icon: self.$icon, color: self.$color, suggestions: self.suggestions, labels: .demo)
         }
     }
 }
@@ -124,7 +136,7 @@ private struct DemoRowPane: View {
 
     var body: some View {
         Form {
-            IconPickerRow(icon: self.$icon, color: self.$color)
+            IconPickerRow(icon: self.$icon, color: self.$color, labels: .demo)
         }
         .formStyle(.grouped)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -153,7 +165,7 @@ private struct DemoInspector: View {
             }
             Section("Selection") {
                 LabeledContent("Icon", value: self.icon)
-                LabeledContent("Color", value: self.color.name)
+                LabeledContent("Color", value: IconPickerLabels.demo.colorName(self.color))
             }
         }
         .formStyle(.grouped)

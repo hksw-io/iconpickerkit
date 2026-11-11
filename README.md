@@ -53,6 +53,9 @@ Add the `IconPickerKit` library product. Add `IconPickerKitIntelligence` too onl
 
 On iPhone and iPad, present `IconPickerView` in a sheet. Bindings update live; you own dismissal. On Mac, skip the sheet and put `IconPickerRow` in the form instead.
 
+The kit ships no strings of its own. Every picker takes `labels:`, the strings it shows and
+speaks, from your app; [Labels](#labels) shows how to build `.app` below.
+
 ```swift
 import SwiftUI
 import IconPickerKit
@@ -66,7 +69,7 @@ struct EditItemView: View {
         Button("Icon") { self.showingPicker = true }
             .sheet(isPresented: self.$showingPicker) {
                 NavigationStack {
-                    IconPickerView(icon: self.$icon, color: self.$color)
+                    IconPickerView(icon: self.$icon, color: self.$color, labels: .app)
                         .navigationTitle("Icon")
                         .toolbar {
                             ToolbarItem(placement: .confirmationAction) {
@@ -95,7 +98,8 @@ IconPickerView(
     icon: $icon,
     color: $color,
     catalog: IconCatalogPreset(
-        groups: [.smileys] + IconGroup.allCases.filter { $0 != .smileys && $0 != .suggestions }))
+        groups: [.smileys] + IconGroup.allCases.filter { $0 != .smileys && $0 != .suggestions }),
+    labels: .app)
 ```
 
 Search trims surrounding whitespace and never reaches omitted groups. A miss shows the system's
@@ -124,7 +128,7 @@ names (a deck called `"French"` can surface 🇫🇷) show as a Suggestions grou
 model is off, unavailable, or returns nothing usable, the extra group is omitted. No API key.
 
 ```swift
-IconPickerView(icon: $icon, color: $color, hint: deckName)
+IconPickerView(icon: $icon, color: $color, hint: deckName, labels: .app)
 ```
 
 To have the group there on the first frame, await a result before presenting and pass it in:
@@ -137,7 +141,7 @@ ready = await IconSuggestions.load(hint: deckName)
 showingPicker = true
 
 // in the sheet:
-IconPickerView(icon: $icon, color: $color, suggestions: ready)
+IconPickerView(icon: $icon, color: $color, suggestions: ready, labels: .app)
 ```
 
 Replacing the hint or the ready result refreshes suggestions in an already-presented picker, and
@@ -157,53 +161,93 @@ Embed the compact row in the form. A full-picker sheet is the iPhone layout.
 
 ```swift
 Form {
-    IconPickerRow(icon: self.$icon, color: self.$color)
+    IconPickerRow(icon: self.$icon, color: self.$color, labels: .app)
 }
 .formStyle(.grouped)
 ```
 
-### Palette and labels
+### Palette
 
 ```swift
-let brand = IconPickerColor(id: "brand", name: "Brand", color: .indigo)
+let brand = IconPickerColor(id: "brand", color: .indigo)
 
-IconPickerView(
-    icon: self.$icon,
-    color: self.$color,
-    colors: [.blue, brand],
-    labels: IconPickerLabels(
-        color: String(localized: "picker.color"),
-        icon: String(localized: "picker.icon"),
-        search: String(localized: "picker.search"),
-        suggestions: String(localized: "picker.suggestions")))
+IconPickerView(icon: self.$icon, color: self.$color, colors: [.blue, brand], labels: .app)
 ```
 
 `IconPickerRow` takes the same `colors` and `labels` arguments. It has no `catalog`, `hint`, or
 `suggestions`; its popover always shows every group.
 
-Localize the catalog as well as its chrome through `IconPickerLabels`. Metadata is keyed by
-stable icon values and color IDs, so changing language never changes saved selections:
+### Labels
+
+`IconPickerLabels` holds every string the picker shows or speaks, and none has a default. Build it
+once from your app's localized strings:
 
 ```swift
-let labels = IconPickerLabels(
-    color: "Färg", icon: "Ikon", search: "Sök ikoner",
-    suggestions: "Förslag", clear: "Rensa", noIcons: "Inga ikoner",
-    groupTitles: [.home: "Hem", .work: "Arbete"],
-    iconNames: ["folder": "Mapp", "📚": "Böcker"],
-    iconKeywords: ["folder": ["dokument"]],
-    colorNames: ["blue": "Blå"])
+extension IconPickerLabels {
+    static var app: IconPickerLabels {
+        IconPickerLabels(
+            color: String(localized: "Color"),
+            icon: String(localized: "Icon"),
+            search: String(localized: "Search Icons"),
+            clear: String(localized: "Clear"),
+            noIcons: String(localized: "No Icons"),
+            groupTitle: { group in
+                switch group {
+                case .work: String(localized: "Work")
+                case .home: String(localized: "Home")
+                case .health: String(localized: "Health")
+                case .places: String(localized: "Places")
+                case .nature: String(localized: "Nature")
+                case .objects: String(localized: "Objects")
+                case .activity: String(localized: "Activity")
+                case .people: String(localized: "People")
+                case .symbols: String(localized: "Symbols")
+                case .food: String(localized: "Food")
+                case .smileys: String(localized: "Smileys")
+                case .animals: String(localized: "Animals")
+                case .suggestions: String(localized: "Suggestions")
+                }
+            },
+            colorName: { color in
+                switch color.id {
+                case "red": String(localized: "Red")
+                case "orange": String(localized: "Orange")
+                case "yellow": String(localized: "Yellow")
+                case "green": String(localized: "Green")
+                case "mint": String(localized: "Mint")
+                case "blue": String(localized: "Blue")
+                case "indigo": String(localized: "Indigo")
+                case "purple": String(localized: "Purple")
+                case "pink": String(localized: "Pink")
+                default: color.id
+                }
+            })
+    }
+}
 ```
 
-Use your app's localized strings for these values. Names feed both search and VoiceOver;
-localized keywords supplement existing keywords, and raw symbol IDs remain searchable.
-The public `IconCatalog` methods also accept `labels:` and return localized section titles
-and item metadata. Missing overrides retain the English defaults. Section titles come from
-`groupTitles` (Suggestions falls back to `suggestions`).
+`color` and `icon` head the swatches and the row's icon button, `search` is the field's prompt,
+`clear` names its clear button for VoiceOver, and `noIcons` shows when the catalog is empty.
+`groupTitle` heads each group; switch over every case, so a group added later fails to compile
+until you name it. `colorName` is a swatch's tooltip and VoiceOver name: cover the ids in the
+palette you pass (`IconPickerColor.all` is the nine above).
 
-Search and classification are also public if you want the catalogs without the view:
+Icon names and search keywords are the one thing built in: the catalog carries English metadata.
+Override it by icon value, so changing language never changes a saved selection:
 
 ```swift
-let sections = IconCatalog.search("dog")  // the picker's search: mixed, trimmed, localizable
+var labels = IconPickerLabels.app
+labels.iconNames = ["folder": "Mapp", "📚": "Böcker"]
+labels.iconKeywords = ["folder": ["dokument"]]
+```
+
+Names feed both search and VoiceOver; your keywords add to the built-in ones, and raw symbol IDs
+stay searchable.
+
+Search and classification are also public if you want the catalog without the view:
+
+```swift
+let sections = IconCatalog.search("dog", labels: .app)  // the picker's search: mixed, trimmed, localized
 let kind = IconKind.classify("🐶")  // .emoji
 let tintable = IconKind.offersColorChrome(for: "folder")  // true
 ```

@@ -38,24 +38,6 @@ public enum IconGroup: String, CaseIterable, Sendable, Identifiable {
     case suggestions
 
     public var id: String { self.rawValue }
-
-    public var title: String {
-        switch self {
-        case .smileys: "Smileys"
-        case .people: "People"
-        case .animals: "Animals"
-        case .food: "Food"
-        case .activity: "Activity"
-        case .health: "Health"
-        case .work: "Work"
-        case .home: "Home"
-        case .places: "Places"
-        case .nature: "Nature"
-        case .objects: "Objects"
-        case .symbols: "Symbols"
-        case .suggestions: "Suggestions"
-        }
-    }
 }
 
 /// A meaning-themed group of mixed emoji and SF Symbols.
@@ -66,10 +48,10 @@ public struct IconSection: Identifiable, Sendable, Equatable {
     public var id: String { self.group.rawValue }
     public let title: String
 
-    public init(group: IconGroup, items: [IconItem], title: String? = nil) {
+    public init(group: IconGroup, items: [IconItem], title: String) {
         self.group = group
         self.items = items
-        self.title = title ?? group.title
+        self.title = title
     }
 }
 
@@ -94,7 +76,7 @@ public enum IconCatalog {
     public static func sections(
         catalog: IconCatalogPreset = .all,
         suggestions: [IconItem] = [],
-        labels: IconPickerLabels = .english,
+        labels: IconPickerLabels,
         selected: String = "") -> [IconSection]
     {
         var seen = Set<IconGroup>()
@@ -103,7 +85,7 @@ public enum IconCatalog {
             let (emojis, symbols) = self.content(for: group)
             let items = emojis.map(Self.emojiItem) + symbols.map(Self.symbolItem)
             return items.isEmpty ? nil : IconSection(
-                group: group, items: items.map(labels.localized), title: labels.title(for: group))
+                group: group, items: items.map(labels.localized), title: labels.groupTitle(group))
         }
         if let first = result.first,
            !result.contains(where: { $0.items.contains { $0.value == selected } }),
@@ -114,7 +96,7 @@ public enum IconCatalog {
         }
         if !suggestions.isEmpty {
             result.insert(IconSection(
-                group: .suggestions, items: suggestions.map(labels.localized), title: labels.title(for: .suggestions)), at: 0)
+                group: .suggestions, items: suggestions.map(labels.localized), title: labels.groupTitle(.suggestions)), at: 0)
         }
         return result
     }
@@ -124,7 +106,7 @@ public enum IconCatalog {
         containing value: String,
         catalog: IconCatalogPreset = .all,
         suggestions: [IconItem] = [],
-        labels: IconPickerLabels = .english) -> IconSection?
+        labels: IconPickerLabels) -> IconSection?
     {
         self.sections(catalog: catalog, suggestions: suggestions, labels: labels, selected: value)
             .first { section in
@@ -137,7 +119,7 @@ public enum IconCatalog {
         _ query: String,
         catalog: IconCatalogPreset = .all,
         suggestions: [IconItem] = [],
-        labels: IconPickerLabels = .english,
+        labels: IconPickerLabels,
         selected: String = "") -> [IconSection]
     {
         let query = query.trimmingCharacters(in: .whitespacesAndNewlines)

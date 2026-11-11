@@ -4,7 +4,7 @@ struct IconPickerSearchField: View {
     @Binding var text: String
     var prompt: String
     var autofocus: Bool = false
-    var clearLabel: String = "Clear"
+    var clearLabel: String
     @FocusState private var focused: Bool
 
     var body: some View {

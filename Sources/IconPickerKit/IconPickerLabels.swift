@@ -1,42 +1,47 @@
-/// Picker copy and catalog metadata. Pass localized strings without changing persisted IDs.
-public struct IconPickerLabels: Equatable, Sendable {
+/// Every string the picker shows or speaks. The kit ships none of its own, so pass your
+/// app's localized strings.
+///
+/// Icon names and search keywords are the exception: the catalog's built-in English
+/// metadata applies unless `iconNames` and `iconKeywords` override it. Both are keyed by
+/// icon value, so changing language never changes a saved selection.
+public struct IconPickerLabels: Sendable {
+    /// Heading of the color swatches.
     public var color: String
+    /// Heading of the row's icon button, and what VoiceOver calls that button.
     public var icon: String
+    /// Prompt in the search field.
     public var search: String
-    public var suggestions: String
+    /// What VoiceOver calls the search field's clear button.
     public var clear: String
+    /// Shown when the catalog has no groups.
     public var noIcons: String
-    public var groupTitles: [IconGroup: String]
+    /// Heading of each group, `.suggestions` included.
+    public var groupTitle: @Sendable (IconGroup) -> String
+    /// A swatch's tooltip, and what VoiceOver calls it.
+    public var colorName: @Sendable (IconPickerColor) -> String
     public var iconNames: [String: String]
     public var iconKeywords: [String: [String]]
-    public var colorNames: [String: String]
 
     public init(
-        color: String = "Color",
-        icon: String = "Icon",
-        search: String = "Search Icons",
-        suggestions: String = "Suggestions",
-        clear: String = "Clear",
-        noIcons: String = "No Icons",
-        groupTitles: [IconGroup: String] = [:],
+        color: String,
+        icon: String,
+        search: String,
+        clear: String,
+        noIcons: String,
+        groupTitle: @escaping @Sendable (IconGroup) -> String,
+        colorName: @escaping @Sendable (IconPickerColor) -> String,
         iconNames: [String: String] = [:],
-        iconKeywords: [String: [String]] = [:],
-        colorNames: [String: String] = [:])
+        iconKeywords: [String: [String]] = [:])
     {
         self.color = color
         self.icon = icon
         self.search = search
-        self.suggestions = suggestions
         self.clear = clear
         self.noIcons = noIcons
-        self.groupTitles = groupTitles
+        self.groupTitle = groupTitle
+        self.colorName = colorName
         self.iconNames = iconNames
         self.iconKeywords = iconKeywords
-        self.colorNames = colorNames
-    }
-
-    func title(for group: IconGroup) -> String {
-        self.groupTitles[group] ?? (group == .suggestions ? self.suggestions : group.title)
     }
 
     func localized(_ item: IconItem) -> IconItem {
@@ -45,6 +50,4 @@ public struct IconPickerLabels: Equatable, Sendable {
             name: self.iconNames[item.value] ?? item.name,
             keywords: item.keywords + (self.iconKeywords[item.value] ?? []))
     }
-
-    public static let english = IconPickerLabels()
 }
