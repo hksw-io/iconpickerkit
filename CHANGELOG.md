@@ -27,6 +27,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ### Fixed
 
+- The on-device model returns at most eight suggestions. The limit was only prose in the prompt; the generation schema now enforces it.
 - `IconPickerRow`'s popover opens with an empty search. The row kept the query, so the popover reopened filtered by the previous search.
 - The icon the picker opens with always has a selected cell. One the catalog doesn't list, such as an icon picked from Suggestions earlier, was in no section; it now leads the first group. `IconCatalog.sections` and `search` take `selected:` for this, and `section(containing:)` returns that first group for such an icon.
 - In the full picker the whole cell selects its icon. Only the glyph took the tap, so a tap near a cell's edge did nothing.

@@ -1,10 +1,11 @@
 #if os(macOS)
 import AppKit
 #endif
+import FoundationModels
 import SwiftUI
 import Testing
 @testable import IconPickerKit
-import IconPickerKitIntelligence
+@testable import IconPickerKitIntelligence
 
 extension IconPickerLabels {
     /// English stand-ins for the strings an app passes. The kit has none of its own.
@@ -377,6 +378,13 @@ extension IconPickerLabels {
         let overflow = IconPickerHover.overflow(for: size)
         #expect(size + 2 * overflow >= size * IconPickerHover.amount)
     }
+}
+
+@Test func modelSuggestionsAreCappedAtEightByTheSchema() throws {
+    let schema = try JSONSerialization.jsonObject(
+        with: JSONEncoder().encode(IconSuggestionDraft.generationSchema)) as? [String: Any]
+    let icons = (schema?["properties"] as? [String: Any])?["icons"] as? [String: Any]
+    #expect(icons?["maxItems"] as? Int == 8)
 }
 
 @Test func coreLibraryDoesNotImportFoundationModels() throws {

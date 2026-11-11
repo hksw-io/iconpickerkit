@@ -54,6 +54,6 @@ extension IconPickerView {
 
 @Generable
 nonisolated struct IconSuggestionDraft {
-    @Guide(description: "At most eight emoji characters or SF Symbol names")
+    @Guide(description: "Emoji characters or SF Symbol names", .maximumCount(8))
     var icons: [String]
 }
