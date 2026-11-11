@@ -21,6 +21,10 @@ All notable changes to IconPickerKit are recorded here. The format follows
   - `EmojiCatalog.search` and `EmojiCatalog.all`, `SymbolCatalog.search`, and the `groups:` overloads of `IconCatalog.sections`, `section(containing:)`, and `search`. Use `catalog: IconCatalogPreset(groups:)`.
   - `IconPickerLabels.emojis` and `symbols`, which the picker never showed.
 
+### Fixed
+
+- In the full picker the whole cell selects its icon. Only the glyph took the tap, so a tap near a cell's edge did nothing.
+
 ## [1.4.1] - 2026-10-20
 
 ### Changed

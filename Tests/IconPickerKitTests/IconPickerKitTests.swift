@@ -1,3 +1,6 @@
+#if os(macOS)
+import AppKit
+#endif
 import SwiftUI
 import Testing
 @testable import IconPickerKit
@@ -406,3 +409,41 @@ import IconPickerKitIntelligence
         #expect(!source.contains("import FoundationModels"), "\(file.lastPathComponent)")
     }
 }
+
+#if os(macOS)
+/// SwiftUI has no hit-test API, so this clicks a hosted cell in its corner, clear of the glyph.
+/// Mac only: a unit test cannot synthesize a touch on iOS.
+@Test @MainActor func fullPickerCellIsTappableOutsideItsGlyph() throws {
+    _ = NSApplication.shared
+    var taps = 0
+    let cell = IconPickerCell(
+        item: IconItem(value: "folder", name: "Folder"), isSelected: false, tint: .blue, size: 44, font: 22)
+    {
+        taps += 1
+    }
+    let window = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 44, height: 44),
+        styleMask: [.borderless],
+        backing: .buffered,
+        defer: false)
+    window.isReleasedWhenClosed = false
+    window.contentView = NSHostingView(rootView: cell)
+    // Events only reach a window that is on screen.
+    window.orderFrontRegardless()
+    defer { window.orderOut(nil) }
+    window.contentView?.layoutSubtreeIfNeeded()
+    for type in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
+        window.sendEvent(try #require(NSEvent.mouseEvent(
+            with: type,
+            location: NSPoint(x: 3, y: 3),
+            modifierFlags: [],
+            timestamp: ProcessInfo.processInfo.systemUptime,
+            windowNumber: window.windowNumber,
+            context: nil,
+            eventNumber: 0,
+            clickCount: 1,
+            pressure: type == .leftMouseDown ? 1 : 0)))
+    }
+    #expect(taps == 1)
+}
+#endif

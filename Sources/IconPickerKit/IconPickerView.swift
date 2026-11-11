@@ -247,35 +247,55 @@ public struct IconPickerView: View {
 
     private func iconButton(_ item: IconItem) -> some View {
         let isSelected = self.icon == item.value
-        return Button {
+        return IconPickerCell(
+            item: item,
+            isSelected: isSelected,
+            tint: self.color.color,
+            size: self.cellSize,
+            font: self.cellFont)
+        {
             self.icon = item.value
-        } label: {
-            ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(isSelected ? self.color.color.opacity(0.15) : Color.clear)
-                    .frame(width: self.cellSize, height: self.cellSize)
-                if item.value.isEmoji {
-                    Text(verbatim: item.value)
-                        .font(.system(size: self.cellFont))
-                } else {
-                    Image(systemName: item.value)
-                        .font(.system(size: self.cellFont))
-                        .foregroundStyle(isSelected ? self.color.color : .secondary)
-                }
-                if isSelected {
-                    RoundedRectangle(cornerRadius: 8)
-                        .strokeBorder(self.color.color, lineWidth: 2)
-                        .frame(width: self.cellSize, height: self.cellSize)
-                }
-            }
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(item.name)
-        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
         .onScrollVisibilityChange { visible in
             guard isSelected else { return }
             self.selectionVisibility.isOnScreen = visible
         }
+    }
+}
+
+/// One catalog cell in the full picker. The whole cell is the tap target, not only its glyph.
+struct IconPickerCell: View {
+    let item: IconItem
+    let isSelected: Bool
+    let tint: Color
+    let size: CGFloat
+    let font: CGFloat
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: self.action) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(self.isSelected ? self.tint.opacity(0.15) : Color.clear)
+                if self.item.value.isEmoji {
+                    Text(verbatim: self.item.value)
+                        .font(.system(size: self.font))
+                } else {
+                    Image(systemName: self.item.value)
+                        .font(.system(size: self.font))
+                        .foregroundStyle(self.isSelected ? self.tint : .secondary)
+                }
+                if self.isSelected {
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(self.tint, lineWidth: 2)
+                }
+            }
+            .frame(width: self.size, height: self.size)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(self.item.name)
+        .accessibilityAddTraits(self.isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }
 
