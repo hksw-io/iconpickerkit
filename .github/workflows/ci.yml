@@ -24,9 +24,11 @@ jobs:
         include:
           - runner: macos-26
             xcode: '26.6'
+            runtime: '26'
           # https://github.com/actions/runner-images/issues/14404
           - runner: xcode-27
             xcode: '27.0'
+            runtime: '27'
     env:
       DEVELOPER_DIR: /Applications/Xcode_${{ matrix.xcode }}.app/Contents/Developer
     steps:
@@ -37,8 +39,18 @@ jobs:
           swift --version
       - name: Test macOS
         run: swift test
-      # The aggregate package test scheme also builds the macOS-only demo and media tool.
-      # Hosted iOS interaction checks run in the native review app; this gate builds the library.
-      # The Intelligence scheme builds IconPickerKit as its dependency.
-      - name: Build iOS Simulator
-        run: xcodebuild build -scheme IconPickerKitIntelligence -destination 'generic/platform=iOS Simulator' -quiet CODE_SIGNING_ALLOWED=NO
+      - name: Test iOS Simulator
+        env:
+          RUNTIME_MAJOR: ${{ matrix.runtime }}
+        run: |
+          device=$(xcrun simctl list devices available -j | python3 -c '
+          import json, os, sys
+          devices = json.load(sys.stdin)["devices"]
+          major = os.environ["RUNTIME_MAJOR"]
+          print(next(d["udid"] for runtime, group in devices.items()
+                     if f"iOS-{major}-" in runtime
+                     for d in group if "iPhone" in d["name"]))')
+          xcodebuild test -scheme IconPickerKit-Package -destination "platform=iOS Simulator,id=$device" -quiet CODE_SIGNING_ALLOWED=NO
+      # The Mac-only demo and media tool are a nested package that nothing else builds.
+      - name: Build the demo
+        run: swift build --package-path Demo

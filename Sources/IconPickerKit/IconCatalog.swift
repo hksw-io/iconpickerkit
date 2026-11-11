@@ -147,7 +147,8 @@ public enum IconCatalog {
             keywords: id.split(separator: ".").map(String.init))
     }
 
-    private static func content(for group: IconGroup) -> ([EmojiItem], [String]) {
+    /// The one place each emoji and SF Symbol name is listed.
+    static func content(for group: IconGroup) -> ([EmojiItem], [String]) {
         switch group {
         case .smileys:
             return (EmojiCatalog.smileys, [])

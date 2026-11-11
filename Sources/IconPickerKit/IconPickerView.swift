@@ -9,10 +9,10 @@ public struct IconPickerView: View {
     @Binding private var icon: String
     @Binding private var color: IconPickerColor
     private let colors: [IconPickerColor]
-    let catalog: IconCatalogPreset
-    let hint: String?
-    let produce: @Sendable (String) async throws -> [String]
-    let readySuggestions: IconSuggestions
+    private let catalog: IconCatalogPreset
+    private let hint: String?
+    private let produce: @Sendable (String) async throws -> [String]
+    private let readySuggestions: IconSuggestions
     private let labels: IconPickerLabels
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion

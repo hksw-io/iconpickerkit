@@ -47,7 +47,7 @@ Internal to the `hksw-io` org. Add:
 
 In Xcode: **File > Add Package Dependencies…** and enter the URL above. You need access to the org.
 Add the `IconPickerKit` library product. Add `IconPickerKitIntelligence` too only if you want
-[on-device model suggestions](#suggested-icons); `IconPickerKitDemo` is a Mac-only demo app.
+[on-device model suggestions](#suggested-icons).
 
 ## Usage
 
@@ -257,24 +257,27 @@ let tintable = IconKind.offersColorChrome(for: "folder")  // true
 
 ```sh
 swift test
-swift run GenerateMedia
-./scripts/run-demo.sh
+xcodebuild test -scheme IconPickerKit-Package -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+swift run --package-path Demo GenerateMedia
+./Demo/run-demo.sh
 ```
 
-Run `swift run GenerateMedia` from the package root in a logged-in macOS session. It rewrites the
+The tests run on macOS and on the iOS Simulator. The Mac-only demo app and media tool live in
+`Demo`, a nested package that depends on this one by path, so they stay out of the iOS build.
+
+Run `swift run --package-path Demo GenerateMedia` from the repository root in a logged-in macOS
+session. It rewrites the
 `IconPickerRow` stills in `Docs/Media`, which are Mac renders. The `IconPickerView` stills and the
 demo are captured from the iOS 27.2 Simulator (iPhone 17 Pro), because a Mac render at phone width
 would not show iOS touch sizing.
 
-`./scripts/run-demo.sh` builds a real Mac app and opens it (Dock and Cmd-Tab). Catalog is the full picker with color and search pinned. Form row is the compact control. The inspector hint plus **Delay 2 seconds** starts canned suggestions after a pause so you can scroll first. **Reload** runs that again. Turn Delay off to use the on-device model.
+`./Demo/run-demo.sh` builds a real Mac app and opens it (Dock and Cmd-Tab). Catalog is the full picker with color and search pinned. Form row is the compact control. The inspector hint plus **Delay 2 seconds** starts canned suggestions after a pause so you can scroll first. **Reload** runs that again. Turn Delay off to use the on-device model.
 
 ## OS 27 compatibility
 
-The deployment minimum remains iOS 26 / macOS 26, with Swift tools 6.2. CI runs package tests
-on macOS and builds the iOS Simulator library with Xcode 26.6 and the Xcode 27.0 preview image.
-The aggregate test scheme includes the Mac-only demo/media executables, so hosted iOS interaction
-checks use a native consumer app rather than that aggregate scheme. Each job selects
-its toolchain generation explicitly; the 27 image is maintained by GitHub as
+The deployment minimum remains iOS 26 / macOS 26, with Swift tools 6.2. CI runs the package tests
+on macOS and on the iOS Simulator, and builds the demo package, with Xcode 26.6 and the Xcode 27.0
+preview image. Each job selects its toolchain generation explicitly; the 27 image is maintained by GitHub as
 [`xcode-27`](https://github.com/actions/runner-images/issues/14404). New SDK-only APIs must
 preserve the existing deployment and compiler minimums. Local SDK 27.2 validation complements
 these jobs; a local pass does not establish the result of a hosted CI run.

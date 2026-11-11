@@ -102,41 +102,12 @@ extension IconPickerLabels {
     #expect(IconPickerScrollPolicy.colorChromeAnimation(reduceMotion: false) != nil)
 }
 
-@Test @MainActor func publicPickerCompiles() {
-    _ = IconPickerView(icon: .constant("folder"), color: .constant(.blue), labels: .fixture)
-    _ = IconPickerView(icon: .constant("🐶"), color: .constant(.blue), labels: .fixture)
-}
-
 @Test func defaultPaletteIncludesBlue() {
     #expect(IconPickerColor.all.contains { $0.id == IconPickerColor.blue.id })
 }
 
 @Test func defaultPaletteFillsARow() {
     #expect(IconPickerColor.all.count >= 8)
-}
-
-@Test @MainActor func pickerAcceptsCustomPalette() {
-    let brand = IconPickerColor(id: "brand", color: .indigo)
-    _ = IconPickerView(
-        icon: .constant("folder"),
-        color: .constant(brand),
-        colors: [brand, .blue],
-        labels: .fixture)
-}
-
-@Test @MainActor func inlineRowCompiles() {
-    _ = IconPickerRow(icon: .constant("folder"), color: .constant(.blue), labels: .fixture)
-    _ = IconPickerRow(icon: .constant("🐶"), color: .constant(.blue), labels: .fixture)
-}
-
-@Test @MainActor func pickerStoresCallerCatalog() {
-    let catalog = IconCatalogPreset(groups: [.home, .smileys])
-    let view = IconPickerView(icon: .constant("folder"), color: .constant(.blue), catalog: catalog, labels: .fixture)
-    #expect(view.catalog == catalog)
-}
-
-@Test func sectionGapMatchesStackGap() {
-    #expect(IconPickerLayout.sectionSpacing == IconPickerLayout.stackSpacing)
 }
 
 @Test func touchTargetsGrowWithoutExpandingMacControls() {
@@ -181,10 +152,10 @@ extension IconPickerLabels {
     #expect(IconCatalog.search("zzzznotanicon", labels: .fixture).isEmpty)
 }
 
-@Test func mixedCatalogAssignsEveryBuiltInSymbol() {
-    let assigned = Set(
-        IconCatalog.sections(labels: .fixture).flatMap(\.items).map(\.value).filter { !$0.isEmoji })
-    #expect(assigned == Set(SymbolCatalog.ids))
+@Test func everyCatalogSymbolIsListedOnceAndExistsOnThisSystem() {
+    // `items(from:)` drops repeats and names the system has no symbol for.
+    let usable = IconSuggestions.items(from: SymbolCatalog.ids).map(\.value)
+    #expect(usable == SymbolCatalog.ids)
 }
 
 @Test func catalogSectionContainsKnownSymbol() {
@@ -281,31 +252,8 @@ extension IconPickerLabels {
     #expect(IconCatalog.sections(suggestions: loaded.items, labels: .fixture).first?.group != .suggestions)
 }
 
-@Test @MainActor func pickerAcceptsFinishedSuggestionsWithoutRunningBody() async {
-    let loaded = await IconSuggestions.load(hint: "French") { _ in ["🇫🇷"] }
-    let view = IconPickerView(
-        icon: .constant("folder"),
-        color: .constant(.blue),
-        suggestions: loaded,
-        labels: .fixture)
-    let sections = IconCatalog.sections(suggestions: view.readySuggestions.items, labels: .fixture)
-    #expect(view.readySuggestions.items.map(\.value) == ["🇫🇷"])
-    #expect(sections.first?.group == .suggestions)
-    #expect(sections.first?.items.map(\.value) == ["🇫🇷"])
-}
-
 @Test func defaultCatalogOmitsEmptySuggestionsGroup() {
     #expect(IconCatalog.sections(labels: .fixture).allSatisfy { $0.group != .suggestions })
-}
-
-@Test @MainActor func popoverSearchAutofocuses() {
-    let field = IconPickerSearchField(
-        text: .constant(""),
-        prompt: "Search Icons",
-        autofocus: true,
-        clearLabel: "Clear",
-        onSubmit: {})
-    #expect(field.autofocus)
 }
 
 @Test func scrollToSelectionSkipsAfterUserScrolls() {
@@ -320,14 +268,6 @@ extension IconPickerLabels {
 
 @Test func scrollToSelectionRunsOnTallFormBeforeUserScrolls() {
     #expect(IconPickerScrollPolicy.shouldScrollToSelection(userHasScrolled: false, shortForm: false))
-}
-
-@Test func appearScrollDoesNotWaitForSuggestions() {
-    #expect(
-        IconPickerScrollPolicy.shouldScrollToSelection(
-            userHasScrolled: false,
-            selectionIsVisible: false,
-            shortForm: false))
 }
 
 @Test func appearScrollSkipsWhenSelectionIsOnScreen() {

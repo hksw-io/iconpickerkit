@@ -1,6 +1,6 @@
 #!/bin/sh
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")"
 
 swift build --product IconPickerKitDemo
 bin="$(swift build --show-bin-path)"

@@ -14,9 +14,6 @@ let package = Package(
         .library(
             name: "IconPickerKitIntelligence",
             targets: ["IconPickerKitIntelligence"]),
-        .executable(
-            name: "IconPickerKitDemo",
-            targets: ["IconPickerKitDemo"]),
     ],
     targets: [
         .target(
@@ -25,13 +22,6 @@ let package = Package(
         .target(
             name: "IconPickerKitIntelligence",
             dependencies: ["IconPickerKit"]),
-        .executableTarget(
-            name: "GenerateMedia",
-            dependencies: ["IconPickerKit"]),
-        .executableTarget(
-            name: "IconPickerKitDemo",
-            dependencies: ["IconPickerKit", "IconPickerKitIntelligence"],
-            exclude: ["Info.plist"]),
         .testTarget(
             name: "IconPickerKitTests",
             dependencies: ["IconPickerKit", "IconPickerKitIntelligence"]),

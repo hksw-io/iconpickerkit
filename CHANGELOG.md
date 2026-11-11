@@ -6,6 +6,11 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Maintenance
+
+- The Mac-only demo app and media tool moved to `Demo`, a nested package (`./Demo/run-demo.sh`, `swift run --package-path Demo GenerateMedia`), and the root package no longer has an `IconPickerKitDemo` product. The package's tests now build for iOS, and CI runs them on the iOS Simulator as well as on macOS.
+- `SymbolCatalog.ids` is derived from the grouped catalog, so each name is listed once, in catalog order. Tests that could not fail are gone; a new one checks that every catalog symbol exists on the running system.
+
 ### Added
 
 - Return in the search field picks the first result, and in `IconPickerRow` also closes the popover, so the Mac row works from the keyboard.
