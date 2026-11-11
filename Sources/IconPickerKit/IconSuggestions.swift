@@ -5,21 +5,17 @@ import AppKit
 import UIKit
 #endif
 
-/// The actual inputs to a picker request, including replacement tasks and ready results.
+/// The inputs to a picker's suggestions: a hint to ask about, or a result the consumer already has.
 struct IconSuggestionRequest: Equatable {
     let hint: String?
-    let task: Task<IconSuggestions, Never>?
     let ready: IconSuggestions
 
     func value(produce: @Sendable (String) async throws -> [String]) async -> IconSuggestions? {
         guard !Task.isCancelled else { return nil }
-        let result: IconSuggestions
-        if let task {
-            result = await task.value
-        } else if let hint {
-            result = await IconSuggestions.load(hint: hint, produce: produce)
+        let result = if let hint {
+            await IconSuggestions.load(hint: hint, produce: produce)
         } else {
-            result = self.ready
+            self.ready
         }
         return Task.isCancelled ? nil : result
     }
@@ -49,18 +45,6 @@ public struct IconSuggestions: Sendable, Equatable {
         } catch {
             return .empty
         }
-    }
-
-    /// Starts `load(hint:produce:)` immediately so the result can be ready before the picker appears.
-    ///
-    /// Call this from the screen that presents the picker — typically in a
-    /// `.task(id: hint)` on the edit form — and pass the task into
-    /// ``IconPickerView``. Do not start it from the picker's own appear path.
-    public static func preload(
-        hint: String,
-        produce: @escaping @Sendable (String) async throws -> [String]
-    ) -> Task<IconSuggestions, Never> {
-        Task { await self.load(hint: hint, produce: produce) }
     }
 
     static func items(from raw: [String]) -> [IconItem] {

@@ -2,10 +2,7 @@
 public struct IconPickerLabels: Equatable, Sendable {
     public var color: String
     public var icon: String
-    public var emojis: String
-    public var symbols: String
     public var search: String
-    public var customColor: String
     public var suggestions: String
     public var clear: String
     public var noIcons: String
@@ -17,10 +14,7 @@ public struct IconPickerLabels: Equatable, Sendable {
     public init(
         color: String = "Color",
         icon: String = "Icon",
-        emojis: String = "Emojis",
-        symbols: String = "Symbols",
         search: String = "Search Icons",
-        customColor: String = "Custom",
         suggestions: String = "Suggestions",
         clear: String = "Clear",
         noIcons: String = "No Icons",
@@ -31,10 +25,7 @@ public struct IconPickerLabels: Equatable, Sendable {
     {
         self.color = color
         self.icon = icon
-        self.emojis = emojis
-        self.symbols = symbols
         self.search = search
-        self.customColor = customColor
         self.suggestions = suggestions
         self.clear = clear
         self.noIcons = noIcons

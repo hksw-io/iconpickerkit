@@ -3,8 +3,6 @@ import SwiftUI
 struct IconColorStrip: View {
     @Binding var color: IconPickerColor
     var colors: [IconPickerColor]
-    var allowsCustomColor: Bool
-    var customLabel: String
     var swatchSize: CGFloat
     var contentInset: CGFloat = IconPickerLayout.horizontalInset
     var colorNames: [String: String] = [:]
@@ -16,9 +14,6 @@ struct IconColorStrip: View {
                 ForEach(self.colors) { swatch in
                     self.presetSwatch(swatch)
                 }
-                if self.allowsCustomColor {
-                    self.customSwatch
-                }
             }
             .padding(.vertical, overflow)
             .padding(.leading, self.contentInset + overflow)
@@ -29,7 +24,7 @@ struct IconColorStrip: View {
 
     private func presetSwatch(_ swatch: IconPickerColor) -> some View {
         let name = self.colorNames[swatch.id] ?? swatch.name
-        let isSelected = !self.color.isCustom && self.color.id == swatch.id
+        let isSelected = self.color.id == swatch.id
         return Button {
             self.color = swatch
         } label: {
@@ -44,25 +39,6 @@ struct IconColorStrip: View {
         .help(name)
         .accessibilityLabel(name)
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
-    }
-
-    private var customSwatch: some View {
-        ColorPicker(
-            self.customLabel,
-            selection: self.customColorBinding,
-            supportsOpacity: false)
-            .labelsHidden()
-            .frame(
-                minWidth: IconPickerLayout.hitSize(for: self.swatchSize),
-                minHeight: IconPickerLayout.hitSize(for: self.swatchSize))
-            .help(self.customLabel)
-            .accessibilityAddTraits(self.color.isCustom ? .isSelected : [])
-    }
-
-    private var customColorBinding: Binding<Color> {
-        Binding(
-            get: { self.color.color },
-            set: { self.color = .custom($0) })
     }
 
     private func circle(_ fill: Color, selected: Bool) -> some View {

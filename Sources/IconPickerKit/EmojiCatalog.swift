@@ -17,18 +17,6 @@ public nonisolated struct EmojiItem: Identifiable, Sendable {
 
 /// Curated emoji catalog used by ``IconPickerView``.
 public enum EmojiCatalog {
-    /// Items whose name or keywords contain `query`. An empty query returns the full catalog.
-    public static func search(_ query: String) -> [EmojiItem] {
-        guard !query.isEmpty else { return self.all }
-        let lowercased = query.lowercased()
-        return self.all.filter { item in
-            item.name.lowercased().contains(lowercased) ||
-                item.keywords.contains { $0.lowercased().contains(lowercased) }
-        }
-    }
-
-    public static let all: [EmojiItem] = smileys + gestures + animals + food + activities + objects + symbols
-
     public static let smileys: [EmojiItem] = [
         EmojiItem(emoji: "😀", name: "Grinning Face", keywords: ["smile", "happy"]),
         EmojiItem(emoji: "😃", name: "Grinning Face with Big Eyes", keywords: ["smile", "happy"]),

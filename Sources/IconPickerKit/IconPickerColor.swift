@@ -29,12 +29,4 @@ public struct IconPickerColor: Identifiable, Hashable, Sendable {
     public static let all: [IconPickerColor] = [
         .red, .orange, .yellow, .green, .mint, .blue, .indigo, .purple, .pink,
     ]
-
-    public static let customID = "custom"
-
-    public static func custom(_ color: Color) -> IconPickerColor {
-        IconPickerColor(id: self.customID, name: "Custom", color: color)
-    }
-
-    public var isCustom: Bool { self.id == Self.customID }
 }

@@ -9,12 +9,9 @@ public struct IconPickerView: View {
     @Binding private var icon: String
     @Binding private var color: IconPickerColor
     private let colors: [IconPickerColor]
-    let symbols: [String]
     let catalog: IconCatalogPreset
-    let allowsCustomColor: Bool
     let hint: String?
     let produce: @Sendable (String) async throws -> [String]
-    let suggestionTask: Task<IconSuggestions, Never>?
     let readySuggestions: IconSuggestions
     private let labels: IconPickerLabels
 
@@ -34,91 +31,53 @@ public struct IconPickerView: View {
     /// Creates a picker bound to the consumer's icon string and tint color.
     ///
     /// Pass `colors` to replace the built-in palette with your own swatches,
-    /// including brand colors. Pass `symbols` to replace the built-in SF Symbol
-    /// catalog. Pass `catalog` to choose groups, order, and per-group caps.
-    /// Pass `allowsCustomColor` to append a system color picker on the far right.
-    /// Pass `suggestions` to reuse work started with
-    /// ``IconSuggestions/preload(hint:produce:)`` before the picker appears —
-    /// that is the path that can have the group ready on first layout.
-    /// Appear-scroll does not wait for it. On-device model suggestions live in
-    /// the separate `IconPickerKitIntelligence` product.
+    /// including brand colors. Pass `catalog` to choose the groups and their order.
+    /// Pass `suggestions` to show a Suggestions group you loaded yourself, for
+    /// example with ``IconSuggestions/load(hint:produce:)``. On-device model
+    /// suggestions live in the separate `IconPickerKitIntelligence` product.
     public init(
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
         colors: [IconPickerColor] = IconPickerColor.all,
-        symbols: [String] = SymbolCatalog.ids,
         catalog: IconCatalogPreset = .all,
-        allowsCustomColor: Bool = false,
-        suggestions: Task<IconSuggestions, Never>? = nil,
+        suggestions: IconSuggestions = .empty,
         labels: IconPickerLabels = .english)
     {
         self.init(
             icon: icon,
             color: color,
             colors: colors,
-            symbols: symbols,
             catalog: catalog,
-            allowsCustomColor: allowsCustomColor,
             hint: nil,
             produce: { _ in [] },
             suggestions: suggestions,
             labels: labels)
     }
 
-    /// Asks `produce` for suggestions for `hint` after appear, unless `suggestions` is supplied.
+    /// Asks `produce` for suggestions for `hint` after appear. Without a hint it shows `suggestions`.
     package init(
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
         colors: [IconPickerColor],
-        symbols: [String],
         catalog: IconCatalogPreset,
-        allowsCustomColor: Bool,
         hint: String?,
         produce: @escaping @Sendable (String) async throws -> [String],
-        suggestions: Task<IconSuggestions, Never>?,
+        suggestions: IconSuggestions,
         labels: IconPickerLabels)
     {
         self._icon = icon
         self._color = color
         self.colors = colors
-        self.symbols = symbols
         self.catalog = catalog
-        self.allowsCustomColor = allowsCustomColor
         self.hint = hint
         self.produce = produce
-        self.suggestionTask = suggestions
-        self.readySuggestions = .empty
-        self.labels = labels
-        self._suggestions = State(initialValue: .empty)
-    }
-
-    /// Creates a picker whose Suggestions group is already populated.
-    public init(
-        icon: Binding<String>,
-        color: Binding<IconPickerColor>,
-        colors: [IconPickerColor] = IconPickerColor.all,
-        symbols: [String] = SymbolCatalog.ids,
-        catalog: IconCatalogPreset = .all,
-        allowsCustomColor: Bool = false,
-        suggestions: IconSuggestions,
-        labels: IconPickerLabels = .english)
-    {
-        self._icon = icon
-        self._color = color
-        self.colors = colors
-        self.symbols = symbols
-        self.catalog = catalog
-        self.allowsCustomColor = allowsCustomColor
-        self.hint = nil
-        self.produce = { _ in [] }
-        self.suggestionTask = nil
         self.readySuggestions = suggestions
         self.labels = labels
         self._suggestions = State(initialValue: suggestions)
     }
 
     public var body: some View {
-        let request = IconSuggestionRequest(hint: self.hint, task: self.suggestionTask, ready: self.readySuggestions)
+        let request = IconSuggestionRequest(hint: self.hint, ready: self.readySuggestions)
         VStack(spacing: IconPickerLayout.sectionSpacing) {
             if IconKind.offersColorChrome(for: self.icon) {
                 self.colorSection
@@ -183,7 +142,6 @@ public struct IconPickerView: View {
         }
         let section = IconCatalog.section(
             containing: self.icon,
-            symbols: self.symbols,
             catalog: self.catalog,
             suggestions: self.suggestions.items,
             labels: self.labels)
@@ -218,8 +176,6 @@ public struct IconPickerView: View {
             IconColorStrip(
                 color: self.$color,
                 colors: self.colors,
-                allowsCustomColor: self.allowsCustomColor,
-                customLabel: self.labels.customColor,
                 swatchSize: IconPickerLayout.swatchSize,
                 colorNames: self.labels.colorNames)
         }
@@ -228,7 +184,6 @@ public struct IconPickerView: View {
     private var catalogList: some View {
         let sections = IconCatalog.search(
             self.debounce.applied,
-            symbols: self.symbols,
             catalog: self.catalog,
             suggestions: self.suggestions.items,
             labels: self.labels)

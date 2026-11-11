@@ -22,7 +22,7 @@ hides Color, because only SF Symbols take the tint.
 `IconPickerView`. Present it in a sheet; you own Done.
 
 <p>
-  <img src="Docs/Media/iconpickerkit-row-light.png" width="360" alt="IconPickerRow in a light Mac form: Icon label and folder button, a divider, then Color, swatches with blue selected, and a color well for a custom color.">
+  <img src="Docs/Media/iconpickerkit-row-light.png" width="360" alt="IconPickerRow in a light Mac form: Icon label and folder button, a divider, then Color and swatches with blue selected.">
   <img src="Docs/Media/iconpickerkit-row-dark.png" width="360" alt="IconPickerRow in a dark Mac form with Icon and Color labels separated by a divider.">
 </p>
 
@@ -81,38 +81,26 @@ struct EditItemView: View {
 
 `icon` is either an emoji (`"🐶"`) or an SF Symbol name (`"folder"`). Persist `icon` and
 `color.id`, and restore with `IconPickerColor.all.first { $0.id == savedID }` (or your own
-`colors`). With `allowsCustomColor`, a custom pick has `id == IconPickerColor.customID`, so also
-persist its resolved color and rebuild it with `IconPickerColor.custom(_:)`. Color is only offered
-for SF Symbols: while an emoji is selected the swatches hide and `color` keeps its value.
+`colors`). Color is only offered for SF Symbols: while an emoji is selected the swatches hide and
+`color` keeps its value.
 
 One mixed catalog, grouped by meaning. The default order is Work, Home, Health, Places, Nature,
 Objects, Activity, People, Symbols, Food, Smileys, Animals: tintable symbol groups first,
 emoji-heavy groups last. Search Icons filters every group in the current catalog. Keystrokes
 debounce for 250 ms.
 
-Presets set which groups appear, their order, and how many items each shows:
-
-```swift
-IconPickerView(icon: $icon, color: $color, catalog: .compact)
-```
-
-`.all` is every group, uncapped. `.compact` is Work 12, Home 8, Places 8, Objects 12, Symbols 8,
-People 8. `.work` is Work 16, Home 12, Objects 12. Or build your own — Smileys first, 8 each:
+Pass `catalog` to choose which groups appear and in what order. Smileys first, say:
 
 ```swift
 IconPickerView(
     icon: $icon,
     color: $color,
     catalog: IconCatalogPreset(
-        groups: [.smileys] + IconGroup.allCases.filter { $0 != .smileys && $0 != .suggestions },
-        limit: 8))
+        groups: [.smileys] + IconGroup.allCases.filter { $0 != .smileys && $0 != .suggestions }))
 ```
 
-For different caps per group, pass
-`IconCatalogPreset([IconSectionLimit(.work, limit: 12), IconSectionLimit(.smileys)])`.
-
-Search ignores positive browse caps and trims surrounding whitespace. Omitted groups and groups
-with a zero or negative limit remain excluded. A miss shows the system's search-empty state.
+Search trims surrounding whitespace and never reaches omitted groups. A miss shows the system's
+search-empty state.
 
 ### Suggested icons
 
@@ -129,28 +117,15 @@ import IconPickerKit
 import IconPickerKitIntelligence
 ```
 
-Start the on-device model **before** presenting the picker so the Suggestions group can already be there. Hold the task on the screen that opens the sheet (an edit form, a deck name field, …) and pass it in:
+Pass `hint:` and the picker asks the on-device model after it appears. Usable emoji or SF Symbol
+names (a deck called `"French"` can surface 🇫🇷) show as a Suggestions group at the top. If the
+model is off, unavailable, or returns nothing usable, the extra group is omitted. No API key.
 
 ```swift
-@State private var suggestions: Task<IconSuggestions, Never>?
-
-.task(id: deckName) {
-    guard !deckName.isEmpty else { suggestions = nil; return }
-    let task = IconSuggestions.preload(hint: deckName)
-    suggestions = task
-    await withTaskCancellationHandler {
-        _ = await task.value
-    } onCancel: {
-        task.cancel()
-    }
-}
-
-.sheet(isPresented: $showingPicker) {
-    IconPickerView(icon: $icon, color: $color, suggestions: suggestions)
-}
+IconPickerView(icon: $icon, color: $color, hint: deckName)
 ```
 
-Or await a finished result and pass that — the extra group is on the first frame:
+To have the group there on the first frame, await a result before presenting and pass it in:
 
 ```swift
 @State private var ready = IconSuggestions.empty
@@ -163,17 +138,9 @@ showingPicker = true
 IconPickerView(icon: $icon, color: $color, suggestions: ready)
 ```
 
-Replacing the task, ready result, or hint refreshes suggestions in an already-presented picker.
-The picker ignores cancelled requests; the caller owns cancellation of supplied preload tasks,
-as in the example above. Clearing the hint or supplied result clears the old suggestions.
-
-Passing only `hint:` still asks the model after appear. Usable emoji or SF Symbol names (a deck called `"French"` can surface 🇫🇷) show as a Suggestions group at the top. If the model is off, unavailable, or returns nothing usable, the extra group is omitted. No API key. If you pass both `hint:` and a `suggestions:` task, the task wins.
-To supply your own suggestions without the model, pass `IconSuggestions.preload(hint:produce:)`
-or `load(hint:produce:)` from `IconPickerKit` alone.
-
-```swift
-IconPickerView(icon: $icon, color: $color, hint: deckName)
-```
+Replacing the hint or the ready result refreshes suggestions in an already-presented picker, and
+clearing it clears the old suggestions. To supply your own suggestions without the model, use
+`IconSuggestions.load(hint:produce:)` from `IconPickerKit` alone.
 
 Color, search, and the current section title stay pinned above the catalog. On iPhone and iPad the picker scrolls to the current icon on first layout without waiting for suggestions, animates that scroll (Reduce Motion jumps instead), and skips it when the icon is already on screen or you have scrolled. On macOS it stays at the top. When suggestions arrive after appear, the group expands in at the top if you are still there; a scrolled catalog keeps its place.
 
@@ -193,7 +160,7 @@ Form {
 .formStyle(.grouped)
 ```
 
-### Palette, symbols, and labels
+### Palette and labels
 
 ```swift
 let brand = IconPickerColor(id: "brand", name: "Brand", color: .indigo)
@@ -202,33 +169,22 @@ IconPickerView(
     icon: self.$icon,
     color: self.$color,
     colors: [.blue, brand],
-    symbols: ["folder", "star", "heart"],
-    allowsCustomColor: true,
     labels: IconPickerLabels(
         color: String(localized: "picker.color"),
         icon: String(localized: "picker.icon"),
         search: String(localized: "picker.search"),
-        customColor: String(localized: "picker.customColor"),
         suggestions: String(localized: "picker.suggestions")))
 ```
 
-`IconPickerRow` takes the same `colors`, `symbols`, `allowsCustomColor`, and `labels` arguments.
-It has no `catalog`, `hint`, or `suggestions`; its popover always shows every group.
-
-`symbols:` is an allow-list: curated groups keep only the SF Symbols you pass, and emoji are
-unaffected. Start from `SymbolCatalog.ids` to add to the defaults.
-
-Supplied SF Symbols outside the curated groups appear in Symbols, in caller order, without
-duplicates. Include `.symbols` when using a custom preset if these icons should be available.
-They come after the curated Symbols items, so a positive `.symbols` cap (as in `.compact`) hides
-them while browsing; search still finds them.
+`IconPickerRow` takes the same `colors` and `labels` arguments. It has no `catalog`, `hint`, or
+`suggestions`; its popover always shows every group.
 
 Localize the catalog as well as its chrome through `IconPickerLabels`. Metadata is keyed by
 stable icon values and color IDs, so changing language never changes saved selections:
 
 ```swift
 let labels = IconPickerLabels(
-    color: "Färg", icon: "Ikon", search: "Sök ikoner", customColor: "Anpassad",
+    color: "Färg", icon: "Ikon", search: "Sök ikoner",
     suggestions: "Förslag", clear: "Rensa", noIcons: "Inga ikoner",
     groupTitles: [.home: "Hem", .work: "Arbete"],
     iconNames: ["folder": "Mapp", "📚": "Böcker"],
@@ -240,14 +196,12 @@ Use your app's localized strings for these values. Names feed both search and Vo
 localized keywords supplement existing keywords, and raw symbol IDs remain searchable.
 The public `IconCatalog` methods also accept `labels:` and return localized section titles
 and item metadata. Missing overrides retain the English defaults. Section titles come from
-`groupTitles` (Suggestions falls back to `suggestions`); the `emojis` and `symbols` labels are
-unused.
+`groupTitles` (Suggestions falls back to `suggestions`).
 
 Search and classification are also public if you want the catalogs without the view:
 
 ```swift
 let sections = IconCatalog.search("dog")  // the picker's search: mixed, trimmed, localizable
-let emoji = EmojiCatalog.search("dog")  // emoji only, English metadata
 let kind = IconKind.classify("🐶")  // .emoji
 let tintable = IconKind.offersColorChrome(for: "folder")  // true
 ```

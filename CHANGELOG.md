@@ -6,6 +6,16 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+### Removed
+
+- **Breaking.** API that no app called:
+  - `IconPickerView(suggestions:)` taking a `Task`, and `IconSuggestions.preload(hint:)` and `preload(hint:produce:)`. Pass `hint:`, or await `IconSuggestions.load` and pass the result as `suggestions:`.
+  - `allowsCustomColor` on both pickers, with `IconPickerLabels.customColor` and `IconPickerColor.custom(_:)`, `customID`, and `isCustom`.
+  - Per-group caps: `IconSectionLimit`, `IconCatalogPreset.compact` and `.work`, and the `limit:` argument. `IconCatalogPreset(groups:)` and `.all` stay, and `IconCatalogPreset.sections` is now `groups`.
+  - The `symbols:` allow-list on both pickers and on `IconCatalog`.
+  - `EmojiCatalog.search` and `EmojiCatalog.all`, `SymbolCatalog.search`, and the `groups:` overloads of `IconCatalog.sections`, `section(containing:)`, and `search`. Use `catalog: IconCatalogPreset(groups:)`.
+  - `IconPickerLabels.emojis` and `symbols`, which the picker never showed.
+
 ## [1.4.1] - 2026-10-20
 
 ### Changed

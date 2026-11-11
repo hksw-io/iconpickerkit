@@ -5,9 +5,7 @@ import SwiftUI
 enum IconPickerLayout {
     static let stackSpacing: CGFloat = 12
     static let horizontalInset: CGFloat = 16
-    static let controlHeight: CGFloat = 28
     static let swatchSize: CGFloat = 32
-    static let viewCellSize: CGFloat = 44
 
     static func hitSize(for visualSize: CGFloat) -> CGFloat {
         #if os(macOS)
@@ -43,15 +41,8 @@ enum IconPickerLayout {
     }
 
     static var sectionSpacing: CGFloat { self.stackSpacing }
-    static var spacingAboveSearch: CGFloat { self.stackSpacing }
-    static var spacingBelowSearch: CGFloat { self.stackSpacing }
-    static var searchInset: CGFloat { self.horizontalInset }
-    static var modeInset: CGFloat { self.horizontalInset }
-    static var labelInset: CGFloat { self.horizontalInset }
     static var catalogInset: CGFloat { self.horizontalInset }
-    static var colorStripInset: CGFloat { self.horizontalInset }
     static var searchHeight: CGFloat { self.hitSize(for: 36) }
-    static var modeHeight: CGFloat { self.controlHeight }
 }
 
 enum IconPickerHover {

@@ -87,7 +87,7 @@ private struct RowShot: View {
 
     var body: some View {
         Form {
-            IconPickerRow(icon: self.$icon, color: self.$color, allowsCustomColor: true)
+            IconPickerRow(icon: self.$icon, color: self.$color)
         }
         .formStyle(.grouped)
         .preferredColorScheme(self.scheme)

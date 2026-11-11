@@ -8,8 +8,6 @@ public struct IconPickerRow: View {
     @Binding private var icon: String
     @Binding private var color: IconPickerColor
     private let colors: [IconPickerColor]
-    let symbols: [String]
-    let allowsCustomColor: Bool
     private let labels: IconPickerLabels
 
     @State private var showingCatalog = false
@@ -26,15 +24,11 @@ public struct IconPickerRow: View {
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
         colors: [IconPickerColor] = IconPickerColor.all,
-        symbols: [String] = SymbolCatalog.ids,
-        allowsCustomColor: Bool = false,
         labels: IconPickerLabels = .english)
     {
         self._icon = icon
         self._color = color
         self.colors = colors
-        self.symbols = symbols
-        self.allowsCustomColor = allowsCustomColor
         self.labels = labels
     }
 
@@ -65,8 +59,6 @@ public struct IconPickerRow: View {
                     IconColorStrip(
                         color: self.$color,
                         colors: self.colors,
-                        allowsCustomColor: self.allowsCustomColor,
-                        customLabel: self.labels.customColor,
                         swatchSize: IconPickerLayout.rowSwatchSize,
                         contentInset: 0,
                         colorNames: self.labels.colorNames)
@@ -116,7 +108,7 @@ public struct IconPickerRow: View {
     }
 
     private var catalogPopover: some View {
-        let sections = IconPickerRowCatalog.sections(query: self.debounce.applied, symbols: self.symbols, labels: self.labels)
+        let sections = IconCatalog.search(self.debounce.applied, labels: self.labels)
         return VStack(spacing: IconPickerLayout.stackSpacing) {
             IconPickerSearchField(
                 text: self.$query,
@@ -198,11 +190,5 @@ public struct IconPickerRow: View {
         .buttonStyle(.plain)
         .accessibilityLabel(item.name)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-}
-
-enum IconPickerRowCatalog {
-    static func sections(query: String, symbols: [String], labels: IconPickerLabels = .english) -> [IconSection] {
-        IconCatalog.search(query, symbols: symbols, labels: labels)
     }
 }

@@ -10,16 +10,16 @@ struct DemoRoot: View {
     @State private var delaySuggestions = true
     @State private var showingInspector = true
     @State private var generation = 0
-    @State private var suggestionTask: Task<IconSuggestions, Never>? = DemoSuggestions.makeTask(
-        hint: "French",
-        delay: true)
+    @State private var appliedHint = "French"
+    @State private var canned = IconSuggestions.empty
 
     var body: some View {
         DemoPaneHost(
             pane: self.pane,
             icon: self.$icon,
             color: self.$color,
-            suggestionTask: self.suggestionTask)
+            hint: self.delaySuggestions ? nil : self.appliedHint,
+            suggestions: self.canned)
             .id(self.generation)
             .inspector(isPresented: self.$showingInspector) {
                 DemoInspector(
@@ -48,13 +48,22 @@ struct DemoRoot: View {
                 self.reload()
             }
             .navigationTitle("IconPickerKit")
+            .task(id: self.generation) {
+                self.canned = .empty
+                guard self.delaySuggestions else { return }
+                let loaded = await IconSuggestions.load(hint: self.appliedHint) { _ in
+                    try await Task.sleep(for: .seconds(2))
+                    return ["🇫🇷", "🥖", "flag", "book", "globe.europe.africa"]
+                }
+                if !Task.isCancelled {
+                    self.canned = loaded
+                }
+            }
     }
 
     private func reload() {
         self.generation += 1
-        self.suggestionTask = DemoSuggestions.makeTask(
-            hint: self.hint,
-            delay: self.delaySuggestions)
+        self.appliedHint = self.hint
     }
 }
 
@@ -76,7 +85,8 @@ private struct DemoPaneHost: View {
     let pane: DemoPane
     @Binding var icon: String
     @Binding var color: IconPickerColor
-    let suggestionTask: Task<IconSuggestions, Never>?
+    let hint: String?
+    let suggestions: IconSuggestions
 
     var body: some View {
         switch self.pane {
@@ -84,7 +94,8 @@ private struct DemoPaneHost: View {
             DemoCatalogPane(
                 icon: self.$icon,
                 color: self.$color,
-                suggestionTask: self.suggestionTask)
+                hint: self.hint,
+                suggestions: self.suggestions)
         case .row:
             DemoRowPane(icon: self.$icon, color: self.$color)
         }
@@ -94,14 +105,16 @@ private struct DemoPaneHost: View {
 private struct DemoCatalogPane: View {
     @Binding var icon: String
     @Binding var color: IconPickerColor
-    let suggestionTask: Task<IconSuggestions, Never>?
+    /// Set to ask the on-device model. `nil` shows the canned `suggestions`.
+    let hint: String?
+    let suggestions: IconSuggestions
 
     var body: some View {
-        IconPickerView(
-            icon: self.$icon,
-            color: self.$color,
-            allowsCustomColor: true,
-            suggestions: self.suggestionTask)
+        if let hint {
+            IconPickerView(icon: self.$icon, color: self.$color, hint: hint)
+        } else {
+            IconPickerView(icon: self.$icon, color: self.$color, suggestions: self.suggestions)
+        }
     }
 }
 
@@ -111,10 +124,7 @@ private struct DemoRowPane: View {
 
     var body: some View {
         Form {
-            IconPickerRow(
-                icon: self.$icon,
-                color: self.$color,
-                allowsCustomColor: true)
+            IconPickerRow(icon: self.$icon, color: self.$color)
         }
         .formStyle(.grouped)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -147,21 +157,5 @@ private struct DemoInspector: View {
             }
         }
         .formStyle(.grouped)
-    }
-}
-
-private enum DemoSuggestions {
-    static let canned = ["🇫🇷", "🥖", "flag", "book", "globe.europe.africa"]
-
-    static func makeTask(hint: String, delay: Bool) -> Task<IconSuggestions, Never>? {
-        let trimmed = hint.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-        if delay {
-            return IconSuggestions.preload(hint: trimmed) { _ in
-                try await Task.sleep(for: .seconds(2))
-                return self.canned
-            }
-        }
-        return IconSuggestions.preload(hint: trimmed)
     }
 }
