@@ -11,12 +11,9 @@ public struct IconPickerRow: View {
     private let labels: IconPickerLabels
 
     @State private var showingCatalog = false
-    @State private var query = ""
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @ScaledMetric(relativeTo: .title3) private var cellFont: CGFloat = 18
-    @ScaledMetric(relativeTo: .title3) private var cellSize: CGFloat = IconPickerLayout.rowCellSize
 
     public init(
         icon: Binding<String>,
@@ -101,13 +98,29 @@ public struct IconPickerRow: View {
         .accessibilityLabel(self.labels.icon)
         .accessibilityValue(self.labels.iconNames[self.icon] ?? self.icon.replacingOccurrences(of: ".", with: " "))
         .popover(isPresented: self.$showingCatalog) {
-            self.catalogPopover
+            IconPickerRowCatalog(
+                icon: self.$icon,
+                tint: self.color.color,
+                labels: self.labels,
+                isPresented: self.$showingCatalog)
         }
     }
+}
 
-    private var catalogPopover: some View {
+/// The row's popover. It owns the search query, so each presentation starts with an empty search.
+private struct IconPickerRowCatalog: View {
+    @Binding var icon: String
+    let tint: Color
+    let labels: IconPickerLabels
+    @Binding var isPresented: Bool
+
+    @State private var query = ""
+    @ScaledMetric(relativeTo: .title3) private var cellFont: CGFloat = 18
+    @ScaledMetric(relativeTo: .title3) private var cellSize: CGFloat = IconPickerLayout.rowCellSize
+
+    var body: some View {
         let sections = IconCatalog.search(self.query, labels: self.labels, selected: self.icon)
-        return VStack(spacing: IconPickerLayout.stackSpacing) {
+        VStack(spacing: IconPickerLayout.stackSpacing) {
             IconPickerSearchField(
                 text: self.$query,
                 prompt: self.labels.search,
@@ -130,11 +143,11 @@ public struct IconPickerRow: View {
         .frame(minWidth: 280, minHeight: 280)
         #endif
         #if os(macOS)
-        .onExitCommand { self.showingCatalog = false }
+        .onExitCommand { self.isPresented = false }
         #endif
         .background {
             Button {
-                self.showingCatalog = false
+                self.isPresented = false
             } label: {
                 EmptyView()
             }
@@ -162,7 +175,7 @@ public struct IconPickerRow: View {
         let isSelected = self.icon == item.value
         return Button {
             self.icon = item.value
-            self.showingCatalog = false
+            self.isPresented = false
         } label: {
             Group {
                 if item.value.isEmoji {
@@ -171,7 +184,7 @@ public struct IconPickerRow: View {
                 } else {
                     Image(systemName: item.value)
                         .font(.system(size: self.cellFont * 0.8))
-                        .foregroundStyle(isSelected ? self.color.color : .secondary)
+                        .foregroundStyle(isSelected ? self.tint : .secondary)
                 }
             }
             .frame(width: self.cellSize, height: self.cellSize)
@@ -179,7 +192,7 @@ public struct IconPickerRow: View {
             .background {
                 if isSelected {
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(self.color.color.opacity(0.15))
+                        .fill(self.tint.opacity(0.15))
                 }
             }
         }
