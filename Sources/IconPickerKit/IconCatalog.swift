@@ -40,27 +40,33 @@ public enum IconGroup: String, CaseIterable, Sendable, Identifiable {
     public var id: String { self.rawValue }
 }
 
-/// A meaning-themed group of mixed emoji and SF Symbols.
+/// A titled group of icons: one of the catalog's, or an app's own.
 public struct IconSection: Identifiable, Sendable, Equatable {
-    public let group: IconGroup
+    public let id: String
+    public let title: String
     public let items: [IconItem]
 
-    public var id: String { self.group.rawValue }
-    public let title: String
-
-    public init(group: IconGroup, items: [IconItem], title: String) {
-        self.group = group
-        self.items = items
+    /// A section of your own. Give it an `id` that no ``IconGroup`` uses.
+    public init(id: String, title: String, items: [IconItem]) {
+        self.id = id
         self.title = title
+        self.items = items
     }
+
+    /// The catalog group this section shows. `nil` for an app's own section.
+    public var group: IconGroup? { IconGroup(rawValue: self.id) }
 }
 
-/// Which groups the picker shows, in order.
+/// What the picker shows: your own sections first, then the catalog groups in order.
 public struct IconCatalogPreset: Sendable, Equatable {
     public var groups: [IconGroup]
+    /// Sections of your own, shown ahead of `groups`. ``IconPickerView`` draws their
+    /// items with the image its `image` closure returns.
+    public var leading: [IconSection]
 
-    public init(groups: [IconGroup]) {
+    public init(groups: [IconGroup], leading: [IconSection] = []) {
         self.groups = groups
+        self.leading = leading
     }
 
     public static let all = IconCatalogPreset(
@@ -69,7 +75,8 @@ public struct IconCatalogPreset: Sendable, Equatable {
 
 /// One catalog of emoji and SF Symbols, grouped by meaning.
 public enum IconCatalog {
-    /// Sections in `catalog` order. A repeated group appears once.
+    /// Suggestions, then the catalog's own sections, then its groups in order. A repeated
+    /// group appears once, and a section with no items is left out.
     ///
     /// A `selected` emoji or SF Symbol that the catalog doesn't list leads the first group,
     /// so the picker has a cell to show as selected.
@@ -85,18 +92,20 @@ public enum IconCatalog {
             let (emojis, symbols) = self.content(for: group)
             let items = emojis.map(Self.emojiItem) + symbols.map(Self.symbolItem)
             return items.isEmpty ? nil : IconSection(
-                group: group, items: items.map(labels.localized), title: labels.groupTitle(group))
+                id: group.rawValue, title: labels.groupTitle(group), items: items.map(labels.localized))
         }
         if let first = result.first,
-           !result.contains(where: { $0.items.contains { $0.value == selected } }),
+           !(catalog.leading + result).contains(where: { $0.items.contains { $0.value == selected } }),
            let item = IconSuggestions.items(from: [selected]).first(where: { $0.value == selected })
         {
-            result[0] = IconSection(
-                group: first.group, items: [labels.localized(item)] + first.items, title: first.title)
+            result[0] = IconSection(id: first.id, title: first.title, items: [labels.localized(item)] + first.items)
         }
+        result.insert(contentsOf: catalog.leading.filter { !$0.items.isEmpty }, at: 0)
         if !suggestions.isEmpty {
             result.insert(IconSection(
-                group: .suggestions, items: suggestions.map(labels.localized), title: labels.groupTitle(.suggestions)), at: 0)
+                id: IconGroup.suggestions.rawValue,
+                title: labels.groupTitle(.suggestions),
+                items: suggestions.map(labels.localized)), at: 0)
         }
         return result
     }
@@ -127,7 +136,7 @@ public enum IconCatalog {
         guard !query.isEmpty else { return all }
         return all.compactMap { section in
             let items = section.items.filter { $0.matches(query) }
-            return items.isEmpty ? nil : IconSection(group: section.group, items: items, title: section.title)
+            return items.isEmpty ? nil : IconSection(id: section.id, title: section.title, items: items)
         }
     }
 

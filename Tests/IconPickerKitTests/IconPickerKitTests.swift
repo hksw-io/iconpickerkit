@@ -185,13 +185,30 @@ extension IconPickerLabels {
     #expect(IconCatalog.sections(catalog: catalog, labels: .fixture, selected: "not an icon") == plain)
 }
 
+@Test func appSectionsLeadTheCatalogAndAreSearched() {
+    let deadlift = IconItem(value: "Exercise-Deadlift", name: "Deadlift", keywords: ["barbell"])
+    let exercises = IconSection(
+        id: "exercises", title: "Exercises", items: [IconItem(value: "Exercise-Squat", name: "Squat"), deadlift])
+    let catalog = IconCatalogPreset(
+        groups: [.home], leading: [exercises, IconSection(id: "empty", title: "Empty", items: [])])
+    let home = IconCatalog.sections(catalog: IconCatalogPreset(groups: [.home]), labels: .fixture)
+    let sections = IconCatalog.sections(
+        catalog: catalog, suggestions: [.init(value: "🥖", name: "🥖")], labels: .fixture, selected: "Exercise-Squat")
+    #expect(sections.map(\.id) == ["suggestions", "exercises", "home"])
+    #expect(sections[1] == exercises)
+    #expect(sections[1].group == nil)
+    #expect(sections[2] == home.first)
+    #expect(IconCatalog.search("BARBELL", catalog: catalog, labels: .fixture).map(\.items) == [[deadlift]])
+    #expect(IconCatalog.section(containing: "Exercise-Squat", catalog: catalog, labels: .fixture)?.id == "exercises")
+}
+
 @Test func catalogRespectsGroupOrder() {
     let sections = IconCatalog.sections(catalog: IconCatalogPreset(groups: [.work, .smileys]), labels: .fixture)
     #expect(sections.map(\.group) == [.work, .smileys])
 }
 
 @Test func defaultCatalogLeadsWithTintableGroups() {
-    let groups = IconCatalog.sections(catalog: .all, labels: .fixture).map(\.group)
+    let groups = IconCatalog.sections(catalog: .all, labels: .fixture).compactMap(\.group)
     let tintable: Set<IconGroup> = [.work, .home, .health, .places, .nature]
     let emojiHeavy: Set<IconGroup> = [.smileys, .animals, .food]
     let lastTintable = groups.lastIndex { tintable.contains($0) }
@@ -208,7 +225,8 @@ extension IconPickerLabels {
 
 @Test func searchPreservesCallerGroupOrder() {
     let sections = IconCatalog.search("a", catalog: IconCatalogPreset(groups: [.work, .smileys, .home]), labels: .fixture)
-    let order = sections.map(\.group)
+    let order = sections.compactMap(\.group)
+    #expect(order.count == 3)
     #expect(order == order.sorted { lhs, rhs in
         let rank: [IconGroup] = [.work, .smileys, .home]
         return rank.firstIndex(of: lhs)! < rank.firstIndex(of: rhs)!

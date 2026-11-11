@@ -14,6 +14,7 @@ public struct IconPickerView: View {
     private let produce: @Sendable (String) async throws -> [String]
     private let readySuggestions: IconSuggestions
     private let labels: IconPickerLabels
+    private let image: (IconItem) -> Image?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var query = ""
@@ -36,13 +37,18 @@ public struct IconPickerView: View {
     /// Pass `suggestions` to show a Suggestions group you loaded yourself, for
     /// example with ``IconSuggestions/load(hint:produce:)``. On-device model
     /// suggestions live in the separate `IconPickerKitIntelligence` product.
+    ///
+    /// Pass `image` to draw the icons of your own sections (``IconCatalogPreset/leading``).
+    /// It is asked about every cell: return `nil` for an emoji or SF Symbol. A template
+    /// image takes the tint, as a symbol does.
     public init(
         icon: Binding<String>,
         color: Binding<IconPickerColor>,
         colors: [IconPickerColor] = IconPickerColor.all,
         catalog: IconCatalogPreset = .all,
         suggestions: IconSuggestions = .empty,
-        labels: IconPickerLabels)
+        labels: IconPickerLabels,
+        image: @escaping (IconItem) -> Image? = { _ in nil })
     {
         self.init(
             icon: icon,
@@ -52,7 +58,8 @@ public struct IconPickerView: View {
             hint: nil,
             produce: { _ in [] },
             suggestions: suggestions,
-            labels: labels)
+            labels: labels,
+            image: image)
     }
 
     /// Asks `produce` for suggestions for `hint` after appear. Without a hint it shows `suggestions`.
@@ -64,7 +71,8 @@ public struct IconPickerView: View {
         hint: String?,
         produce: @escaping @Sendable (String) async throws -> [String],
         suggestions: IconSuggestions,
-        labels: IconPickerLabels)
+        labels: IconPickerLabels,
+        image: @escaping (IconItem) -> Image?)
     {
         self._icon = icon
         self._color = color
@@ -74,6 +82,7 @@ public struct IconPickerView: View {
         self.produce = produce
         self.readySuggestions = suggestions
         self.labels = labels
+        self.image = image
         self._suggestions = State(initialValue: suggestions)
         self._openedWith = State(initialValue: icon.wrappedValue)
     }
@@ -263,6 +272,7 @@ public struct IconPickerView: View {
         let isSelected = self.icon == item.value
         return IconPickerCell(
             item: item,
+            image: self.image(item),
             isSelected: isSelected,
             tint: self.color.color,
             size: self.cellSize,
@@ -280,6 +290,7 @@ public struct IconPickerView: View {
 /// One catalog cell in the full picker. The whole cell is the tap target, not only its glyph.
 struct IconPickerCell: View {
     let item: IconItem
+    var image: Image?
     let isSelected: Bool
     let tint: Color
     let size: CGFloat
@@ -291,7 +302,14 @@ struct IconPickerCell: View {
             ZStack {
                 RoundedRectangle(cornerRadius: 8)
                     .fill(self.isSelected ? self.tint.opacity(0.15) : Color.clear)
-                if self.item.value.isEmoji {
+                if let image = self.image {
+                    // About the box a symbol's glyph fills.
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: self.size * 0.62, height: self.size * 0.62)
+                        .foregroundStyle(self.isSelected ? self.tint : .secondary)
+                } else if self.item.value.isEmoji {
                     Text(verbatim: self.item.value)
                         .font(.system(size: self.font))
                 } else {

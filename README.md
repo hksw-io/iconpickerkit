@@ -178,6 +178,33 @@ IconPickerView(icon: self.$icon, color: self.$color, colors: [.blue, brand], lab
 `IconPickerRow` takes the same `colors` and `labels` arguments. It has no `catalog`, `hint`, or
 `suggestions`; its popover always shows every group.
 
+### Your own icons
+
+Lead the catalog with sections of your own, and tell the picker how to draw their icons:
+
+```swift
+let exercises = IconSection(
+    id: "exercises",
+    title: String(localized: "Exercises"),
+    items: [IconItem(value: "Exercise-Squat", name: String(localized: "Squat"))])
+
+IconPickerView(
+    icon: $icon,
+    color: $color,
+    catalog: IconCatalogPreset(groups: [.activity, .health], leading: [exercises]),
+    labels: .app,
+    image: { item in
+        item.value.hasPrefix("Exercise-") ? Image(item.value).renderingMode(.template) : nil
+    })
+```
+
+Your sections come after Suggestions and before the catalog groups, and search covers their item
+names, values, and keywords. Picking one sets `icon` to the item's `value`, which your app draws
+itself everywhere else. `image` is asked about every cell, so return `nil` for an emoji or SF
+Symbol. A template image takes the tint as a symbol does, and Color stays on screen for it. Give
+each section an `id` that no `IconGroup` uses. `IconPickerRow` has no such hook: it draws only
+emoji and SF Symbols.
+
 ### Labels
 
 `IconPickerLabels` holds every string the picker shows or speaks, and none has a default. Build it
@@ -271,7 +298,7 @@ session. It rewrites the
 demo are captured from the iOS 27.2 Simulator (iPhone 17 Pro), because a Mac render at phone width
 would not show iOS touch sizing.
 
-`./Demo/run-demo.sh` builds a real Mac app and opens it (Dock and Cmd-Tab). Catalog is the full picker with color and search pinned. Form row is the compact control. The inspector hint plus **Delay 2 seconds** starts canned suggestions after a pause so you can scroll first. **Reload** runs that again. Turn Delay off to use the on-device model.
+`./Demo/run-demo.sh` builds a real Mac app and opens it (Dock and Cmd-Tab). Catalog is the full picker with color and search pinned; its Demo section shows an app's own icons. Form row is the compact control, which cannot draw those. The inspector hint plus **Delay 2 seconds** starts canned suggestions after a pause so you can scroll first. **Reload** runs that again. Turn Delay off to use the on-device model.
 
 ## OS 27 compatibility
 

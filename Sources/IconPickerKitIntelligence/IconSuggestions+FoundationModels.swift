@@ -38,7 +38,8 @@ extension IconPickerView {
         colors: [IconPickerColor] = IconPickerColor.all,
         catalog: IconCatalogPreset = .all,
         hint: String?,
-        labels: IconPickerLabels)
+        labels: IconPickerLabels,
+        image: @escaping (IconItem) -> Image? = { _ in nil })
     {
         self.init(
             icon: icon,
@@ -48,7 +49,8 @@ extension IconPickerView {
             hint: hint,
             produce: IconSuggestions.foundationModels,
             suggestions: .empty,
-            labels: labels)
+            labels: labels,
+            image: image)
     }
 }
 

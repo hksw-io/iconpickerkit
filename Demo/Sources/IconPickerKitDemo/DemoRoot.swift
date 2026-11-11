@@ -123,9 +123,45 @@ private struct DemoCatalogPane: View {
 
     var body: some View {
         if let hint {
-            IconPickerView(icon: self.$icon, color: self.$color, hint: hint, labels: .demo)
+            IconPickerView(
+                icon: self.$icon,
+                color: self.$color,
+                catalog: DemoIcons.catalog,
+                hint: hint,
+                labels: .demo,
+                image: DemoIcons.image)
         } else {
-            IconPickerView(icon: self.$icon, color: self.$color, suggestions: self.suggestions, labels: .demo)
+            IconPickerView(
+                icon: self.$icon,
+                color: self.$color,
+                catalog: DemoIcons.catalog,
+                suggestions: self.suggestions,
+                labels: .demo,
+                image: DemoIcons.image)
+        }
+    }
+}
+
+/// A section of the demo's own, as an app would add one. SF Symbols stand in for the
+/// app's asset images. The form row has no such hook and cannot draw these icons.
+private enum DemoIcons {
+    static let catalog = IconCatalogPreset(
+        groups: IconCatalogPreset.all.groups,
+        leading: [
+            IconSection(
+                id: "demo",
+                title: "Demo",
+                items: [
+                    IconItem(value: "demo-seal", name: "Seal"),
+                    IconItem(value: "demo-burst", name: "Burst"),
+                ]),
+        ])
+
+    static func image(_ item: IconItem) -> Image? {
+        switch item.value {
+        case "demo-seal": Image(systemName: "seal.fill")
+        case "demo-burst": Image(systemName: "burst.fill")
+        default: nil
         }
     }
 }
