@@ -6,6 +6,8 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-11-11
+
 ### Maintenance
 
 - CI runs with Xcode 27.0 only; the Xcode 26.6 job is gone. The deployment minimum stays iOS 26 / macOS 26.
