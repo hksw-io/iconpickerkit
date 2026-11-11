@@ -8,6 +8,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ### Maintenance
 
+- CI runs with Xcode 27.0 only; the Xcode 26.6 job is gone. The deployment minimum stays iOS 26 / macOS 26.
 - The Mac-only demo app and media tool moved to `Demo`, a nested package (`./Demo/run-demo.sh`, `swift run --package-path Demo GenerateMedia`), and the root package no longer has an `IconPickerKitDemo` product. The package's tests now build for iOS, and CI runs them on the iOS Simulator as well as on macOS.
 - `SymbolCatalog.ids` is derived from the grouped catalog, so each name is listed once, in catalog order. Tests that could not fail are gone; a new one checks that every catalog symbol exists on the running system.
 

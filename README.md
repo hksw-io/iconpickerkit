@@ -276,11 +276,11 @@ would not show iOS touch sizing.
 ## OS 27 compatibility
 
 The deployment minimum remains iOS 26 / macOS 26, with Swift tools 6.2. CI runs the package tests
-on macOS and on the iOS Simulator, and builds the demo package, with Xcode 26.6 and the Xcode 27.0
-preview image. Each job selects its toolchain generation explicitly; the 27 image is maintained by GitHub as
-[`xcode-27`](https://github.com/actions/runner-images/issues/14404). New SDK-only APIs must
-preserve the existing deployment and compiler minimums. Local SDK 27.2 validation complements
-these jobs; a local pass does not establish the result of a hosted CI run.
+on macOS and on the iOS Simulator, and builds the demo package, with the Xcode 27.0 preview image,
+which GitHub maintains as [`xcode-27`](https://github.com/actions/runner-images/issues/14404).
+No CI job builds with an Xcode 26 toolchain, so new SDK-only APIs must preserve the existing
+deployment and compiler minimums. Local SDK 27.2 validation complements the job; a local pass does
+not establish the result of a hosted CI run.
 
 ## License
 
