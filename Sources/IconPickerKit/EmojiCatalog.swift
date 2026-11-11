@@ -382,8 +382,9 @@ extension Character {
 }
 
 extension String {
-    /// `true` when the string starts with an emoji scalar.
-    public var isEmoji: Bool {
+    /// `true` when the string starts with an emoji. Internal, so it cannot collide with an
+    /// app's own `String.isEmoji`; ``IconKind/classify(_:)`` is the public API.
+    var isEmoji: Bool {
         guard let firstChar = self.first else { return false }
         return firstChar.isEmoji
     }

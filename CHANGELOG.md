@@ -10,6 +10,7 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 - **Breaking.** The kit ships no strings; every one comes from the app. `labels:` is required on `IconPickerView`, `IconPickerRow`, and the `IconCatalog` functions, and `IconPickerLabels` has no defaults for `color`, `icon`, `search`, `clear`, or `noIcons`. Group titles come from `groupTitle`, a closure over `IconGroup` that also names Suggestions, replacing `groupTitles` and `suggestions`. Color names come from `colorName`, a closure over `IconPickerColor`, replacing `colorNames`. `iconNames` and `iconKeywords` still override the catalog's built-in English icon metadata. `IconPickerLabels` is no longer `Equatable`.
 - **Breaking.** `IconPickerColor` has no `name`: create one with `IconPickerColor(id:color:)` and name it in `IconPickerLabels.colorName`.
+- **Breaking.** `String.isEmoji` is internal. As a public extension on `String` it collided with an app's own `isEmoji` that used a different rule. Use `IconKind.classify(_:) == .emoji`.
 - Search filters on every keystroke. The 250 ms debounce is gone: filtering the whole catalog takes about 2 ms, so the pause only delayed results.
 
 ### Removed
