@@ -106,7 +106,7 @@ public struct IconPickerRow: View {
     }
 
     private var catalogPopover: some View {
-        let sections = IconCatalog.search(self.query, labels: self.labels)
+        let sections = IconCatalog.search(self.query, labels: self.labels, selected: self.icon)
         return VStack(spacing: IconPickerLayout.stackSpacing) {
             IconPickerSearchField(
                 text: self.$query,

@@ -88,10 +88,14 @@ public struct IconCatalogPreset: Sendable, Equatable {
 /// One catalog of emoji and SF Symbols, grouped by meaning.
 public enum IconCatalog {
     /// Sections in `catalog` order. A repeated group appears once.
+    ///
+    /// A `selected` emoji or SF Symbol that the catalog doesn't list leads the first group,
+    /// so the picker has a cell to show as selected.
     public static func sections(
         catalog: IconCatalogPreset = .all,
         suggestions: [IconItem] = [],
-        labels: IconPickerLabels = .english) -> [IconSection]
+        labels: IconPickerLabels = .english,
+        selected: String = "") -> [IconSection]
     {
         var seen = Set<IconGroup>()
         var result = catalog.groups.compactMap { group -> IconSection? in
@@ -101,6 +105,13 @@ public enum IconCatalog {
             return items.isEmpty ? nil : IconSection(
                 group: group, items: items.map(labels.localized), title: labels.title(for: group))
         }
+        if let first = result.first,
+           !result.contains(where: { $0.items.contains { $0.value == selected } }),
+           let item = IconSuggestions.items(from: [selected]).first(where: { $0.value == selected })
+        {
+            result[0] = IconSection(
+                group: first.group, items: [labels.localized(item)] + first.items, title: first.title)
+        }
         if !suggestions.isEmpty {
             result.insert(IconSection(
                 group: .suggestions, items: suggestions.map(labels.localized), title: labels.title(for: .suggestions)), at: 0)
@@ -108,14 +119,14 @@ public enum IconCatalog {
         return result
     }
 
-    /// The meaning section that holds `value`, if any.
+    /// The section that shows `value` when it is selected, if any.
     public static func section(
         containing value: String,
         catalog: IconCatalogPreset = .all,
         suggestions: [IconItem] = [],
         labels: IconPickerLabels = .english) -> IconSection?
     {
-        self.sections(catalog: catalog, suggestions: suggestions, labels: labels)
+        self.sections(catalog: catalog, suggestions: suggestions, labels: labels, selected: value)
             .first { section in
                 section.items.contains { $0.value == value }
             }
@@ -126,10 +137,11 @@ public enum IconCatalog {
         _ query: String,
         catalog: IconCatalogPreset = .all,
         suggestions: [IconItem] = [],
-        labels: IconPickerLabels = .english) -> [IconSection]
+        labels: IconPickerLabels = .english,
+        selected: String = "") -> [IconSection]
     {
         let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        let all = self.sections(catalog: catalog, suggestions: suggestions, labels: labels)
+        let all = self.sections(catalog: catalog, suggestions: suggestions, labels: labels, selected: selected)
         guard !query.isEmpty else { return all }
         return all.compactMap { section in
             let items = section.items.filter { $0.matches(query) }

@@ -17,6 +17,9 @@ public struct IconPickerView: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var query = ""
+    /// The icon the picker opened with. The catalog keeps a cell for it even when it lists no
+    /// such icon; tracking the live selection instead would shift the grid under each tap.
+    @State private var openedWith: String
     @State private var suggestions = IconSuggestions.empty
     @State private var userHasScrolled = false
     @State private var catalogIsAtTop = true
@@ -72,6 +75,7 @@ public struct IconPickerView: View {
         self.readySuggestions = suggestions
         self.labels = labels
         self._suggestions = State(initialValue: suggestions)
+        self._openedWith = State(initialValue: icon.wrappedValue)
     }
 
     public var body: some View {
@@ -182,7 +186,8 @@ public struct IconPickerView: View {
             self.query,
             catalog: self.catalog,
             suggestions: self.suggestions.items,
-            labels: self.labels)
+            labels: self.labels,
+            selected: self.openedWith)
         let suggestion = sections.first { $0.group == .suggestions }
         return LazyVStack(
             alignment: .leading,

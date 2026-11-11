@@ -224,6 +224,19 @@ import IconPickerKitIntelligence
     #expect(IconCatalog.section(containing: "zzzznotanicon") == nil)
 }
 
+@Test func selectedIconOutsideTheCatalogLeadsTheFirstGroup() {
+    let catalog = IconCatalogPreset(groups: [.home, .work])
+    let plain = IconCatalog.sections(catalog: catalog)
+    let sections = IconCatalog.sections(
+        catalog: catalog, suggestions: [.init(value: "🥖", name: "🥖")], selected: "🇫🇷")
+    #expect(sections.map(\.group) == [.suggestions, .home, .work])
+    #expect(sections[1].items.map(\.value) == ["🇫🇷"] + plain[0].items.map(\.value))
+    #expect(sections[2] == plain[1])
+    #expect(IconCatalog.section(containing: "🇫🇷", catalog: catalog)?.group == .home)
+    #expect(IconCatalog.sections(catalog: catalog, selected: "folder") == plain)
+    #expect(IconCatalog.sections(catalog: catalog, selected: "not an icon") == plain)
+}
+
 @Test func catalogRespectsGroupOrder() {
     let sections = IconCatalog.sections(catalog: IconCatalogPreset(groups: [.work, .smileys]))
     #expect(sections.map(\.group) == [.work, .smileys])

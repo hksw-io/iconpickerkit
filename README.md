@@ -101,6 +101,9 @@ IconPickerView(
 Search trims surrounding whitespace and never reaches omitted groups. A miss shows the system's
 search-empty state.
 
+The icon the picker opens with always has a selected cell. If the catalog doesn't list it (an icon
+picked from Suggestions last time, or your own default symbol), it leads the first group.
+
 ### Suggested icons
 
 On-device model suggestions live in the separate `IconPickerKitIntelligence` product, the only
