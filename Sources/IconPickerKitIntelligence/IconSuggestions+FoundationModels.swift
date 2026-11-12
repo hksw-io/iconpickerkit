@@ -16,8 +16,7 @@ extension IconSuggestions {
             instructions: """
                 Suggest icons for a named item.
                 Return at most 8 values.
-                Each value is one emoji (including country flags) or one SF Symbol name \
-                such as folder or flag.fill.
+                Each value is one emoji (including country flags) or one SF Symbol name.
                 No sentences, no punctuation, no explanations.
                 """)
         let response = try await session.respond(
