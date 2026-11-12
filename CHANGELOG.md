@@ -6,6 +6,12 @@ All notable changes to IconPickerKit are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-11-12
+
+### Fixed
+
+- On-device suggestions no longer fall back to `folder` and `flag`. The model's instructions named those two symbols as examples, and for names it had no better answer for (such as "Office Mac") it returned them as the suggestions.
+
 ## [1.5.0] - 2026-11-11
 
 ### Maintenance
