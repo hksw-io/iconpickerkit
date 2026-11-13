@@ -35,19 +35,20 @@ hides Color, because only SF Symbols take the tint.
 
 ## Installation
 
-Internal to the `hksw-io` org. Add:
-
 ```swift
-.package(url: "https://github.com/hksw-io/iconpickerkit.git", from: "1.5.1")
+.package(url: "https://github.com/hksw-io/iconpickerkit.git", exact: "1.5.1")
 ```
 
 ```swift
 .product(name: "IconPickerKit", package: "IconPickerKit"),
 ```
 
-In Xcode: **File > Add Package Dependencies…** and enter the URL above. You need access to the org.
+In Xcode: **File > Add Package Dependencies…**, enter the URL above, and choose **Exact Version** `1.5.1`.
 Add the `IconPickerKit` library product. Add `IconPickerKitIntelligence` too only if you want
 [on-device model suggestions](#suggested-icons).
+
+See [CHANGELOG.md](CHANGELOG.md) for what changed between releases. A minor release may contain a
+breaking change, marked **Breaking** there, so pin an exact version.
 
 ## Usage
 
@@ -291,23 +292,7 @@ swift run --package-path Demo GenerateMedia
 
 The tests run on macOS and on the iOS Simulator. The Mac-only demo app and media tool live in
 `Demo`, a nested package that depends on this one by path, so they stay out of the iOS build.
-
-Run `swift run --package-path Demo GenerateMedia` from the repository root in a logged-in macOS
-session. It rewrites the
-`IconPickerRow` stills in `Docs/Media`, which are Mac renders. The `IconPickerView` stills and the
-demo are captured from the iOS 27.2 Simulator (iPhone 17 Pro), because a Mac render at phone width
-would not show iOS touch sizing.
-
-`./Demo/run-demo.sh` builds a real Mac app and opens it (Dock and Cmd-Tab). Catalog is the full picker with color and search pinned; its Demo section shows an app's own icons. Form row is the compact control, which cannot draw those. The inspector hint plus **Delay 2 seconds** starts canned suggestions after a pause so you can scroll first. **Reload** runs that again. Turn Delay off to use the on-device model.
-
-## OS 27 compatibility
-
-The deployment minimum remains iOS 26 / macOS 26, with Swift tools 6.2. CI runs the package tests
-on macOS and on the iOS Simulator, and builds the demo package, with the Xcode 27.0 preview image,
-which GitHub maintains as [`xcode-27`](https://github.com/actions/runner-images/issues/14404).
-No CI job builds with an Xcode 26 toolchain, so new SDK-only APIs must preserve the existing
-deployment and compiler minimums. Local SDK 27.2 validation complements the job; a local pass does
-not establish the result of a hosted CI run.
+How the README media is made and how to use the demo app are in [AGENTS.md](AGENTS.md).
 
 ## License
 
